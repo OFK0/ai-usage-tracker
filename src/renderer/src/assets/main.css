@@ -110,12 +110,24 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    /* The window itself is transparent, so the widget shell draws the only
+       visible surface and the desktop shows through around its rounded edges. */
+    @apply text-foreground bg-transparent;
     margin: 0;
+    overflow: hidden;
     font-family:
       system-ui,
       -apple-system,
       'Segoe UI',
       sans-serif;
   }
+}
+
+/* Only the header is a drag handle; controls inside it opt back out. */
+.drag-region {
+  -webkit-app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
 }

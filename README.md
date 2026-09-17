@@ -44,6 +44,12 @@ npm run dev
 | `npm run typecheck` | Typecheck main, preload and renderer |
 | `npm run test`      | Run the test suite                   |
 
+## Tray icons
+
+The tray icons are drawn procedurally by `scripts/generate-tray-icons.mjs`, which
+writes raw RGBA and encodes PNG with `node:zlib`, so no image tooling is needed.
+Run `npm run generate:icons` after changing the shape or the accent colour.
+
 ## Git hooks
 
 Husky runs three hooks:

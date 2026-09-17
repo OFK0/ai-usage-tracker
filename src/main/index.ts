@@ -1,54 +1,44 @@
-import { join } from 'node:path'
-import { app, shell, BrowserWindow } from 'electron'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { app, BrowserWindow, ipcMain } from 'electron'
+import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { APP_ID } from '@shared/app-info'
+import { createTray, destroyTray } from './tray'
+import { createWidgetWindow, hideWidgetWindow, showWidgetWindow } from './windows/widget'
 
-function createWindow(): void {
-  const mainWindow = new BrowserWindow({
-    width: 420,
-    height: 560,
-    show: false,
-    autoHideMenuBar: true,
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.mjs'),
-      sandbox: true,
-      contextIsolation: true,
-      nodeIntegration: false
-    }
+// A second launch should surface the widget that is already running rather than
+// start a rival instance with its own tray icon.
+if (!app.requestSingleInstanceLock()) {
+  app.quit()
+} else {
+  app.on('second-instance', () => showWidgetWindow())
+
+  void app.whenReady().then(() => {
+    electronApp.setAppUserModelId(APP_ID)
+
+    // The widget is a tray application, so it does not belong in the dock.
+    app.dock?.hide()
+
+    app.on('browser-window-created', (_, window) => {
+      optimizer.watchWindowShortcuts(window)
+    })
+
+    // The widget has no title bar, so its own header button asks to hide it.
+    // The typed IPC contract that will own this channel lands with #10.
+    ipcMain.on('widget:hide', () => hideWidgetWindow())
+
+    createWidgetWindow()
+    createTray()
+
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) {
+        createWidgetWindow()
+      } else {
+        showWidgetWindow()
+      }
+    })
   })
 
-  mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
-  })
+  // Closing the widget leaves the app alive in the tray, which is the whole
+  // point of a tray application, so window-all-closed deliberately does nothing.
 
-  mainWindow.webContents.setWindowOpenHandler((details) => {
-    void shell.openExternal(details.url)
-    return { action: 'deny' }
-  })
-
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    void mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-  } else {
-    void mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
-  }
+  app.on('before-quit', () => destroyTray())
 }
-
-void app.whenReady().then(() => {
-  electronApp.setAppUserModelId(APP_ID)
-
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
-  })
-
-  createWindow()
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
-})
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
-})
