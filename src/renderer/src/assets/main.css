@@ -1,0 +1,35 @@
+@import 'tailwindcss';
+
+/*
+ * Accent colour is driven by a single hue token. Every gradient and accent
+ * surface derives from it, so changing --accent-h restyles the whole app.
+ * The full token set arrives with the design system milestone.
+ */
+@theme {
+  --color-surface: oklch(1 0 0);
+  --color-surface-muted: oklch(0.97 0.005 250);
+  --color-ink: oklch(0.25 0.02 250);
+  --color-accent: oklch(0.62 0.16 var(--accent-h));
+}
+
+:root {
+  --accent-h: 250;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-surface: oklch(0.2 0.01 250);
+    --color-surface-muted: oklch(0.26 0.015 250);
+    --color-ink: oklch(0.95 0.01 250);
+  }
+}
+
+body {
+  margin: 0;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+}
