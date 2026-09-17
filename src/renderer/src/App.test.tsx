@@ -11,4 +11,10 @@ describe('App', () => {
       expect(screen.getByText(id)).toBeInTheDocument()
     }
   })
+
+  it('renders a usage progress bar per provider', () => {
+    render(<App />)
+
+    expect(screen.getAllByRole('progressbar')).toHaveLength(PROVIDER_IDS.length)
+  })
 })

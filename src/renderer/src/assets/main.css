@@ -1,35 +1,121 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
 
 /*
- * Accent colour is driven by a single hue token. Every gradient and accent
- * surface derives from it, so changing --accent-h restyles the whole app.
- * The full token set arrives with the design system milestone.
+ * Every accent surface and gradient is derived from a single hue token.
+ * Changing --accent-h restyles the whole app in both themes, which is what the
+ * accent colour picker in settings drives.
  */
-@theme {
-  --color-surface: oklch(1 0 0);
-  --color-surface-muted: oklch(0.97 0.005 250);
-  --color-ink: oklch(0.25 0.02 250);
-  --color-accent: oklch(0.62 0.16 var(--accent-h));
-}
-
 :root {
   --accent-h: 250;
-  color-scheme: light dark;
+  --radius: 0.625rem;
+
+  --background: oklch(0.99 0.002 var(--accent-h));
+  --foreground: oklch(0.25 0.02 var(--accent-h));
+
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
+
+  --primary: oklch(0.55 0.17 var(--accent-h));
+  --primary-foreground: oklch(0.99 0.005 var(--accent-h));
+
+  --secondary: oklch(0.96 0.01 var(--accent-h));
+  --secondary-foreground: oklch(0.35 0.04 var(--accent-h));
+
+  --muted: oklch(0.96 0.008 var(--accent-h));
+  --muted-foreground: oklch(0.55 0.02 var(--accent-h));
+
+  --accent: oklch(0.94 0.03 var(--accent-h));
+  --accent-foreground: oklch(0.35 0.06 var(--accent-h));
+
+  --destructive: oklch(0.58 0.22 25);
+  --border: oklch(0.9 0.01 var(--accent-h));
+  --input: oklch(0.92 0.01 var(--accent-h));
+  --ring: oklch(0.55 0.17 var(--accent-h));
+
+  /* Usage thresholds, shared by progress bars and status badges. */
+  --usage-ok: oklch(0.65 0.15 155);
+  --usage-warn: oklch(0.75 0.15 75);
+  --usage-critical: oklch(0.6 0.22 25);
+  --usage-inactive: oklch(0.7 0.01 var(--accent-h));
 }
 
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-surface: oklch(0.2 0.01 250);
-    --color-surface-muted: oklch(0.26 0.015 250);
-    --color-ink: oklch(0.95 0.01 250);
+.dark {
+  --background: oklch(0.2 0.012 var(--accent-h));
+  --foreground: oklch(0.95 0.008 var(--accent-h));
+
+  --card: oklch(0.24 0.015 var(--accent-h));
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.24 0.015 var(--accent-h));
+  --popover-foreground: var(--foreground);
+
+  --primary: oklch(0.7 0.15 var(--accent-h));
+  --primary-foreground: oklch(0.18 0.02 var(--accent-h));
+
+  --secondary: oklch(0.29 0.018 var(--accent-h));
+  --secondary-foreground: oklch(0.93 0.01 var(--accent-h));
+
+  --muted: oklch(0.28 0.015 var(--accent-h));
+  --muted-foreground: oklch(0.68 0.015 var(--accent-h));
+
+  --accent: oklch(0.33 0.04 var(--accent-h));
+  --accent-foreground: oklch(0.95 0.01 var(--accent-h));
+
+  --destructive: oklch(0.65 0.2 25);
+  --border: oklch(0.32 0.015 var(--accent-h));
+  --input: oklch(0.34 0.015 var(--accent-h));
+  --ring: oklch(0.7 0.15 var(--accent-h));
+
+  --usage-inactive: oklch(0.45 0.01 var(--accent-h));
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-usage-ok: var(--usage-ok);
+  --color-usage-warn: var(--usage-warn);
+  --color-usage-critical: var(--usage-critical);
+  --color-usage-inactive: var(--usage-inactive);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
 
-body {
-  margin: 0;
-  font-family:
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    sans-serif;
+  body {
+    @apply bg-background text-foreground;
+    margin: 0;
+    font-family:
+      system-ui,
+      -apple-system,
+      'Segoe UI',
+      sans-serif;
+  }
 }
