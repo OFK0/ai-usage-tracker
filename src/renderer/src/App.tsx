@@ -1,29 +1,41 @@
+import { X } from 'lucide-react'
 import { PROVIDER_IDS } from '@shared/app-info'
 import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 
 /**
- * Placeholder surface for the toolchain. Real provider cards, wired to live
- * usage data, arrive with the design system and provider milestones.
+ * Shell of the widget. The provider rows are placeholders until the provider
+ * engine lands; what is real here is the transparent, draggable surface.
  */
 export default function App(): React.JSX.Element {
   return (
-    <main className="bg-background text-foreground flex min-h-screen flex-col gap-4 p-6">
-      <header className="flex items-center justify-between">
-        <h1 className="text-base font-semibold">LLM Usage Tracker</h1>
-        <Button size="sm" variant="secondary">
-          Refresh
-        </Button>
-      </header>
+    <div className="h-screen w-screen p-2">
+      <section className="bg-card/85 border-border flex h-full flex-col overflow-hidden rounded-xl border shadow-lg backdrop-blur-xl">
+        <header className="drag-region border-border/60 flex items-center justify-between border-b px-3 py-2">
+          <h1 className="text-sm font-semibold">LLM Usage Tracker</h1>
+          <Button
+            className="no-drag size-6"
+            size="icon"
+            variant="ghost"
+            aria-label="Hide widget"
+            onClick={() => window.api.hideWidget()}
+          >
+            <X className="size-3.5" />
+          </Button>
+        </header>
 
-      <ul className="flex flex-col gap-3">
-        {PROVIDER_IDS.map((id) => (
-          <li key={id} className="bg-card border-border rounded-lg border p-3">
-            <p className="mb-2 text-sm font-medium capitalize">{id}</p>
-            <Progress value={0} aria-label={`${id} session usage`} />
-          </li>
-        ))}
-      </ul>
-    </main>
+        <ul className="flex flex-col gap-3 overflow-y-auto p-3">
+          {PROVIDER_IDS.map((id) => (
+            <li key={id} className="flex flex-col gap-2">
+              <div className="flex items-baseline justify-between">
+                <span className="text-sm font-medium capitalize">{id}</span>
+                <span className="text-muted-foreground text-xs">Not connected</span>
+              </div>
+              <Progress value={0} aria-label={`${id} session usage`} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
   )
 }

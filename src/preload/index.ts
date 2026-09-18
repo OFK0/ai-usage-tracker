@@ -1,9 +1,9 @@
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
-/** Surface exposed to the renderer. Grows as providers and settings land. */
+/** Surface exposed to the renderer. A typed contract replaces this in #10. */
 const api = {
-  getVersions: (): NodeJS.ProcessVersions => process.versions
+  hideWidget: (): void => ipcRenderer.send('widget:hide')
 }
 
 export type PreloadApi = typeof api
