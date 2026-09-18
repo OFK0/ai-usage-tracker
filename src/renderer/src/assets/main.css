@@ -4,16 +4,21 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Every accent surface and gradient is derived from a single hue token.
- * Changing --accent-h restyles the whole app in both themes, which is what the
- * accent colour picker in settings drives.
+ * Every accent colour and gradient is derived from a single hue token,
+ * --accent-h, which the accent colour picker in settings drives.
+ *
+ * Light is white with blue; dark is anthracite with blue. Surfaces, text and
+ * borders sit on a fixed cool neutral instead, so picking an orange accent
+ * recolours the accents and gradients but leaves anthracite anthracite.
  */
 :root {
   --accent-h: 250;
+  --neutral-h: 255;
   --radius: 0.625rem;
+  color-scheme: light;
 
-  --background: oklch(0.99 0.002 var(--accent-h));
-  --foreground: oklch(0.25 0.02 var(--accent-h));
+  --background: oklch(0.99 0.002 var(--neutral-h));
+  --foreground: oklch(0.25 0.02 var(--neutral-h));
 
   --card: oklch(1 0 0);
   --card-foreground: var(--foreground);
@@ -23,54 +28,69 @@
   --primary: oklch(0.55 0.17 var(--accent-h));
   --primary-foreground: oklch(0.99 0.005 var(--accent-h));
 
-  --secondary: oklch(0.96 0.01 var(--accent-h));
-  --secondary-foreground: oklch(0.35 0.04 var(--accent-h));
+  --secondary: oklch(0.96 0.01 var(--neutral-h));
+  --secondary-foreground: oklch(0.35 0.04 var(--neutral-h));
 
-  --muted: oklch(0.96 0.008 var(--accent-h));
-  --muted-foreground: oklch(0.55 0.02 var(--accent-h));
+  --muted: oklch(0.96 0.008 var(--neutral-h));
+  --muted-foreground: oklch(0.55 0.02 var(--neutral-h));
 
   --accent: oklch(0.94 0.03 var(--accent-h));
   --accent-foreground: oklch(0.35 0.06 var(--accent-h));
 
   --destructive: oklch(0.58 0.22 25);
-  --border: oklch(0.9 0.01 var(--accent-h));
-  --input: oklch(0.92 0.01 var(--accent-h));
+  --border: oklch(0.9 0.01 var(--neutral-h));
+  --input: oklch(0.92 0.01 var(--neutral-h));
   --ring: oklch(0.55 0.17 var(--accent-h));
 
-  /* Usage thresholds, shared by progress bars and status badges. */
-  --usage-ok: oklch(0.65 0.15 155);
-  --usage-warn: oklch(0.75 0.15 75);
-  --usage-critical: oklch(0.6 0.22 25);
-  --usage-inactive: oklch(0.7 0.01 var(--accent-h));
+  /* The accent gradient: the accent itself leaning a little towards violet. */
+  --gradient-from: oklch(0.62 0.17 var(--accent-h));
+  --gradient-to: oklch(0.55 0.19 calc(var(--accent-h) + 28));
+  /* A soft wash of the accent behind the widget's top corner. */
+  --glow: oklch(0.7 0.14 var(--accent-h) / 0.14);
+
+  /* Usage thresholds. Below them a bar uses the accent gradient. */
+  --usage-track: oklch(0.55 0.17 var(--accent-h) / 0.13);
+  --usage-warn-from: oklch(0.82 0.15 85);
+  --usage-warn-to: oklch(0.74 0.17 62);
+  --usage-critical-from: oklch(0.68 0.2 32);
+  --usage-critical-to: oklch(0.58 0.22 20);
+  --usage-inactive: oklch(0.8 0.01 var(--neutral-h));
 }
 
 .dark {
-  --background: oklch(0.2 0.012 var(--accent-h));
-  --foreground: oklch(0.95 0.008 var(--accent-h));
+  color-scheme: dark;
 
-  --card: oklch(0.24 0.015 var(--accent-h));
+  --background: oklch(0.2 0.012 var(--neutral-h));
+  --foreground: oklch(0.95 0.008 var(--neutral-h));
+
+  --card: oklch(0.235 0.014 var(--neutral-h));
   --card-foreground: var(--foreground);
-  --popover: oklch(0.24 0.015 var(--accent-h));
+  --popover: oklch(0.24 0.015 var(--neutral-h));
   --popover-foreground: var(--foreground);
 
   --primary: oklch(0.7 0.15 var(--accent-h));
   --primary-foreground: oklch(0.18 0.02 var(--accent-h));
 
-  --secondary: oklch(0.29 0.018 var(--accent-h));
-  --secondary-foreground: oklch(0.93 0.01 var(--accent-h));
+  --secondary: oklch(0.29 0.018 var(--neutral-h));
+  --secondary-foreground: oklch(0.93 0.01 var(--neutral-h));
 
-  --muted: oklch(0.28 0.015 var(--accent-h));
-  --muted-foreground: oklch(0.68 0.015 var(--accent-h));
+  --muted: oklch(0.28 0.015 var(--neutral-h));
+  --muted-foreground: oklch(0.68 0.015 var(--neutral-h));
 
   --accent: oklch(0.33 0.04 var(--accent-h));
   --accent-foreground: oklch(0.95 0.01 var(--accent-h));
 
   --destructive: oklch(0.65 0.2 25);
-  --border: oklch(0.32 0.015 var(--accent-h));
-  --input: oklch(0.34 0.015 var(--accent-h));
+  --border: oklch(0.32 0.015 var(--neutral-h));
+  --input: oklch(0.34 0.015 var(--neutral-h));
   --ring: oklch(0.7 0.15 var(--accent-h));
 
-  --usage-inactive: oklch(0.45 0.01 var(--accent-h));
+  --gradient-from: oklch(0.74 0.14 var(--accent-h));
+  --gradient-to: oklch(0.64 0.18 calc(var(--accent-h) + 28));
+  --glow: oklch(0.6 0.16 var(--accent-h) / 0.22);
+
+  --usage-track: oklch(0.7 0.15 var(--accent-h) / 0.16);
+  --usage-inactive: oklch(0.42 0.012 var(--neutral-h));
 }
 
 @theme inline {
@@ -92,10 +112,9 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-
-  --color-usage-ok: var(--usage-ok);
-  --color-usage-warn: var(--usage-warn);
-  --color-usage-critical: var(--usage-critical);
+  --color-usage-track: var(--usage-track);
+  --color-usage-warn: var(--usage-warn-to);
+  --color-usage-critical: var(--usage-critical-to);
   --color-usage-inactive: var(--usage-inactive);
 
   --radius-sm: calc(var(--radius) - 4px);
@@ -110,8 +129,8 @@
   }
 
   body {
-    /* The window itself is transparent, so the widget shell draws the only
-       visible surface and the desktop shows through around its rounded edges. */
+    /* The widget window is transparent, so its shell draws the only visible
+       surface and the desktop shows through around its rounded edges. */
     @apply text-foreground bg-transparent;
     margin: 0;
     overflow: hidden;
@@ -120,6 +139,69 @@
       -apple-system,
       'Segoe UI',
       sans-serif;
+  }
+}
+
+@layer components {
+  .widget-surface {
+    background-image: radial-gradient(120% 55% at 0% 0%, var(--glow), transparent 70%);
+  }
+
+  .accent-gradient {
+    background-image: linear-gradient(135deg, var(--gradient-from), var(--gradient-to));
+  }
+
+  /* Bar fills by usage level. The level lives on the bar, the colour on the fill. */
+  .usage-fill {
+    background-image: linear-gradient(90deg, var(--gradient-from), var(--gradient-to));
+  }
+
+  [data-level='warning'] > .usage-fill {
+    background-image: linear-gradient(90deg, var(--usage-warn-from), var(--usage-warn-to));
+  }
+
+  [data-level='critical'] > .usage-fill,
+  [data-level='exhausted'] > .usage-fill {
+    background-image: linear-gradient(90deg, var(--usage-critical-from), var(--usage-critical-to));
+  }
+
+  [data-level='inactive'] > .usage-fill {
+    background-image: none;
+    background-color: var(--usage-inactive);
+  }
+
+  /* Data that is no longer current keeps its shape but loses its colour. */
+  [data-stale='true'] > .usage-fill {
+    filter: saturate(0.25);
+    opacity: 0.7;
+  }
+
+  /* The accent picker: a track showing every hue at the lightness the UI uses. */
+  .hue-slider {
+    appearance: none;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: linear-gradient(
+      to right,
+      oklch(0.65 0.17 0),
+      oklch(0.65 0.17 60),
+      oklch(0.65 0.17 120),
+      oklch(0.65 0.17 180),
+      oklch(0.65 0.17 240),
+      oklch(0.65 0.17 300),
+      oklch(0.65 0.17 360)
+    );
+  }
+
+  .hue-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 9999px;
+    border: 2px solid white;
+    background: var(--primary);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.35);
+    cursor: pointer;
   }
 }
 

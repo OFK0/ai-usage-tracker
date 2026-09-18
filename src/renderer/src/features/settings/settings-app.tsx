@@ -1,7 +1,13 @@
 import { useEffect, useId, useState } from 'react'
 import { SUPPORTED_PROVIDERS, type ProviderId } from '@shared/app-info'
 import type { SecretStorageStatus } from '@shared/secrets'
-import type { ProviderSettings } from '@shared/settings'
+import {
+  SETTINGS_RANGES,
+  type ProviderSettings,
+  type Settings,
+  type SettingsPatch,
+  type Theme
+} from '@shared/settings'
 import type { ProviderSnapshot } from '@shared/usage'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,6 +15,9 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { useUsage } from '@/features/usage/hooks'
 import { providerName, statusText } from '@/features/usage/labels'
+import { useDebouncedCallback } from '@/lib/use-debounced-callback'
+import { cn } from '@/lib/utils'
+import { applyAccentHue } from '@/theme/accent'
 import { ipcErrorMessage, useSecret, useSettings } from './hooks'
 
 /** English only for now; these move into the locale files with i18n. */
@@ -162,11 +171,16 @@ function ProviderSection({
             {connectionSummary(provider, settings, snapshot)}
           </p>
         </div>
-        <Switch
-          checked={settings.enabled}
-          aria-label={`Show ${name} in the widget`}
-          onCheckedChange={(enabled) => onChange({ enabled })}
-        />
+        <div className="flex items-center gap-2">
+          <span aria-hidden className="text-muted-foreground text-xs">
+            Show in widget
+          </span>
+          <Switch
+            checked={settings.enabled}
+            aria-label={`Show ${name} in the widget`}
+            onCheckedChange={(enabled) => onChange({ enabled })}
+          />
+        </div>
       </div>
 
       {text && (
@@ -190,6 +204,81 @@ function ProviderSection({
   )
 }
 
+const THEME_OPTIONS: { value: Theme; label: string }[] = [
+  { value: 'system', label: 'System' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' }
+]
+
+function AppearanceSection({
+  settings,
+  update
+}: {
+  settings: Settings
+  update: (patch: SettingsPatch) => Promise<void>
+}): React.JSX.Element {
+  // While the slider moves, the hue is previewed straight away but saved only
+  // once it settles, instead of rewriting the settings file on every pixel.
+  const [draftHue, setDraftHue] = useState<number | null>(null)
+  const saveHue = useDebouncedCallback((hue: number) => {
+    void update({ accentHue: hue }).finally(() => setDraftHue(null))
+  }, 200)
+  const hue = draftHue ?? settings.accentHue
+  const hueId = useId()
+
+  return (
+    <section
+      aria-label="Appearance"
+      className="bg-card border-border flex flex-col gap-4 rounded-lg border p-4"
+    >
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-sm font-medium">Theme</span>
+        <div role="radiogroup" aria-label="Theme" className="bg-muted flex rounded-md p-0.5">
+          {THEME_OPTIONS.map(({ value, label }) => (
+            <button
+              key={value}
+              type="button"
+              role="radio"
+              aria-checked={settings.theme === value}
+              className={cn(
+                'rounded px-3 py-1 text-xs transition-colors',
+                settings.theme === value
+                  ? 'bg-card text-foreground font-medium shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+              onClick={() => void update({ theme: value })}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor={hueId}>Accent colour</Label>
+          <span aria-hidden className="accent-gradient h-4 w-10 rounded-full" />
+        </div>
+        <input
+          id={hueId}
+          type="range"
+          min={SETTINGS_RANGES.accentHue.min}
+          max={SETTINGS_RANGES.accentHue.max}
+          step={1}
+          value={hue}
+          className="hue-slider w-full"
+          onChange={(event) => {
+            const next = Number(event.target.value)
+            setDraftHue(next)
+            applyAccentHue(next)
+            saveHue(next)
+          }}
+        />
+      </div>
+    </section>
+  )
+}
+
 export function SettingsApp(): React.JSX.Element {
   const { settings, update } = useSettings()
   const { snapshots } = useUsage()
@@ -202,6 +291,15 @@ export function SettingsApp(): React.JSX.Element {
     <div className="bg-background h-screen overflow-y-auto">
       <main className="mx-auto flex max-w-lg flex-col gap-6 p-6">
         <h1 className="text-lg font-semibold">Settings</h1>
+
+        {settings && (
+          <div className="flex flex-col gap-3">
+            <h2 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+              Appearance
+            </h2>
+            <AppearanceSection settings={settings} update={update} />
+          </div>
+        )}
 
         <div className="flex flex-col gap-3">
           <h2 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">

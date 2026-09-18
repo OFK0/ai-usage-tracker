@@ -1,4 +1,5 @@
 import { BrowserWindow } from 'electron'
+import { windowBackground } from '../theme'
 import { hardenWindow, loadRenderer, secureWebPreferences } from './common'
 
 let settingsWindow: BrowserWindow | null = null
@@ -19,8 +20,8 @@ export function openSettingsWindow(): void {
     minHeight: 440,
     show: false,
     autoHideMenuBar: true,
-    // Matches the light surface the renderer paints, so opening doesn't flash.
-    backgroundColor: '#fcfcfd',
+    // Matches the surface the renderer paints, so opening doesn't flash.
+    backgroundColor: windowBackground(),
     webPreferences: secureWebPreferences()
   })
 
