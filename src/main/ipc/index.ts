@@ -3,7 +3,7 @@ import { parseSettingsPatch } from '@shared/settings'
 import { secretVault, settingsRepository } from '../store'
 import { usagePoller } from '../usage'
 import { openSettingsWindow } from '../windows/settings'
-import { hideWidgetWindow } from '../windows/widget'
+import { fitWidgetToContent, hideWidgetWindow } from '../windows/widget'
 import { handle, listen } from './typed'
 
 export function registerIpcHandlers(): void {
@@ -19,5 +19,8 @@ export function registerIpcHandlers(): void {
   handle('usage:refresh', () => usagePoller.refresh())
 
   listen('widget:hide', () => hideWidgetWindow())
+  listen('widget:fit', (height) => {
+    if (typeof height === 'number' && Number.isFinite(height)) fitWidgetToContent(height)
+  })
   listen('settings:open', () => openSettingsWindow())
 }

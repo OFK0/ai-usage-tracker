@@ -1,8 +1,9 @@
-import { useId } from 'react'
+import { useId, useRef } from 'react'
 import { RotateCw, Settings, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useNow, useUsage } from '@/features/usage/hooks'
 import { ProviderCard } from '@/features/usage/provider-card'
+import { useFitWindowToContent } from '@/lib/use-fit-window'
 import { cn } from '@/lib/utils'
 
 /** The tray icon's gauge, drawn in the accent gradient. */
@@ -31,10 +32,18 @@ function GaugeMark(): React.JSX.Element {
 export default function App(): React.JSX.Element {
   const { snapshots, refreshing, refresh } = useUsage()
   const now = useNow()
+  const shell = useRef<HTMLElement>(null)
+  const scroller = useRef<HTMLDivElement>(null)
+  const content = useRef<HTMLDivElement>(null)
+  useFitWindowToContent(shell, scroller, content)
 
   return (
-    <div className="h-screen w-screen p-2">
-      <section className="widget-surface bg-card/90 border-border flex h-full flex-col overflow-hidden rounded-xl border shadow-lg backdrop-blur-xl">
+    <div className="flex h-screen w-screen flex-col p-2">
+      {/* Takes its natural height, capped at the window, which main keeps sized to it. */}
+      <section
+        ref={shell}
+        className="widget-surface bg-card/90 border-border flex max-h-full min-h-0 flex-col overflow-hidden rounded-xl border shadow-lg backdrop-blur-xl"
+      >
         <header className="drag-region flex items-center justify-between px-3 pt-2.5 pb-2">
           <div className="flex items-center gap-2">
             <GaugeMark />
@@ -72,18 +81,20 @@ export default function App(): React.JSX.Element {
           </div>
         </header>
 
-        <div className="border-border/60 flex-1 overflow-y-auto border-t px-3 py-3">
-          {snapshots === null ? (
-            <p className="text-muted-foreground text-xs">Loading…</p>
-          ) : snapshots.length === 0 ? (
-            <p className="text-muted-foreground text-xs">No providers are enabled.</p>
-          ) : (
-            <ul className="divide-border/60 flex flex-col divide-y">
-              {snapshots.map((snapshot) => (
-                <ProviderCard key={snapshot.providerId} snapshot={snapshot} now={now} />
-              ))}
-            </ul>
-          )}
+        <div ref={scroller} className="border-border/60 min-h-0 overflow-y-auto border-t">
+          <div ref={content} className="px-3 py-3">
+            {snapshots === null ? (
+              <p className="text-muted-foreground text-xs">Loading…</p>
+            ) : snapshots.length === 0 ? (
+              <p className="text-muted-foreground text-xs">No providers are enabled.</p>
+            ) : (
+              <ul className="divide-border/60 flex flex-col divide-y">
+                {snapshots.map((snapshot) => (
+                  <ProviderCard key={snapshot.providerId} snapshot={snapshot} now={now} />
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </section>
     </div>
