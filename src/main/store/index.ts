@@ -2,11 +2,14 @@ import { safeStorage } from 'electron'
 import Store from 'electron-store'
 import type { ProviderId } from '@shared/app-info'
 import type { Settings } from '@shared/settings'
+import type { Point } from '../windows/position'
 import { createSecretVault, type StoredSecret } from './secret-vault'
 import { createSettingsRepository } from './settings-repository'
+import { createWindowStateRepository } from './window-state'
 
 interface ConfigSchema {
   settings?: Settings
+  widgetPosition?: Point
 }
 
 type SecretsSchema = Partial<Record<ProviderId, StoredSecret>>
@@ -35,6 +38,11 @@ function secretsStore(): Store<SecretsSchema> {
 export const settingsRepository = createSettingsRepository({
   read: () => configStore().get('settings'),
   write: (settings) => configStore().set('settings', settings)
+})
+
+export const windowState = createWindowStateRepository({
+  read: () => configStore().get('widgetPosition'),
+  write: (position) => configStore().set('widgetPosition', position)
 })
 
 export const secretVault = createSecretVault({

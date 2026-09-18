@@ -1,11 +1,35 @@
 import { join } from 'node:path'
 import { BrowserWindow, screen, shell } from 'electron'
 import { is } from '@electron-toolkit/utils'
-import { anchorTopRight, clampToWorkArea } from './position'
+import { debounce } from '../lib/debounce'
+import { windowState } from '../store'
+import { anchorTopRight, clampToWorkArea, type Point } from './position'
 
 export const WIDGET_SIZE = { width: 340, height: 420 }
 
 let widget: BrowserWindow | null = null
+
+function initialPosition(): Point {
+  const saved = windowState.getPosition()
+
+  if (saved) {
+    // The display the widget was left on may be gone or rearranged since, so
+    // bring it back onto whichever display is now closest.
+    const { workArea } = screen.getDisplayNearestPoint(saved)
+    return clampToWorkArea(saved, workArea, WIDGET_SIZE)
+  }
+
+  return anchorTopRight(screen.getPrimaryDisplay().workArea, WIDGET_SIZE)
+}
+
+// Dragging fires move events continuously; only the spot it comes to rest in
+// is worth writing to disk.
+const persistPosition = debounce(() => {
+  const window = getWidgetWindow()
+  if (!window) return
+  const [x, y] = window.getPosition()
+  if (x !== undefined && y !== undefined) windowState.savePosition({ x, y })
+}, 500)
 
 function loadRenderer(window: BrowserWindow): void {
   const devUrl = process.env['ELECTRON_RENDERER_URL']
@@ -18,8 +42,7 @@ function loadRenderer(window: BrowserWindow): void {
 }
 
 export function createWidgetWindow(): BrowserWindow {
-  const { workArea } = screen.getPrimaryDisplay()
-  const { x, y } = anchorTopRight(workArea, WIDGET_SIZE)
+  const { x, y } = initialPosition()
 
   widget = new BrowserWindow({
     ...WIDGET_SIZE,
@@ -50,6 +73,9 @@ export function createWidgetWindow(): BrowserWindow {
   widget.setAlwaysOnTop(true, 'floating')
 
   widget.on('ready-to-show', () => widget?.show())
+  widget.on('move', () => persistPosition())
+  // Quitting right after a drag would otherwise lose the last position.
+  widget.on('close', () => persistPosition.flush())
   widget.on('closed', () => {
     widget = null
   })
