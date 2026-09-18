@@ -1,29 +1,113 @@
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { LimitWindow, ProviderSnapshot } from '@shared/usage'
 import App from './App'
-import { PROVIDER_IDS } from '@shared/app-info'
 
-const hideWidget = vi.fn()
+function window(overrides: Partial<LimitWindow> = {}): LimitWindow {
+  return {
+    key: 'session',
+    scope: null,
+    usedPercent: 24,
+    used: null,
+    limit: null,
+    // A little over 2h 40m, so the countdown reads the same for the whole test.
+    resetsAt: new Date(Date.now() + (2 * 60 + 40) * 60_000 + 30_000).toISOString(),
+    exhausted: false,
+    applicable: true,
+    unlimited: false,
+    ...overrides
+  }
+}
+
+function claude(overrides: Partial<ProviderSnapshot> = {}): ProviderSnapshot {
+  return {
+    providerId: 'claude',
+    status: 'ok',
+    source: 'oauth',
+    planLabel: 'Pro',
+    windows: [window(), window({ key: 'weekly', usedPercent: 9, resetsAt: null })],
+    credits: null,
+    fetchedAt: new Date().toISOString(),
+    detail: null,
+    ...overrides
+  }
+}
+
+let pushUsage: (snapshots: ProviderSnapshot[]) => void
+const api = {
+  widget: { hide: vi.fn() },
+  usage: {
+    get: vi.fn(() => Promise.resolve([claude()])),
+    refresh: vi.fn(() => Promise.resolve([claude()])),
+    onChange: vi.fn((listener: (snapshots: ProviderSnapshot[]) => void) => {
+      pushUsage = listener
+      return () => {}
+    })
+  }
+}
 
 beforeEach(() => {
-  hideWidget.mockClear()
-  vi.stubGlobal('api', { widget: { hide: hideWidget } })
+  vi.clearAllMocks()
+  vi.stubGlobal('api', api)
 })
 
 describe('App', () => {
-  it('renders a row for every known provider', () => {
+  it('shows each window with its usage and countdown', async () => {
     render(<App />)
 
-    for (const id of PROVIDER_IDS) {
-      expect(screen.getByText(id)).toBeInTheDocument()
-    }
+    expect(await screen.findByText('Claude')).toBeInTheDocument()
+    expect(screen.getByText('Pro')).toBeInTheDocument()
+    expect(screen.getByText('24%')).toBeInTheDocument()
+    expect(screen.getByText('Resets in 2h 40m')).toBeInTheDocument()
+    expect(screen.getByRole('progressbar', { name: 'Claude Weekly usage' })).toBeInTheDocument()
   })
 
-  it('renders a usage progress bar per provider', () => {
+  it('updates when main pushes new usage', async () => {
+    render(<App />)
+    await screen.findByText('24%')
+
+    act(() => pushUsage([claude({ windows: [window({ usedPercent: 100, exhausted: true })] })]))
+
+    expect(screen.getByText('Limit reached')).toBeInTheDocument()
+  })
+
+  it('says so when the sign-in is missing', async () => {
+    api.usage.get.mockResolvedValueOnce([claude({ status: 'unauthenticated', windows: [] })])
+
     render(<App />)
 
-    expect(screen.getAllByRole('progressbar')).toHaveLength(PROVIDER_IDS.length)
+    expect(await screen.findByText('Sign in to Claude Code to see usage')).toBeInTheDocument()
+  })
+
+  it('marks a limit outside the plan instead of showing it as used up', async () => {
+    api.usage.get.mockResolvedValueOnce([
+      claude({ windows: [window({ key: 'weekly_opus', applicable: false, usedPercent: 0 })] })
+    ])
+
+    render(<App />)
+
+    expect(await screen.findByText('Not in plan')).toBeInTheDocument()
+    expect(screen.queryByText('Limit reached')).not.toBeInTheDocument()
+  })
+
+  it('shows credits only when they are switched on', async () => {
+    api.usage.get.mockResolvedValueOnce([
+      claude({ credits: { used: 12.5, limit: 50, currency: 'USD', enabled: true } })
+    ])
+
+    render(<App />)
+
+    expect(await screen.findByText('Credits')).toBeInTheDocument()
+  })
+
+  it('refreshes on demand', async () => {
+    render(<App />)
+    await screen.findByText('Claude')
+
+    await userEvent.click(screen.getByRole('button', { name: 'Refresh usage' }))
+
+    expect(api.usage.refresh).toHaveBeenCalledOnce()
   })
 
   it('asks the main process to hide the widget', async () => {
@@ -31,6 +115,6 @@ describe('App', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Hide widget' }))
 
-    expect(hideWidget).toHaveBeenCalledOnce()
+    expect(api.widget.hide).toHaveBeenCalledOnce()
   })
 })

@@ -10,6 +10,7 @@ import type {
   SendChannel
 } from '@shared/ipc-contract'
 import type { Settings, SettingsPatch } from '@shared/settings'
+import type { ProviderSnapshot } from '@shared/usage'
 
 function invoke<C extends InvokeChannel>(
   channel: C,
@@ -56,6 +57,12 @@ const api = {
     describe: (provider: ProviderId) => invoke('secrets:describe', provider),
     save: (provider: ProviderId, token: string) => invoke('secrets:save', provider, token),
     clear: (provider: ProviderId) => invoke('secrets:clear', provider)
+  },
+  usage: {
+    get: (): Promise<ProviderSnapshot[]> => invoke('usage:get'),
+    refresh: (): Promise<ProviderSnapshot[]> => invoke('usage:refresh'),
+    onChange: (listener: (snapshots: ProviderSnapshot[]) => void): (() => void) =>
+      subscribe('usage:changed', listener)
   }
 }
 
