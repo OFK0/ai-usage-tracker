@@ -39,6 +39,7 @@ function claude(overrides: Partial<ProviderSnapshot> = {}): ProviderSnapshot {
 let pushUsage: (snapshots: ProviderSnapshot[]) => void
 const api = {
   widget: { hide: vi.fn() },
+  settings: { open: vi.fn() },
   usage: {
     get: vi.fn(() => Promise.resolve([claude()])),
     refresh: vi.fn(() => Promise.resolve([claude()])),
@@ -72,6 +73,16 @@ describe('App', () => {
     act(() => pushUsage([claude({ windows: [window({ usedPercent: 100, exhausted: true })] })]))
 
     expect(screen.getByText('Limit reached')).toBeInTheDocument()
+  })
+
+  it('sends the user to settings while a provider is not connected', async () => {
+    api.usage.get.mockResolvedValueOnce([claude({ status: 'disconnected', windows: [] })])
+
+    render(<App />)
+    await userEvent.click(await screen.findByRole('button', { name: 'Connect in settings' }))
+
+    expect(screen.getByText('Not connected')).toBeInTheDocument()
+    expect(api.settings.open).toHaveBeenCalledOnce()
   })
 
   it('says so when the sign-in is missing', async () => {

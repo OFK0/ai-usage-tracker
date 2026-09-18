@@ -25,7 +25,15 @@ describe('normalizeSettings', () => {
     const settings = normalizeSettings({ theme: 'light' })
 
     expect(settings.opacity).toBe(1)
-    expect(settings.providers.copilot).toEqual({ enabled: true })
+    expect(settings.providers.copilot).toEqual({ enabled: true, connected: false })
+  })
+
+  it('never treats a provider as connected unless that was saved explicitly', () => {
+    // A settings file from before the connect switch existed must not turn on
+    // reading anyone's credentials.
+    const settings = normalizeSettings({ providers: { claude: { enabled: true } } })
+
+    expect(settings.providers.claude.connected).toBe(false)
   })
 
   it('falls back to the default for values it cannot use', () => {
@@ -50,6 +58,12 @@ describe('normalizeSettings', () => {
 
     expect(settings.providers.codex.enabled).toBe(false)
     expect(settings.providers).not.toHaveProperty('gemini')
+  })
+
+  it('keeps a saved connection', () => {
+    const settings = normalizeSettings({ providers: { claude: { connected: true } } })
+
+    expect(settings.providers.claude).toEqual({ enabled: true, connected: true })
   })
 })
 
@@ -91,6 +105,18 @@ describe('parseSettingsPatch', () => {
     )
     expect(() => parseSettingsPatch({ providers: { claude: { colour: 'red' } } })).toThrow(
       'unknown setting "providers.claude.colour"'
+    )
+  })
+
+  it('accepts connecting a provider', () => {
+    expect(parseSettingsPatch({ providers: { claude: { connected: true } } })).toEqual({
+      providers: { claude: { connected: true } }
+    })
+  })
+
+  it('rejects a connection flag that is not a boolean', () => {
+    expect(() => parseSettingsPatch({ providers: { claude: { connected: 'yes' } } })).toThrow(
+      'invalid value for "providers.claude.connected"'
     )
   })
 

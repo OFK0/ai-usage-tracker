@@ -3,23 +3,29 @@
 A small desktop widget that shows how much of your LLM coding allowance is left, for
 Claude Code, Codex and GitHub Copilot, without opening a CLI or an IDE panel.
 
-## Why it reads local files instead of asking for API keys
+## Where the numbers come from
 
-Subscription limits (Claude Max, ChatGPT Plus, Copilot) are not exposed through the
-pay-as-you-go API keys. Those keys only report API spend. The session and weekly
-windows come from the credentials the official CLIs already store on your machine:
+Nothing is read until you connect a provider in Settings. Each provider has a
+connect switch, off by default, and the widget points you there until it's on.
 
-| Provider | Source                                                                                                    |
-| -------- | --------------------------------------------------------------------------------------------------------- |
-| Claude   | OAuth token from `~/.claude/.credentials.json`, falling back to the session logs in `~/.claude/projects/` |
-| Codex    | Access token from `~/.codex/auth.json`, falling back to `~/.codex/sessions/`                              |
-| Copilot  | `gh auth token`, the editor token, or a personal access token you supply                                  |
+Subscription limits (Claude Pro/Max, ChatGPT Plus, Copilot) aren't exposed
+through pay-as-you-go API keys, which only report API spend. The session and
+weekly windows come from the sign-in the official CLI already keeps on your
+machine, so that's what connecting allows the app to read:
 
-An API key is optional and only adds a spend card.
+| Provider | What connecting reads                                                                                            |
+| -------- | ---------------------------------------------------------------------------------------------------------------- |
+| Claude   | Claude Code's sign-in (the macOS keychain, or `~/.claude/.credentials.json`), and its session logs as a fallback |
 
-Tokens are read but never written, never logged, and never sent anywhere except the
-provider they belong to. Any key you type into settings is encrypted with the OS
-keychain through Electron's `safeStorage`.
+Codex and Copilot follow the same rule when they land.
+
+Pasting a long-lived token instead doesn't work for Claude: `claude setup-token`
+only grants the `user:inference` scope, and the usage endpoint needs
+`user:profile`.
+
+The sign-in is read but never written, never logged, and only ever sent to the
+provider it belongs to. The optional Anthropic Admin API key in Settings adds your
+API spend; it's encrypted with the OS keychain through Electron's `safeStorage`.
 
 ## Requirements
 

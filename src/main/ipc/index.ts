@@ -2,6 +2,7 @@ import { parseProviderId } from '@shared/app-info'
 import { parseSettingsPatch } from '@shared/settings'
 import { secretVault, settingsRepository } from '../store'
 import { usagePoller } from '../usage'
+import { openSettingsWindow } from '../windows/settings'
 import { hideWidgetWindow } from '../windows/widget'
 import { handle, listen } from './typed'
 
@@ -18,4 +19,5 @@ export function registerIpcHandlers(): void {
   handle('usage:refresh', () => usagePoller.refresh())
 
   listen('widget:hide', () => hideWidgetWindow())
+  listen('settings:open', () => openSettingsWindow())
 }

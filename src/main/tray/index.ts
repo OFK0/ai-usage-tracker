@@ -30,6 +30,7 @@ function buildIcon(): NativeImage {
 
 export interface TrayActions {
   refresh(): void
+  openSettings(): void
 }
 
 /** Rebuilt on every open so the show/hide label matches the current state. */
@@ -41,8 +42,7 @@ function buildMenu(actions: TrayActions): Menu {
     },
     { type: 'separator' },
     { label: 'Refresh', click: () => actions.refresh() },
-    // Enabled once the settings window exists.
-    { label: 'Settings', enabled: false },
+    { label: 'Settings…', click: () => actions.openSettings() },
     { type: 'separator' },
     { label: 'Quit', role: 'quit' }
   ])

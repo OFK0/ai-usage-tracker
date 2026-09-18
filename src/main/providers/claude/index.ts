@@ -7,6 +7,10 @@ import { parseClaudeUsage } from './usage-response'
 export const CLAUDE_USAGE_URL = 'https://api.anthropic.com/api/oauth/usage'
 
 export interface ClaudeProviderDeps {
+  /** The user's connect switch in settings. Nothing of Claude Code's is read while it's off. */
+  isConnected: () => boolean
+  /** Throws away anything already read from Claude Code, once the user disconnects. */
+  forgetLocalData: () => void
   readCredentials: () => Promise<ClaudeCredentials | null>
   /** Whether Claude Code has ever run here, to tell "not installed" from "signed out". */
   isInstalled: () => Promise<boolean>
@@ -102,9 +106,18 @@ export function createClaudeProvider(deps: ClaudeProviderDeps): UsageProvider {
     id: 'claude',
 
     read: async (signal) => {
-      // Spend comes from a different API with its own key, so it neither waits
-      // for nor depends on the usage read.
+      // Spend comes from a different API with a key the user typed in, so it
+      // neither waits for nor depends on the usage read, or on being connected.
       const apiSpend = deps.readApiSpend(signal).catch(() => null)
+
+      if (!deps.isConnected()) {
+        rejectedToken = null
+        knownResetAt = null
+        deps.forgetLocalData()
+        throw new ProviderError('disconnected', 'Claude Code is not connected in settings', {
+          salvage: { activity: null, apiSpend: await apiSpend }
+        })
+      }
 
       try {
         const reading = await readOauth(signal)

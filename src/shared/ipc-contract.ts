@@ -25,6 +25,7 @@ export interface InvokeChannels {
 /** Renderer tells main, no answer. */
 export interface SendChannels {
   'widget:hide': () => void
+  'settings:open': () => void
 }
 
 /** Main pushes to every open window. */

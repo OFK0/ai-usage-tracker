@@ -1,7 +1,7 @@
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { app, net } from 'electron'
-import { secretVault } from '../store'
+import { secretVault, settingsRepository } from '../store'
 import { createClaudeProvider } from './claude'
 import { summarizeActivity } from './claude/activity'
 import { createAdminSpendReader } from './claude/admin-spend'
@@ -32,6 +32,8 @@ export function createProviders(): UsageProvider[] {
 
   return [
     createClaudeProvider({
+      isConnected: () => settingsRepository.get().providers.claude.connected,
+      forgetLocalData: () => claudeLog.clear(),
       readCredentials: () => readClaudeCredentials(process.platform, claudeSources),
       isInstalled: () => directoryExists(claudeDir),
       fetch,

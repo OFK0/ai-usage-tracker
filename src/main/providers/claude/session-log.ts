@@ -12,6 +12,8 @@ export interface UsageEntry {
 export interface SessionLog {
   /** Entries from the lookback period, oldest first. */
   collect(now: number): Promise<UsageEntry[]>
+  /** Forgets everything read so far; the next collect starts from scratch. */
+  clear(): void
 }
 
 /** Two session windows' worth, enough to tell where the current window began. */
@@ -136,6 +138,11 @@ export function createSessionLog(projectsDir: string): SessionLog {
   }
 
   return {
+    clear() {
+      files.clear()
+      entries.clear()
+    },
+
     async collect(now) {
       const since = now - LOOKBACK_MS
 

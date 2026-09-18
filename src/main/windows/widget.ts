@@ -1,8 +1,7 @@
-import { join } from 'node:path'
-import { BrowserWindow, screen, shell } from 'electron'
-import { is } from '@electron-toolkit/utils'
+import { BrowserWindow, screen } from 'electron'
 import { debounce } from '../lib/debounce'
 import { windowState } from '../store'
+import { hardenWindow, loadRenderer, secureWebPreferences } from './common'
 import { anchorTopRight, clampToWorkArea, type Point } from './position'
 
 export const WIDGET_SIZE = { width: 340, height: 420 }
@@ -45,16 +44,6 @@ const persistPosition = debounce(() => {
   if (x !== undefined && y !== undefined) windowState.savePosition({ x, y })
 }, 500)
 
-function loadRenderer(window: BrowserWindow): void {
-  const devUrl = process.env['ELECTRON_RENDERER_URL']
-
-  if (is.dev && devUrl) {
-    void window.loadURL(devUrl)
-  } else {
-    void window.loadFile(join(__dirname, '../renderer/index.html'))
-  }
-}
-
 export function createWidgetWindow(): BrowserWindow {
   const { x, y } = initialPosition()
 
@@ -74,19 +63,16 @@ export function createWidgetWindow(): BrowserWindow {
     fullscreenable: false,
     skipTaskbar: true,
     alwaysOnTop: true,
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      sandbox: true,
-      contextIsolation: true,
-      nodeIntegration: false
-    }
+    webPreferences: secureWebPreferences()
   })
 
   // 'floating' sits above normal windows without covering menus or the screen
   // saver. Keeping the widget off fullscreen spaces is handled separately.
   widget.setAlwaysOnTop(true, 'floating')
 
-  widget.on('ready-to-show', () => widget?.show())
+  // The widget appears on its own, often at login, so it must not take focus
+  // away from whatever the user is doing. Opening it from the tray does focus it.
+  widget.on('ready-to-show', () => widget?.showInactive())
   widget.on('show', () => notifyVisibility(true))
   widget.on('hide', () => notifyVisibility(false))
   widget.on('move', () => persistPosition())
@@ -96,18 +82,7 @@ export function createWidgetWindow(): BrowserWindow {
     widget = null
   })
 
-  // The widget has no chrome to navigate with, so anything that asks for a new
-  // window is a link and belongs in the user's browser. Only web links, though:
-  // openExternal would happily launch file: or custom protocol handlers too.
-  widget.webContents.setWindowOpenHandler(({ url }) => {
-    if (/^https?:\/\//i.test(url)) void shell.openExternal(url)
-    return { action: 'deny' }
-  })
-
-  // IPC trusts the sender by its URL, which only holds if the window can never
-  // leave the page it was given.
-  widget.webContents.on('will-navigate', (event) => event.preventDefault())
-
+  hardenWindow(widget)
   loadRenderer(widget)
 
   return widget

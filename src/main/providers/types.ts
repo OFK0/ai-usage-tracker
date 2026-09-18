@@ -17,12 +17,17 @@ export interface UsageProvider {
 }
 
 /**
- * `not_installed` and `unauthenticated` describe the user's setup and are shown
- * as they are. The rest are transient, so the poller keeps showing the last good
- * data as stale and backs off.
+ * `disconnected`, `not_installed` and `unauthenticated` describe the user's
+ * setup and are shown as they are. The rest are transient, so the poller keeps
+ * showing the last good data as stale and backs off.
  */
 export type ProviderErrorKind =
-  'not_installed' | 'unauthenticated' | 'rate_limited' | 'unavailable' | 'unexpected_response'
+  | 'disconnected'
+  | 'not_installed'
+  | 'unauthenticated'
+  | 'rate_limited'
+  | 'unavailable'
+  | 'unexpected_response'
 
 /** Facts a provider still knows after its main source failed, such as local logs. */
 export type Salvage = Partial<Pick<ProviderReading, 'activity' | 'apiSpend'>>

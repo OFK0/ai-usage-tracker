@@ -30,15 +30,21 @@ function provider(
   options: {
     creds?: ClaudeCredentials | null
     installed?: boolean
+    connected?: boolean
     fetch?: (url: string, init: RequestInit) => Promise<Response>
     spend?: () => Promise<ApiSpend | null>
   } = {}
 ) {
   let creds = options.creds === undefined ? credentials : options.creds
+  let connected = options.connected ?? true
   const fetch = vi.fn(options.fetch ?? (() => Promise.resolve(jsonResponse(fixture))))
+  const readCredentials = vi.fn(() => Promise.resolve(creds))
   const readLocalActivity = vi.fn(() => Promise.resolve(activity))
+  const forgetLocalData = vi.fn()
   const p = createClaudeProvider({
-    readCredentials: () => Promise.resolve(creds),
+    isConnected: () => connected,
+    forgetLocalData,
+    readCredentials,
     isInstalled: () => Promise.resolve(options.installed ?? true),
     fetch,
     readLocalActivity,
@@ -49,9 +55,14 @@ function provider(
   return {
     read: () => p.read(new AbortController().signal),
     fetch,
+    readCredentials,
     readLocalActivity,
+    forgetLocalData,
     setCredentials: (next: ClaudeCredentials | null) => {
       creds = next
+    },
+    setConnected: (next: boolean) => {
+      connected = next
     }
   }
 }
@@ -144,6 +155,40 @@ describe('createClaudeProvider', () => {
     })
 
     expect((await failure(read())).kind).toBe('unexpected_response')
+  })
+})
+
+describe('connection', () => {
+  it('reads nothing of Claude Code until the user connects it', async () => {
+    const p = provider({ connected: false })
+
+    expect((await failure(p.read())).kind).toBe('disconnected')
+    expect(p.readCredentials).not.toHaveBeenCalled()
+    expect(p.readLocalActivity).not.toHaveBeenCalled()
+    expect(p.fetch).not.toHaveBeenCalled()
+  })
+
+  it('still shows API spend from a typed-in admin key while disconnected', async () => {
+    const p = provider({ connected: false, spend: () => Promise.resolve(apiSpend) })
+
+    expect((await failure(p.read())).salvage?.apiSpend).toEqual(apiSpend)
+  })
+
+  it('forgets what it learned from Claude Code once disconnected', async () => {
+    const p = provider()
+    await p.read()
+
+    p.setConnected(false)
+    await failure(p.read())
+    expect(p.forgetLocalData).toHaveBeenCalled()
+
+    // Reconnect with an expired sign-in: the fallback must not be pinned to a
+    // reset time learned before the user disconnected.
+    p.setConnected(true)
+    p.setCredentials({ ...credentials, expiresAt: NOW - 1 })
+    await failure(p.read())
+
+    expect(p.readLocalActivity).toHaveBeenLastCalledWith(null)
   })
 })
 
