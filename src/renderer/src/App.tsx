@@ -1,8 +1,32 @@
-import { RotateCw, X } from 'lucide-react'
+import { useId } from 'react'
+import { RotateCw, Settings, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useNow, useUsage } from '@/features/usage/hooks'
 import { ProviderCard } from '@/features/usage/provider-card'
 import { cn } from '@/lib/utils'
+
+/** The tray icon's gauge, drawn in the accent gradient. */
+function GaugeMark(): React.JSX.Element {
+  const gradient = useId()
+
+  return (
+    <svg viewBox="0 0 16 16" className="size-4" aria-hidden>
+      <defs>
+        <linearGradient id={gradient} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" style={{ stopColor: 'var(--gradient-from)' }} />
+          <stop offset="1" style={{ stopColor: 'var(--gradient-to)' }} />
+        </linearGradient>
+      </defs>
+      <path
+        d="M4.1 12.2A5.6 5.6 0 1 1 11.9 12.2"
+        fill="none"
+        stroke={`url(#${gradient})`}
+        strokeWidth="2.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
 
 export default function App(): React.JSX.Element {
   const { snapshots, refreshing, refresh } = useUsage()
@@ -10,12 +34,15 @@ export default function App(): React.JSX.Element {
 
   return (
     <div className="h-screen w-screen p-2">
-      <section className="bg-card/85 border-border flex h-full flex-col overflow-hidden rounded-xl border shadow-lg backdrop-blur-xl">
-        <header className="drag-region border-border/60 flex items-center justify-between border-b px-3 py-2">
-          <h1 className="text-sm font-semibold">LLM Usage Tracker</h1>
+      <section className="widget-surface bg-card/90 border-border flex h-full flex-col overflow-hidden rounded-xl border shadow-lg backdrop-blur-xl">
+        <header className="drag-region flex items-center justify-between px-3 pt-2.5 pb-2">
+          <div className="flex items-center gap-2">
+            <GaugeMark />
+            <h1 className="text-[13px] font-semibold tracking-tight">LLM Usage</h1>
+          </div>
           <div className="flex gap-0.5">
             <Button
-              className="no-drag size-6"
+              className="no-drag text-muted-foreground size-6"
               size="icon"
               variant="ghost"
               aria-label="Refresh usage"
@@ -25,7 +52,16 @@ export default function App(): React.JSX.Element {
               <RotateCw className={cn('size-3.5', refreshing && 'animate-spin')} />
             </Button>
             <Button
-              className="no-drag size-6"
+              className="no-drag text-muted-foreground size-6"
+              size="icon"
+              variant="ghost"
+              aria-label="Open settings"
+              onClick={() => window.api.settings.open()}
+            >
+              <Settings className="size-3.5" />
+            </Button>
+            <Button
+              className="no-drag text-muted-foreground size-6"
               size="icon"
               variant="ghost"
               aria-label="Hide widget"
@@ -36,13 +72,13 @@ export default function App(): React.JSX.Element {
           </div>
         </header>
 
-        <div className="overflow-y-auto p-3">
+        <div className="border-border/60 flex-1 overflow-y-auto border-t px-3 py-3">
           {snapshots === null ? (
             <p className="text-muted-foreground text-xs">Loading…</p>
           ) : snapshots.length === 0 ? (
             <p className="text-muted-foreground text-xs">No providers are enabled.</p>
           ) : (
-            <ul className="flex flex-col gap-4">
+            <ul className="divide-border/60 flex flex-col divide-y">
               {snapshots.map((snapshot) => (
                 <ProviderCard key={snapshot.providerId} snapshot={snapshot} now={now} />
               ))}

@@ -53,6 +53,8 @@ const api = {
 beforeEach(() => {
   vi.clearAllMocks()
   vi.stubGlobal('api', api)
+  // Cards remember being collapsed; each test starts from a clean slate.
+  localStorage.clear()
 })
 
 describe('App', () => {
@@ -64,6 +66,44 @@ describe('App', () => {
     expect(screen.getByText('24%')).toBeInTheDocument()
     expect(screen.getByText('Resets in 2h 40m')).toBeInTheDocument()
     expect(screen.getByRole('progressbar', { name: 'Claude Weekly usage' })).toBeInTheDocument()
+  })
+
+  it('collapses a card down to the window closest to running out, and remembers it', async () => {
+    api.usage.get.mockResolvedValue([
+      claude({ windows: [window({ usedPercent: 24 }), window({ key: 'weekly', usedPercent: 81 })] })
+    ])
+    const { unmount } = render(<App />)
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Hide Claude details' }))
+
+    expect(screen.getAllByRole('progressbar')).toHaveLength(1)
+    expect(screen.getByRole('progressbar', { name: 'Claude Weekly usage' })).toBeInTheDocument()
+    expect(screen.getByText('81%')).toBeInTheDocument()
+
+    unmount()
+    render(<App />)
+
+    expect(await screen.findByRole('button', { name: 'Show Claude details' })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    )
+    api.usage.get.mockResolvedValue([claude()])
+  })
+
+  it('marks the level of a window nearing its limit', async () => {
+    api.usage.get.mockResolvedValueOnce([claude({ windows: [window({ usedPercent: 92 })] })])
+
+    render(<App />)
+
+    expect(await screen.findByRole('progressbar')).toHaveAttribute('data-level', 'critical')
+  })
+
+  it('opens settings from the header', async () => {
+    render(<App />)
+
+    await userEvent.click(screen.getByRole('button', { name: 'Open settings' }))
+
+    expect(api.settings.open).toHaveBeenCalledOnce()
   })
 
   it('updates when main pushes new usage', async () => {
