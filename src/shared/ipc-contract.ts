@@ -1,6 +1,7 @@
 import type { ProviderId } from './app-info'
 import type { SecretStorageStatus, TokenInfo } from './secrets'
 import type { Settings, SettingsPatch } from './settings'
+import type { ProviderSnapshot } from './usage'
 
 /**
  * Every message between main and renderer is listed here. The preload builds
@@ -16,6 +17,9 @@ export interface InvokeChannels {
   'secrets:describe': (provider: ProviderId) => TokenInfo
   'secrets:save': (provider: ProviderId, token: string) => TokenInfo
   'secrets:clear': (provider: ProviderId) => TokenInfo
+  'usage:get': () => ProviderSnapshot[]
+  /** Resolves once every provider that could be asked has answered. */
+  'usage:refresh': () => ProviderSnapshot[]
 }
 
 /** Renderer tells main, no answer. */
@@ -26,6 +30,7 @@ export interface SendChannels {
 /** Main pushes to every open window. */
 export interface EventChannels {
   'settings:changed': (settings: Settings) => void
+  'usage:changed': (snapshots: ProviderSnapshot[]) => void
 }
 
 export type InvokeChannel = keyof InvokeChannels

@@ -2,8 +2,11 @@ import { app, BrowserWindow } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { APP_ID } from '@shared/app-info'
 import { registerIpcHandlers } from './ipc'
+import { broadcast } from './ipc/typed'
+import { settingsRepository } from './store'
 import { createTray, destroyTray } from './tray'
-import { createWidgetWindow, showWidgetWindow } from './windows/widget'
+import { usagePoller } from './usage'
+import { createWidgetWindow, onWidgetVisibilityChange, showWidgetWindow } from './windows/widget'
 
 // A second launch should surface the widget that is already running rather than
 // start a rival instance with its own tray icon.
@@ -23,8 +26,16 @@ if (!app.requestSingleInstanceLock()) {
     })
 
     registerIpcHandlers()
+
+    settingsRepository.onChange((settings) => {
+      broadcast('settings:changed', settings)
+      usagePoller.reconfigure()
+    })
+    onWidgetVisibilityChange((visible) => usagePoller.setVisible(visible))
+
     createWidgetWindow()
-    createTray()
+    createTray({ refresh: () => void usagePoller.refresh() })
+    usagePoller.start()
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) {
@@ -38,5 +49,8 @@ if (!app.requestSingleInstanceLock()) {
   // Closing the widget leaves the app alive in the tray, which is the whole
   // point of a tray application, so window-all-closed deliberately does nothing.
 
-  app.on('before-quit', () => destroyTray())
+  app.on('before-quit', () => {
+    usagePoller.stop()
+    destroyTray()
+  })
 }

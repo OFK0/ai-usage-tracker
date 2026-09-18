@@ -9,6 +9,20 @@ export const WIDGET_SIZE = { width: 340, height: 420 }
 
 let widget: BrowserWindow | null = null
 
+const visibilityListeners = new Set<(visible: boolean) => void>()
+
+function notifyVisibility(visible: boolean): void {
+  for (const listener of visibilityListeners) listener(visible)
+}
+
+/** Lets the poller slow down while nobody can see the widget. */
+export function onWidgetVisibilityChange(listener: (visible: boolean) => void): () => void {
+  visibilityListeners.add(listener)
+  return () => {
+    visibilityListeners.delete(listener)
+  }
+}
+
 function initialPosition(): Point {
   const saved = windowState.getPosition()
 
@@ -73,6 +87,8 @@ export function createWidgetWindow(): BrowserWindow {
   widget.setAlwaysOnTop(true, 'floating')
 
   widget.on('ready-to-show', () => widget?.show())
+  widget.on('show', () => notifyVisibility(true))
+  widget.on('hide', () => notifyVisibility(false))
   widget.on('move', () => persistPosition())
   // Quitting right after a drag would otherwise lose the last position.
   widget.on('close', () => persistPosition.flush())

@@ -51,4 +51,17 @@ describe('createSettingsRepository', () => {
 
     expect(repository.get().language).toBe('tr')
   })
+
+  it('tells listeners about each update until they unsubscribe', () => {
+    const repository = createSettingsRepository(backend())
+    const listener = vi.fn()
+
+    const unsubscribe = repository.onChange(listener)
+    repository.update({ theme: 'dark' })
+    unsubscribe()
+    repository.update({ theme: 'light' })
+
+    expect(listener).toHaveBeenCalledOnce()
+    expect(listener).toHaveBeenCalledWith(expect.objectContaining({ theme: 'dark' }))
+  })
 })

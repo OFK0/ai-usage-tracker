@@ -28,27 +28,31 @@ function buildIcon(): NativeImage {
   return image
 }
 
+export interface TrayActions {
+  refresh(): void
+}
+
 /** Rebuilt on every open so the show/hide label matches the current state. */
-function buildMenu(): Menu {
+function buildMenu(actions: TrayActions): Menu {
   return Menu.buildFromTemplate([
     {
       label: isWidgetVisible() ? 'Hide widget' : 'Show widget',
       click: () => toggleWidgetWindow()
     },
     { type: 'separator' },
-    // Enabled once the provider engine and the settings window exist.
-    { label: 'Refresh', enabled: false },
+    { label: 'Refresh', click: () => actions.refresh() },
+    // Enabled once the settings window exists.
     { label: 'Settings', enabled: false },
     { type: 'separator' },
     { label: 'Quit', role: 'quit' }
   ])
 }
 
-export function createTray(): Tray {
+export function createTray(actions: TrayActions): Tray {
   tray = new Tray(buildIcon())
   tray.setToolTip(APP_NAME)
   tray.on('click', () => toggleWidgetWindow())
-  tray.on('right-click', () => tray?.popUpContextMenu(buildMenu()))
+  tray.on('right-click', () => tray?.popUpContextMenu(buildMenu(actions)))
 
   return tray
 }
