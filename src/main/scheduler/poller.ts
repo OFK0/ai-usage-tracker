@@ -54,6 +54,8 @@ function emptySnapshot(providerId: ProviderId): ProviderSnapshot {
     planLabel: null,
     windows: [],
     credits: null,
+    activity: null,
+    apiSpend: null,
     fetchedAt: null,
     detail: null
   }
@@ -134,19 +136,22 @@ export function createPoller(options: PollerOptions): Poller {
 
   function snapshotAfterFailure(state: ProviderState, failure: ProviderError): ProviderSnapshot {
     const { id } = state.provider
+    // Whatever the provider could still work out locally is fresher than
+    // anything carried over from the last good read.
+    const salvaged = { detail: failure.message, ...failure.salvage }
 
     if (failure.kind === 'not_installed') {
-      return { ...emptySnapshot(id), status: 'not_installed', detail: failure.message }
+      return { ...emptySnapshot(id), status: 'not_installed', ...salvaged }
     }
     if (failure.kind === 'unauthenticated') {
       // The last numbers are still worth seeing next to the sign-in prompt.
       const base = state.lastGood ?? emptySnapshot(id)
-      return { ...base, status: 'unauthenticated', detail: failure.message }
+      return { ...base, status: 'unauthenticated', ...salvaged }
     }
     if (state.lastGood) {
-      return { ...state.lastGood, status: 'stale', detail: failure.message }
+      return { ...state.lastGood, status: 'stale', ...salvaged }
     }
-    return { ...emptySnapshot(id), status: 'error', detail: failure.message }
+    return { ...emptySnapshot(id), status: 'error', ...salvaged }
   }
 
   function schedule(state: ProviderState, delay: number): void {
