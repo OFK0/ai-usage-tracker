@@ -1,8 +1,8 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { SecretStorageStatus, TokenInfo } from '@shared/secrets'
-import { defaultSettings, type Settings, type SettingsPatch } from '@shared/settings'
+import { defaultSettings, mergeSettings, type Settings, type SettingsPatch } from '@shared/settings'
 import type { ProviderSnapshot } from '@shared/usage'
 import { ipcErrorMessage } from './hooks'
 import { SettingsApp } from './settings-app'
@@ -19,7 +19,7 @@ const api = {
   settings: {
     get: vi.fn(() => Promise.resolve(defaultSettings())),
     update: vi.fn((patch: SettingsPatch) =>
-      Promise.resolve(withClaude(patch.providers?.claude ?? {}))
+      Promise.resolve(mergeSettings(defaultSettings(), patch))
     ),
     onChange: vi.fn(() => () => {})
   },
@@ -140,6 +140,39 @@ describe('SettingsApp', () => {
 
     expect(await within(section).findByText(/No system keyring was found/)).toBeInTheDocument()
     expect(within(section).getByLabelText('Anthropic Admin API key')).toBeDisabled()
+  })
+})
+
+describe('appearance', () => {
+  async function appearanceSection(): Promise<HTMLElement> {
+    render(<SettingsApp />)
+    return screen.findByRole('region', { name: 'Appearance' })
+  }
+
+  it('shows the current theme and switches it', async () => {
+    const section = await appearanceSection()
+
+    expect(within(section).getByRole('radio', { name: 'System' })).toBeChecked()
+
+    await userEvent.click(within(section).getByRole('radio', { name: 'Dark' }))
+
+    expect(api.settings.update).toHaveBeenCalledWith({ theme: 'dark' })
+    expect(within(section).getByRole('radio', { name: 'Dark' })).toBeChecked()
+  })
+
+  it('previews an accent hue at once and saves it once the slider settles', async () => {
+    const section = await appearanceSection()
+    const slider = within(section).getByLabelText('Accent colour')
+
+    fireEvent.change(slider, { target: { value: '10' } })
+    fireEvent.change(slider, { target: { value: '20' } })
+    fireEvent.change(slider, { target: { value: '30' } })
+
+    expect(document.documentElement.style.getPropertyValue('--accent-h')).toBe('30')
+    expect(api.settings.update).not.toHaveBeenCalled()
+
+    await vi.waitFor(() => expect(api.settings.update).toHaveBeenCalledTimes(1))
+    expect(api.settings.update).toHaveBeenCalledWith({ accentHue: 30 })
   })
 })
 

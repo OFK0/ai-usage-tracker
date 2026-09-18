@@ -4,6 +4,7 @@ import { APP_ID, PROVIDER_IDS } from '@shared/app-info'
 import { registerIpcHandlers } from './ipc'
 import { broadcast } from './ipc/typed'
 import { settingsRepository } from './store'
+import { applyTheme } from './theme'
 import { createTray, destroyTray } from './tray'
 import { usagePoller } from './usage'
 import { openSettingsWindow } from './windows/settings'
@@ -29,8 +30,10 @@ if (!app.requestSingleInstanceLock()) {
     registerIpcHandlers()
 
     let previous = settingsRepository.get()
+    applyTheme(previous)
     settingsRepository.onChange((settings) => {
       broadcast('settings:changed', settings)
+      applyTheme(settings)
       usagePoller.reconfigure()
 
       // Connecting or disconnecting a provider should show straight away, not
