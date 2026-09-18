@@ -11,7 +11,7 @@ export interface ProviderReading {
 
 export interface UsageProvider {
   id: ProviderId
-  read(signal: AbortSignal): Promise<ProviderReading>
+  read: (signal: AbortSignal) => Promise<ProviderReading>
 }
 
 /**
