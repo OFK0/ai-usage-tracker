@@ -1,4 +1,5 @@
 import type { Credits, LimitWindow, ProviderSnapshot } from '@shared/usage'
+import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { formatMoney } from '@/lib/format'
 import { cn } from '@/lib/utils'
@@ -107,6 +108,17 @@ export function ProviderCard({
         <p className="text-muted-foreground text-xs" title={snapshot.detail ?? undefined}>
           {status}
         </p>
+      )}
+
+      {snapshot.status === 'disconnected' && (
+        <Button
+          size="sm"
+          variant="secondary"
+          className="self-start"
+          onClick={() => window.api.settings.open()}
+        >
+          Connect in settings
+        </Button>
       )}
 
       {snapshot.windows.map((window) => (

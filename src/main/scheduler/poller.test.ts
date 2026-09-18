@@ -253,6 +253,26 @@ describe('failures', () => {
     expect(latest()[0]).toMatchObject({ status: 'unauthenticated', apiSpend })
     expect(latest()[0]?.windows[0]?.usedPercent).toBe(42)
   })
+
+  it('drops everything it had once the user disconnects the provider', async () => {
+    start(
+      scriptedProvider(
+        'claude',
+        reading(42),
+        new ProviderError('disconnected', 'not connected'),
+        new ProviderError('unavailable', 'HTTP 503')
+      )
+    )
+    await vi.advanceTimersByTimeAsync(0)
+    await vi.advanceTimersByTimeAsync(INTERVAL)
+
+    expect(latest()[0]).toMatchObject({ status: 'disconnected', windows: [] })
+
+    // A later failure must not bring the old numbers back as stale.
+    await vi.advanceTimersByTimeAsync(INTERVAL)
+
+    expect(latest()[0]).toMatchObject({ status: 'error', windows: [] })
+  })
 })
 
 describe('control', () => {

@@ -7,8 +7,19 @@ export const LANGUAGES = ['en', 'tr', 'fr', 'de', 'it', 'ru', 'ar'] as const
 export type Language = (typeof LANGUAGES)[number]
 
 export interface ProviderSettings {
+  /** Whether the provider is polled and shown at all. */
   enabled: boolean
+  /**
+   * The user has allowed reading this provider's CLI sign-in and session logs
+   * on this machine. Off by default: nothing of the CLI's is touched until then.
+   */
+  connected: boolean
 }
+
+const PROVIDER_FIELDS = [
+  'enabled',
+  'connected'
+] as const satisfies readonly (keyof ProviderSettings)[]
 
 export interface Settings {
   theme: Theme
@@ -46,10 +57,9 @@ export function defaultSettings(): Settings {
     launchAtLogin: false,
     refreshIntervalSeconds: 60,
     reduceMotion: false,
-    providers: Object.fromEntries(PROVIDER_IDS.map((id) => [id, { enabled: true }])) as Record<
-      ProviderId,
-      ProviderSettings
-    >
+    providers: Object.fromEntries(
+      PROVIDER_IDS.map((id) => [id, { enabled: true, connected: false }])
+    ) as Record<ProviderId, ProviderSettings>
   }
 }
 
@@ -134,11 +144,19 @@ export function normalizeSettings(raw: unknown): Settings {
 
   for (const id of PROVIDER_IDS) {
     const entry = providers[id]
-    const enabled = isRecord(entry) ? readBoolean(entry['enabled']) : undefined
-    if (enabled !== undefined) settings.providers[id] = { enabled }
+    if (!isRecord(entry)) continue
+
+    for (const field of PROVIDER_FIELDS) {
+      const value = readBoolean(entry[field])
+      if (value !== undefined) settings.providers[id][field] = value
+    }
   }
 
   return settings
+}
+
+function isProviderField(field: string): field is (typeof PROVIDER_FIELDS)[number] {
+  return (PROVIDER_FIELDS as readonly string[]).includes(field)
 }
 
 function parseProvidersPatch(
@@ -164,15 +182,15 @@ function parseProvidersPatch(
 
     const next: Partial<ProviderSettings> = {}
     for (const [field, value] of Object.entries(entry)) {
-      if (field !== 'enabled') {
+      if (!isProviderField(field)) {
         issues.push(`unknown setting "providers.${id}.${field}"`)
         continue
       }
-      const enabled = readBoolean(value)
-      if (enabled === undefined) {
-        issues.push(`invalid value for "providers.${id}.enabled"`)
+      const flag = readBoolean(value)
+      if (flag === undefined) {
+        issues.push(`invalid value for "providers.${id}.${field}"`)
       } else {
-        next.enabled = enabled
+        next[field] = flag
       }
     }
     providers[id] = next

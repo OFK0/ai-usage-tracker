@@ -50,7 +50,8 @@ const api = {
     get: (): Promise<Settings> => invoke('settings:get'),
     update: (patch: SettingsPatch): Promise<Settings> => invoke('settings:update', patch),
     onChange: (listener: (settings: Settings) => void): (() => void) =>
-      subscribe('settings:changed', listener)
+      subscribe('settings:changed', listener),
+    open: (): void => send('settings:open')
   },
   secrets: {
     status: () => invoke('secrets:status'),

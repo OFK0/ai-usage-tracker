@@ -117,7 +117,11 @@ export function createPoller(options: PollerOptions): Poller {
   }
 
   function delayAfterFailure(state: ProviderState, failure: ProviderError): number {
-    if (failure.kind === 'not_installed' || failure.kind === 'unauthenticated') {
+    if (
+      failure.kind === 'disconnected' ||
+      failure.kind === 'not_installed' ||
+      failure.kind === 'unauthenticated'
+    ) {
       // These are about the user's setup, not a struggling server, so there is
       // nothing to back off from. Checking again picks up a fresh sign-in.
       state.failures = 0
@@ -140,6 +144,12 @@ export function createPoller(options: PollerOptions): Poller {
     // anything carried over from the last good read.
     const salvaged = { detail: failure.message, ...failure.salvage }
 
+    if (failure.kind === 'disconnected') {
+      // Data read under a permission the user has since withdrawn must not
+      // linger on screen, or come back later as "stale".
+      state.lastGood = null
+      return { ...emptySnapshot(id), status: 'disconnected', ...salvaged }
+    }
     if (failure.kind === 'not_installed') {
       return { ...emptySnapshot(id), status: 'not_installed', ...salvaged }
     }

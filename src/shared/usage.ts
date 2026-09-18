@@ -5,10 +5,11 @@ import type { ProviderId } from './app-info'
  * `stale`: the last fetch failed, so the data shown is from an earlier one.
  * `unauthenticated`: the provider's CLI is installed but its sign-in is missing or expired.
  * `not_installed`: no trace of the provider's CLI on this machine.
+ * `disconnected`: the user hasn't connected the provider in settings, so nothing was read.
  * `error`: the fetch failed and there is no earlier data to fall back on.
  */
 export type ProviderStatus =
-  'loading' | 'ok' | 'stale' | 'unauthenticated' | 'not_installed' | 'error'
+  'loading' | 'ok' | 'stale' | 'unauthenticated' | 'not_installed' | 'disconnected' | 'error'
 
 export type SnapshotSource = 'oauth' | 'local' | 'admin-api'
 

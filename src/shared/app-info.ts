@@ -7,6 +7,9 @@ export const PROVIDER_IDS = ['claude', 'codex', 'copilot'] as const
 
 export type ProviderId = (typeof PROVIDER_IDS)[number]
 
+/** Providers that already have an implementation. Codex and Copilot join with their milestones. */
+export const SUPPORTED_PROVIDERS: readonly ProviderId[] = ['claude']
+
 export function isProviderId(value: unknown): value is ProviderId {
   return typeof value === 'string' && (PROVIDER_IDS as readonly string[]).includes(value)
 }

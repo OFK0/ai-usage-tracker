@@ -138,6 +138,16 @@ describe('createSessionLog', () => {
     expect((await log.collect(NOW)).map((e) => e.key)).toContain('msg_c:req_c')
   })
 
+  it('reads everything again after being cleared', async () => {
+    await writeFile(join(project, 'session.jsonl'), `${line('a', 30)}\n`)
+    const log = createSessionLog(dir)
+    await log.collect(NOW)
+
+    log.clear()
+
+    expect(await log.collect(NOW)).toHaveLength(1)
+  })
+
   it('returns nothing when there is no projects folder', async () => {
     expect(await createSessionLog(join(dir, 'missing')).collect(NOW)).toEqual([])
   })

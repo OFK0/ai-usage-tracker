@@ -1,11 +1,12 @@
 import { app, BrowserWindow } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
-import { APP_ID } from '@shared/app-info'
+import { APP_ID, PROVIDER_IDS } from '@shared/app-info'
 import { registerIpcHandlers } from './ipc'
 import { broadcast } from './ipc/typed'
 import { settingsRepository } from './store'
 import { createTray, destroyTray } from './tray'
 import { usagePoller } from './usage'
+import { openSettingsWindow } from './windows/settings'
 import { createWidgetWindow, onWidgetVisibilityChange, showWidgetWindow } from './windows/widget'
 
 // A second launch should surface the widget that is already running rather than
@@ -27,14 +28,26 @@ if (!app.requestSingleInstanceLock()) {
 
     registerIpcHandlers()
 
+    let previous = settingsRepository.get()
     settingsRepository.onChange((settings) => {
       broadcast('settings:changed', settings)
       usagePoller.reconfigure()
+
+      // Connecting or disconnecting a provider should show straight away, not
+      // on the next poll a minute later.
+      const connectionChanged = PROVIDER_IDS.some(
+        (id) => settings.providers[id].connected !== previous.providers[id].connected
+      )
+      if (connectionChanged) void usagePoller.refresh()
+      previous = settings
     })
     onWidgetVisibilityChange((visible) => usagePoller.setVisible(visible))
 
     createWidgetWindow()
-    createTray({ refresh: () => void usagePoller.refresh() })
+    createTray({
+      refresh: () => void usagePoller.refresh(),
+      openSettings: () => openSettingsWindow()
+    })
     usagePoller.start()
 
     app.on('activate', () => {

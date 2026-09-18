@@ -90,6 +90,8 @@ export function statusText(snapshot: ProviderSnapshot, now: number): string | nu
       return `Open ${tool} to update usage`
     case 'not_installed':
       return `${tool} not found`
+    case 'disconnected':
+      return 'Not connected'
     case 'error':
       return "Couldn't load usage"
   }
