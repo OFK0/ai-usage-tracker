@@ -8,7 +8,7 @@ const hideWidget = vi.fn()
 
 beforeEach(() => {
   hideWidget.mockClear()
-  vi.stubGlobal('api', { hideWidget })
+  vi.stubGlobal('api', { widget: { hide: hideWidget } })
 })
 
 describe('App', () => {

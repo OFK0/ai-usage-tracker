@@ -1,8 +1,9 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { APP_ID } from '@shared/app-info'
+import { registerIpcHandlers } from './ipc'
 import { createTray, destroyTray } from './tray'
-import { createWidgetWindow, hideWidgetWindow, showWidgetWindow } from './windows/widget'
+import { createWidgetWindow, showWidgetWindow } from './windows/widget'
 
 // A second launch should surface the widget that is already running rather than
 // start a rival instance with its own tray icon.
@@ -21,10 +22,7 @@ if (!app.requestSingleInstanceLock()) {
       optimizer.watchWindowShortcuts(window)
     })
 
-    // The widget has no title bar, so its own header button asks to hide it.
-    // The typed IPC contract that will own this channel lands with #10.
-    ipcMain.on('widget:hide', () => hideWidgetWindow())
-
+    registerIpcHandlers()
     createWidgetWindow()
     createTray()
 
