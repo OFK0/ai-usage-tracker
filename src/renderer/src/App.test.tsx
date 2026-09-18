@@ -28,6 +28,8 @@ function claude(overrides: Partial<ProviderSnapshot> = {}): ProviderSnapshot {
     planLabel: 'Pro',
     windows: [window(), window({ key: 'weekly', usedPercent: 9, resetsAt: null })],
     credits: null,
+    activity: null,
+    apiSpend: null,
     fetchedAt: new Date().toISOString(),
     detail: null,
     ...overrides
@@ -77,7 +79,40 @@ describe('App', () => {
 
     render(<App />)
 
-    expect(await screen.findByText('Sign in to Claude Code to see usage')).toBeInTheDocument()
+    expect(await screen.findByText('Open Claude Code to update usage')).toBeInTheDocument()
+  })
+
+  it('stops showing an old number once the window has reset while signed out', async () => {
+    const resetsAt = new Date(Date.now() - 60_000).toISOString()
+    api.usage.get.mockResolvedValueOnce([
+      claude({
+        status: 'unauthenticated',
+        windows: [window({ usedPercent: 100, exhausted: true, resetsAt })]
+      })
+    ])
+
+    render(<App />)
+
+    expect(await screen.findByText('Reset')).toBeInTheDocument()
+    expect(screen.getByText('Reset · waiting for fresh data')).toBeInTheDocument()
+    expect(screen.queryByText('Limit reached')).not.toBeInTheDocument()
+  })
+
+  it('shows local activity and API spend when they are known', async () => {
+    api.usage.get.mockResolvedValueOnce([
+      claude({
+        status: 'unauthenticated',
+        activity: { block: null, lastActivityAt: null },
+        apiSpend: { currency: 'USD', today: 1, month: 2 }
+      })
+    ])
+
+    render(<App />)
+
+    expect(
+      await screen.findByText('No Claude Code activity in the last 5 hours')
+    ).toBeInTheDocument()
+    expect(screen.getByText('API spend')).toBeInTheDocument()
   })
 
   it('marks a limit outside the plan instead of showing it as used up', async () => {

@@ -13,7 +13,9 @@ function reading(usedPercent = 24, resetsAt: string | null = null): ProviderRead
     source: 'oauth',
     planLabel: 'Pro',
     windows: [createLimitWindow({ key: 'session', usedPercent, resetsAt })],
-    credits: null
+    credits: null,
+    activity: null,
+    apiSpend: null
   }
 }
 
@@ -213,7 +215,7 @@ describe('failures', () => {
   it('waits as long as Retry-After says when rate limited', async () => {
     const claude = scriptedProvider(
       'claude',
-      new ProviderError('rate_limited', 'HTTP 429', 180_000),
+      new ProviderError('rate_limited', 'HTTP 429', { retryAfterMs: 180_000 }),
       reading()
     )
     const p = start(claude)
@@ -234,6 +236,22 @@ describe('failures', () => {
     await vi.advanceTimersByTimeAsync(0)
 
     expect(latest().map((s) => s.status)).toEqual(['error', 'ok'])
+  })
+
+  it('shows what the provider could still work out locally after a failure', async () => {
+    const apiSpend = { currency: 'USD', today: 1.5, month: 20 }
+    start(
+      scriptedProvider(
+        'claude',
+        reading(42),
+        new ProviderError('unauthenticated', 'expired', { salvage: { apiSpend, activity: null } })
+      )
+    )
+    await vi.advanceTimersByTimeAsync(0)
+    await vi.advanceTimersByTimeAsync(INTERVAL)
+
+    expect(latest()[0]).toMatchObject({ status: 'unauthenticated', apiSpend })
+    expect(latest()[0]?.windows[0]?.usedPercent).toBe(42)
   })
 })
 

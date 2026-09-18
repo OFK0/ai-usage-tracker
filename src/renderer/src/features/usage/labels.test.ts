@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import type { LimitWindow, ProviderSnapshot } from '@shared/usage'
-import { resetText, statusText, windowLabel } from './labels'
+import type { LimitWindow, LocalActivity, ProviderSnapshot } from '@shared/usage'
+import { activityText, resetText, spendText, statusText, windowLabel } from './labels'
 
 const NOW = Date.parse('2026-09-18T10:00:00Z')
+const MINUTE = 60_000
 
 function window(overrides: Partial<LimitWindow> = {}): LimitWindow {
   return {
@@ -27,9 +28,25 @@ function snapshot(overrides: Partial<ProviderSnapshot> = {}): ProviderSnapshot {
     planLabel: 'Pro',
     windows: [],
     credits: null,
+    activity: null,
+    apiSpend: null,
     fetchedAt: new Date(NOW).toISOString(),
     detail: null,
     ...overrides
+  }
+}
+
+function activity(block: Partial<NonNullable<LocalActivity['block']>> | null): LocalActivity {
+  return {
+    block: block && {
+      startedAt: new Date(NOW - 2 * 60 * MINUTE).toISOString(),
+      endsAt: new Date(NOW + (3 * 60 - 20) * MINUTE).toISOString(),
+      exact: true,
+      messages: 42,
+      tokens: { input: 0, output: 0, cacheCreation: 0, cacheRead: 0 },
+      ...block
+    },
+    lastActivityAt: null
   }
 }
 
@@ -45,7 +62,7 @@ describe('windowLabel', () => {
 
 describe('resetText', () => {
   it('counts down to the reset', () => {
-    const resetsAt = new Date(NOW + (2 * 60 + 40) * 60_000).toISOString()
+    const resetsAt = new Date(NOW + (2 * 60 + 40) * MINUTE).toISOString()
 
     expect(resetText(window({ resetsAt }), NOW)).toBe('Resets in 2h 40m')
   })
@@ -54,6 +71,12 @@ describe('resetText', () => {
     expect(resetText(window({ resetsAt: new Date(NOW - 1000).toISOString() }), NOW)).toBe(
       'Resetting…'
     )
+  })
+
+  it('admits there is no new number yet when the data is not fresh', () => {
+    const resetsAt = new Date(NOW - 1000).toISOString()
+
+    expect(resetText(window({ resetsAt }), NOW, false)).toBe('Reset · waiting for fresh data')
   })
 
   it('says nothing without a reset time', () => {
@@ -67,19 +90,47 @@ describe('statusText', () => {
   })
 
   it('says how old stale data is', () => {
-    const fetchedAt = new Date(NOW - 5 * 60_000).toISOString()
+    const fetchedAt = new Date(NOW - 5 * MINUTE).toISOString()
 
     expect(statusText(snapshot({ status: 'stale', fetchedAt }), NOW)).toBe(
       "Couldn't refresh · updated 5m ago"
     )
   })
 
-  it('points at the tool to sign in to', () => {
+  it('points at the tool that renews the sign-in', () => {
     expect(statusText(snapshot({ status: 'unauthenticated' }), NOW)).toBe(
-      'Sign in to Claude Code to see usage'
+      'Open Claude Code to update usage'
     )
     expect(statusText(snapshot({ providerId: 'codex', status: 'not_installed' }), NOW)).toBe(
       'Codex CLI not found'
+    )
+  })
+})
+
+describe('activityText', () => {
+  it('counts messages and shows when the window ends', () => {
+    expect(activityText('claude', activity({}), NOW)).toBe(
+      '42 messages this session · ends in 2h 40m'
+    )
+  })
+
+  it('marks an estimated window', () => {
+    expect(activityText('claude', activity({ exact: false, messages: 1 }), NOW)).toBe(
+      '1 message this session · ends in ~2h 40m'
+    )
+  })
+
+  it('says when there has been no recent activity', () => {
+    expect(activityText('claude', activity(null), NOW)).toBe(
+      'No Claude Code activity in the last 5 hours'
+    )
+  })
+})
+
+describe('spendText', () => {
+  it('shows today and the month so far', () => {
+    expect(spendText({ currency: 'USD', today: 1.5, month: 42 }, 'en-US')).toBe(
+      '$1.50 today · $42.00 this month'
     )
   })
 })

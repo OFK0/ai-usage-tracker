@@ -37,6 +37,37 @@ export interface Credits {
   enabled: boolean
 }
 
+export interface TokenCounts {
+  input: number
+  output: number
+  cacheCreation: number
+  cacheRead: number
+}
+
+/**
+ * What the CLI's own session logs say, used when the provider's API can't be
+ * reached. It has no limits in it, so it can't give a percentage.
+ */
+export interface LocalActivity {
+  /** The session window in progress, or null when there has been no recent activity. */
+  block: {
+    startedAt: string
+    endsAt: string
+    /** True when the window times come from the provider rather than an estimate. */
+    exact: boolean
+    messages: number
+    tokens: TokenCounts
+  } | null
+  lastActivityAt: string | null
+}
+
+/** Pay-as-you-go API spend, separate from any subscription. Days are UTC. */
+export interface ApiSpend {
+  currency: string
+  today: number
+  month: number
+}
+
 export interface ProviderSnapshot {
   providerId: ProviderId
   status: ProviderStatus
@@ -44,6 +75,8 @@ export interface ProviderSnapshot {
   planLabel: string | null
   windows: LimitWindow[]
   credits: Credits | null
+  activity: LocalActivity | null
+  apiSpend: ApiSpend | null
   /** When the data shown was fetched. Older than the last attempt while stale. */
   fetchedAt: string | null
   /** Short technical reason behind the status, meant for a tooltip. */

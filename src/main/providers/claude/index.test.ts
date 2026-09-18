@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from 'vitest'
+import type { ApiSpend, LocalActivity } from '@shared/usage'
 import { ProviderError } from '../types'
 import fixture from './__fixtures__/oauth-usage.json'
 import type { ClaudeCredentials } from './credentials'
@@ -22,23 +23,37 @@ function jsonResponse(body: unknown, init: ResponseInit = {}): Response {
   })
 }
 
+const activity: LocalActivity = { block: null, lastActivityAt: '2026-09-18T09:30:00.000Z' }
+const apiSpend: ApiSpend = { currency: 'USD', today: 1.25, month: 30 }
+
 function provider(
   options: {
     creds?: ClaudeCredentials | null
     installed?: boolean
     fetch?: (url: string, init: RequestInit) => Promise<Response>
+    spend?: () => Promise<ApiSpend | null>
   } = {}
 ) {
+  let creds = options.creds === undefined ? credentials : options.creds
   const fetch = vi.fn(options.fetch ?? (() => Promise.resolve(jsonResponse(fixture))))
+  const readLocalActivity = vi.fn(() => Promise.resolve(activity))
   const p = createClaudeProvider({
-    readCredentials: () =>
-      Promise.resolve(options.creds === undefined ? credentials : options.creds),
+    readCredentials: () => Promise.resolve(creds),
     isInstalled: () => Promise.resolve(options.installed ?? true),
     fetch,
+    readLocalActivity,
+    readApiSpend: options.spend ?? (() => Promise.resolve(null)),
     userAgent: 'llm-usage-tracker/0.1.0',
     now: () => NOW
   })
-  return { read: () => p.read(new AbortController().signal), fetch }
+  return {
+    read: () => p.read(new AbortController().signal),
+    fetch,
+    readLocalActivity,
+    setCredentials: (next: ClaudeCredentials | null) => {
+      creds = next
+    }
+  }
 }
 
 async function failure(promise: Promise<unknown>): Promise<ProviderError> {
@@ -129,6 +144,63 @@ describe('createClaudeProvider', () => {
     })
 
     expect((await failure(read())).kind).toBe('unexpected_response')
+  })
+})
+
+describe('fallbacks', () => {
+  it('does not read the session logs while the API answers', async () => {
+    const { read, readLocalActivity } = provider()
+
+    expect((await read()).activity).toBeNull()
+    expect(readLocalActivity).not.toHaveBeenCalled()
+  })
+
+  it('falls back to the session logs when the API cannot be used', async () => {
+    const { read } = provider({ creds: { ...credentials, expiresAt: NOW - 1 } })
+
+    expect((await failure(read())).salvage?.activity).toEqual(activity)
+  })
+
+  it('pins the local window to the reset time from the last good read', async () => {
+    const p = provider()
+    await p.read()
+
+    p.setCredentials({ ...credentials, expiresAt: NOW - 1 })
+    await failure(p.read())
+
+    const sessionReset = fixture.limits.find((l) => l.kind === 'session')?.resets_at ?? ''
+    expect(p.readLocalActivity).toHaveBeenCalledWith(Date.parse(sessionReset))
+  })
+
+  it('does not look for session logs when Claude Code is not installed', async () => {
+    const { read, readLocalActivity } = provider({ creds: null, installed: false })
+
+    expect((await failure(read())).salvage?.activity).toBeNull()
+    expect(readLocalActivity).not.toHaveBeenCalled()
+  })
+
+  it('adds API spend to a good read', async () => {
+    const { read } = provider({ spend: () => Promise.resolve(apiSpend) })
+
+    expect((await read()).apiSpend).toEqual(apiSpend)
+  })
+
+  it('still reports API spend when the usage read fails', async () => {
+    const { read } = provider({
+      fetch: () => Promise.resolve(new Response('', { status: 503 })),
+      spend: () => Promise.resolve(apiSpend)
+    })
+
+    expect((await failure(read())).salvage?.apiSpend).toEqual(apiSpend)
+  })
+
+  it('does not let a failing spend request break the usage read', async () => {
+    const { read } = provider({ spend: () => Promise.reject(new Error('HTTP 401')) })
+
+    const result = await read()
+
+    expect(result.windows).not.toHaveLength(0)
+    expect(result.apiSpend).toBeNull()
   })
 })
 
