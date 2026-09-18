@@ -6,3 +6,15 @@ export const APP_NAME = 'LLM Usage Tracker'
 export const PROVIDER_IDS = ['claude', 'codex', 'copilot'] as const
 
 export type ProviderId = (typeof PROVIDER_IDS)[number]
+
+export function isProviderId(value: unknown): value is ProviderId {
+  return typeof value === 'string' && (PROVIDER_IDS as readonly string[]).includes(value)
+}
+
+/** For values arriving over IPC, where the type annotation is only a promise. */
+export function parseProviderId(value: unknown): ProviderId {
+  if (!isProviderId(value)) {
+    throw new Error(`Unknown provider: ${String(value)}`)
+  }
+  return value
+}

@@ -18,7 +18,7 @@ export default function App(): React.JSX.Element {
             size="icon"
             variant="ghost"
             aria-label="Hide widget"
-            onClick={() => window.api.hideWidget()}
+            onClick={() => window.api.widget.hide()}
           >
             <X className="size-3.5" />
           </Button>

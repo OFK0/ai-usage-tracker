@@ -55,11 +55,16 @@ export function createWidgetWindow(): BrowserWindow {
   })
 
   // The widget has no chrome to navigate with, so anything that asks for a new
-  // window is a link and belongs in the user's browser.
+  // window is a link and belongs in the user's browser. Only web links, though:
+  // openExternal would happily launch file: or custom protocol handlers too.
   widget.webContents.setWindowOpenHandler(({ url }) => {
-    void shell.openExternal(url)
+    if (/^https?:\/\//i.test(url)) void shell.openExternal(url)
     return { action: 'deny' }
   })
+
+  // IPC trusts the sender by its URL, which only holds if the window can never
+  // leave the page it was given.
+  widget.webContents.on('will-navigate', (event) => event.preventDefault())
 
   loadRenderer(widget)
 
