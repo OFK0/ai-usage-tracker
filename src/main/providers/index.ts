@@ -15,7 +15,7 @@ import { createSessionLog } from './claude/session-log'
 import type { UsageProvider } from './types'
 
 export function createProviders(): UsageProvider[] {
-  const userAgent = `llm-usage-tracker/${app.getVersion()}`
+  const userAgent = `ai-usage-tracker/${app.getVersion()}`
   // Chromium's network stack rather than Node's, so system proxy settings and
   // the OS certificate store apply, as they would in a browser.
   const fetch = (url: string, init: RequestInit): Promise<Response> => net.fetch(url, init)

@@ -74,7 +74,7 @@ describe('createAdminSpendReader', () => {
     const r = createAdminSpendReader({
       readKey: () => Promise.resolve(options.key === undefined ? 'sk-ant-admin01-x' : options.key),
       fetch,
-      userAgent: 'llm-usage-tracker/0.1.0',
+      userAgent: 'ai-usage-tracker/0.1.0',
       now: () => time
     })
     return {

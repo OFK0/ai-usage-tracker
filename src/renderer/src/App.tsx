@@ -104,7 +104,7 @@ export default function App(): React.JSX.Element {
         <header className="drag-region flex items-center justify-between px-3 pt-2.5 pb-2">
           <div className="flex items-center gap-2">
             <GaugeMark sweep={openCount} />
-            <h1 className="text-[13px] font-semibold tracking-tight">LLM Usage</h1>
+            <h1 className="text-[13px] font-semibold tracking-tight">AI Usage</h1>
           </div>
           <div className="flex gap-0.5">
             <Button

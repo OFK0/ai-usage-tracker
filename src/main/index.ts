@@ -4,6 +4,7 @@ import { APP_ID, PROVIDER_IDS } from '@shared/app-info'
 import { registerIpcHandlers } from './ipc'
 import { broadcast } from './ipc/typed'
 import { settingsRepository } from './store'
+import { migrateLegacySettings } from './store/migrate-legacy'
 import { applyTheme } from './theme'
 import { createTray, destroyTray } from './tray'
 import { usagePoller } from './usage'
@@ -17,8 +18,13 @@ if (!app.requestSingleInstanceLock()) {
 } else {
   app.on('second-instance', () => showWidgetWindow())
 
-  void app.whenReady().then(() => {
+  void app.whenReady().then(async () => {
     electronApp.setAppUserModelId(APP_ID)
+
+    // Before anything reads the settings, so a renamed install starts with them.
+    await migrateLegacySettings(app.getPath('appData'), app.getPath('userData')).catch(
+      (error: unknown) => console.error('Could not carry settings over from the old name', error)
+    )
 
     // The widget is a tray application, so it does not belong in the dock.
     app.dock?.hide()
