@@ -170,10 +170,47 @@
     background-color: var(--usage-inactive);
   }
 
-  /* Data that is no longer current keeps its shape but loses its colour. */
+  /* Data that is no longer current keeps its shape but loses its colour, and a
+     slow shimmer runs across it while the next attempt is pending. */
+  .usage-fill {
+    position: relative;
+    overflow: hidden;
+  }
+
   [data-stale='true'] > .usage-fill {
     filter: saturate(0.25);
     opacity: 0.7;
+  }
+
+  [data-stale='true'] > .usage-fill::after,
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.4), transparent);
+    animation: shimmer 1.8s ease-in-out infinite;
+  }
+
+  /* An exhausted limit breathes a red glow so it's hard to miss. */
+  [data-level='exhausted'] {
+    animation: exhausted-pulse 2.4s ease-in-out infinite;
+  }
+
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    border-radius: 9999px;
+    background-color: var(--muted);
+  }
+
+  /* Less motion, asked for in settings or by the OS: no decorative animation. */
+  :root[data-motion='reduce'] [data-stale='true'] > .usage-fill::after,
+  :root[data-motion='reduce'] .skeleton::after {
+    display: none;
+  }
+
+  :root[data-motion='reduce'] [data-level='exhausted'] {
+    animation: none;
   }
 
   /* The accent picker: a track showing every hue at the lightness the UI uses. */
@@ -202,6 +239,25 @@
     background: var(--primary);
     box-shadow: 0 1px 3px rgb(0 0 0 / 0.35);
     cursor: pointer;
+  }
+}
+
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes exhausted-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  50% {
+    box-shadow: 0 0 10px 1px var(--usage-critical-from);
   }
 }
 

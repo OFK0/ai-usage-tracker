@@ -119,6 +119,23 @@ describe('window size', () => {
 })
 
 describe('App', () => {
+  it('shows placeholders until the first reading arrives', async () => {
+    let answer: (snapshots: ProviderSnapshot[]) => void = () => {}
+    api.usage.get.mockReturnValueOnce(
+      new Promise((resolve) => {
+        answer = resolve
+      })
+    )
+    render(<App />)
+
+    expect(screen.getByRole('status', { name: 'Loading usage' })).toBeInTheDocument()
+
+    act(() => answer([claude()]))
+
+    expect(await screen.findByText('Claude')).toBeInTheDocument()
+    expect(screen.queryByRole('status', { name: 'Loading usage' })).not.toBeInTheDocument()
+  })
+
   it('shows each window with its usage and countdown', async () => {
     render(<App />)
 

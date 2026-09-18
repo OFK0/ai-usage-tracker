@@ -174,6 +174,14 @@ describe('appearance', () => {
     await vi.waitFor(() => expect(api.settings.update).toHaveBeenCalledTimes(1))
     expect(api.settings.update).toHaveBeenCalledWith({ accentHue: 30 })
   })
+
+  it('turns down motion', async () => {
+    const section = await appearanceSection()
+
+    await userEvent.click(within(section).getByRole('switch', { name: 'Reduce motion' }))
+
+    expect(api.settings.update).toHaveBeenCalledWith({ reduceMotion: true })
+  })
 })
 
 describe('ipcErrorMessage', () => {
