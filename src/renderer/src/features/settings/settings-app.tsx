@@ -225,6 +225,7 @@ function AppearanceSection({
   }, 200)
   const hue = draftHue ?? settings.accentHue
   const hueId = useId()
+  const motionId = useId()
 
   return (
     <section
@@ -273,6 +274,21 @@ function AppearanceSection({
             applyAccentHue(next)
             saveHue(next)
           }}
+        />
+      </div>
+
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <Label htmlFor={motionId}>Reduce motion</Label>
+          <p className="text-muted-foreground text-xs">
+            Turns off decorative animation. If your system asks for less motion, that is respected
+            either way.
+          </p>
+        </div>
+        <Switch
+          id={motionId}
+          checked={settings.reduceMotion}
+          onCheckedChange={(reduceMotion) => void update({ reduceMotion })}
         />
       </div>
     </section>

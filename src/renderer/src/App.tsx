@@ -1,14 +1,33 @@
-import { useId, useRef } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { RotateCw, Settings, X } from 'lucide-react'
+import { AnimatePresence, motion, useAnimate } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { useNow, useUsage } from '@/features/usage/hooks'
 import { ProviderCard } from '@/features/usage/provider-card'
 import { useFitWindowToContent } from '@/lib/use-fit-window'
 import { cn } from '@/lib/utils'
+import { useStillMotion } from '@/theme/motion'
 
-/** The tray icon's gauge, drawn in the accent gradient. */
-function GaugeMark(): React.JSX.Element {
+/** Counts how many times the window has been brought into view, starting at 1. */
+function useOpenCount(): number {
+  const [count, setCount] = useState(1)
+
+  useEffect(() => {
+    // Hiding the window hides the page too, so this fires on every open from the tray.
+    const onVisibility = (): void => {
+      if (document.visibilityState === 'visible') setCount((current) => current + 1)
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => document.removeEventListener('visibilitychange', onVisibility)
+  }, [])
+
+  return count
+}
+
+/** The tray icon's gauge, drawn in the accent gradient. It sweeps in each time the widget opens. */
+function GaugeMark({ sweep }: { sweep: number }): React.JSX.Element {
   const gradient = useId()
+  const still = useStillMotion()
 
   return (
     <svg viewBox="0 0 16 16" className="size-4" aria-hidden>
@@ -18,35 +37,73 @@ function GaugeMark(): React.JSX.Element {
           <stop offset="1" style={{ stopColor: 'var(--gradient-to)' }} />
         </linearGradient>
       </defs>
-      <path
+      <motion.path
+        key={sweep}
         d="M4.1 12.2A5.6 5.6 0 1 1 11.9 12.2"
         fill="none"
         stroke={`url(#${gradient})`}
         strokeWidth="2.6"
         strokeLinecap="round"
+        initial={{ pathLength: still ? 1 : 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.7, ease: 'easeOut', delay: 0.1 }}
       />
     </svg>
+  )
+}
+
+/** Placeholder rows while the first reading is on its way. */
+function LoadingRows(): React.JSX.Element {
+  return (
+    <div role="status" aria-label="Loading usage" className="flex flex-col gap-3">
+      <div className="flex items-center gap-2.5">
+        <div className="skeleton size-6 rounded-md" />
+        <div className="skeleton h-3 w-24" />
+      </div>
+      <div className="flex flex-col gap-2 ps-8.5">
+        <div className="skeleton h-1.5 w-full" />
+        <div className="skeleton h-1.5 w-2/3" />
+      </div>
+    </div>
   )
 }
 
 export default function App(): React.JSX.Element {
   const { snapshots, refreshing, refresh } = useUsage()
   const now = useNow()
-  const shell = useRef<HTMLElement>(null)
+  const still = useStillMotion()
+  const openCount = useOpenCount()
+  const [shell, animate] = useAnimate<HTMLElement>()
   const scroller = useRef<HTMLDivElement>(null)
   const content = useRef<HTMLDivElement>(null)
   useFitWindowToContent(shell, scroller, content)
+
+  // Springs open like a popover whenever the widget comes into view.
+  useEffect(() => {
+    if (!shell.current) return
+    void animate(
+      shell.current,
+      still ? { opacity: [0, 1] } : { opacity: [0, 1], scale: [0.96, 1], y: [-6, 0] },
+      still ? { duration: 0.15 } : { type: 'spring', stiffness: 420, damping: 30 }
+    )
+  }, [openCount, animate, shell, still])
+
+  // Placeholders only until there is something real to show; a provider still
+  // loading next to one that has answered gets its own "Loading…" line instead.
+  const loading =
+    snapshots === null ||
+    (snapshots.length > 0 && snapshots.every((snapshot) => snapshot.status === 'loading'))
 
   return (
     <div className="flex h-screen w-screen flex-col p-2">
       {/* Takes its natural height, capped at the window, which main keeps sized to it. */}
       <section
         ref={shell}
-        className="widget-surface bg-card/90 border-border flex max-h-full min-h-0 flex-col overflow-hidden rounded-xl border shadow-lg backdrop-blur-xl"
+        className="widget-surface bg-card/90 border-border flex max-h-full min-h-0 origin-top flex-col overflow-hidden rounded-xl border shadow-lg backdrop-blur-xl"
       >
         <header className="drag-region flex items-center justify-between px-3 pt-2.5 pb-2">
           <div className="flex items-center gap-2">
-            <GaugeMark />
+            <GaugeMark sweep={openCount} />
             <h1 className="text-[13px] font-semibold tracking-tight">LLM Usage</h1>
           </div>
           <div className="flex gap-0.5">
@@ -83,15 +140,22 @@ export default function App(): React.JSX.Element {
 
         <div ref={scroller} className="border-border/60 min-h-0 overflow-y-auto border-t">
           <div ref={content} className="px-3 py-3">
-            {snapshots === null ? (
-              <p className="text-muted-foreground text-xs">Loading…</p>
+            {loading ? (
+              <LoadingRows />
             ) : snapshots.length === 0 ? (
               <p className="text-muted-foreground text-xs">No providers are enabled.</p>
             ) : (
               <ul className="divide-border/60 flex flex-col divide-y">
-                {snapshots.map((snapshot) => (
-                  <ProviderCard key={snapshot.providerId} snapshot={snapshot} now={now} />
-                ))}
+                <AnimatePresence initial>
+                  {snapshots.map((snapshot, index) => (
+                    <ProviderCard
+                      key={snapshot.providerId}
+                      snapshot={snapshot}
+                      now={now}
+                      index={index}
+                    />
+                  ))}
+                </AnimatePresence>
               </ul>
             )}
           </div>
