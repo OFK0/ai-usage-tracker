@@ -44,7 +44,8 @@ function subscribe<C extends EventChannel>(
  */
 const api = {
   widget: {
-    hide: (): void => send('widget:hide')
+    hide: (): void => send('widget:hide'),
+    fit: (height: number): void => send('widget:fit', height)
   },
   settings: {
     get: (): Promise<Settings> => invoke('settings:get'),

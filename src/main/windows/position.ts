@@ -43,3 +43,18 @@ export function clampToWorkArea(position: Point, workArea: Rect, size: Size): Po
     y: Math.round(Math.min(Math.max(position.y, workArea.y), maxY))
   }
 }
+
+/**
+ * The height to give a window that wants `requested` pixels: never shorter than
+ * `min`, never taller than `max`, and never taller than the work area leaves
+ * room for once `margin` is kept clear top and bottom.
+ */
+export function fitHeight(
+  requested: number,
+  workArea: Rect,
+  limits: { min: number; max: number; margin: number }
+): number {
+  const roomLeft = workArea.height - 2 * limits.margin
+  const ceiling = Math.max(limits.min, Math.min(limits.max, roomLeft))
+  return Math.round(Math.min(Math.max(requested, limits.min), ceiling))
+}

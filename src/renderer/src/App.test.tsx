@@ -1,6 +1,6 @@
 import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { LimitWindow, ProviderSnapshot } from '@shared/usage'
 import App from './App'
 
@@ -38,7 +38,7 @@ function claude(overrides: Partial<ProviderSnapshot> = {}): ProviderSnapshot {
 
 let pushUsage: (snapshots: ProviderSnapshot[]) => void
 const api = {
-  widget: { hide: vi.fn() },
+  widget: { hide: vi.fn(), fit: vi.fn() },
   settings: { open: vi.fn() },
   usage: {
     get: vi.fn(() => Promise.resolve([claude()])),
@@ -55,6 +55,67 @@ beforeEach(() => {
   vi.stubGlobal('api', api)
   // Cards remember being collapsed; each test starts from a clean slate.
   localStorage.clear()
+})
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
+
+describe('window size', () => {
+  function stubLayoutApis(): { resize: () => void } {
+    let callback: () => void = () => {}
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(cb: () => void) {
+          callback = cb
+        }
+        observe(): void {}
+        disconnect(): void {}
+      }
+    )
+    vi.stubGlobal('requestAnimationFrame', (cb: () => void) => {
+      cb()
+      return 0
+    })
+    vi.stubGlobal('cancelAnimationFrame', () => {})
+    return { resize: () => callback() }
+  }
+
+  function setBox(element: Element, box: Record<string, number>): void {
+    for (const [name, value] of Object.entries(box)) {
+      Object.defineProperty(element, name, { configurable: true, value })
+    }
+  }
+
+  it('asks for the height the content needs, including what is scrolled out of view', async () => {
+    const layout = stubLayoutApis()
+    const { container } = render(<App />)
+    await screen.findByText('Claude')
+
+    const [shell, scroller] = [
+      container.querySelector('section'),
+      container.querySelector('.overflow-y-auto')
+    ]
+    setBox(shell!, { offsetHeight: 300 })
+    setBox(scroller!, { scrollHeight: 460, clientHeight: 260 })
+    layout.resize()
+
+    // 300 visible + 200 scrolled out of view + 16 of room for the shadow.
+    expect(api.widget.fit).toHaveBeenLastCalledWith(516)
+  })
+
+  it('does not ask again while the height stays the same', async () => {
+    const layout = stubLayoutApis()
+    render(<App />)
+    await screen.findByText('Claude')
+    const calls = api.widget.fit.mock.calls.length
+
+    layout.resize()
+    layout.resize()
+
+    expect(api.widget.fit).toHaveBeenCalledTimes(calls)
+  })
 })
 
 describe('App', () => {

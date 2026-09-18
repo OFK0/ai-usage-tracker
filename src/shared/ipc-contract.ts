@@ -25,6 +25,8 @@ export interface InvokeChannels {
 /** Renderer tells main, no answer. */
 export interface SendChannels {
   'widget:hide': () => void
+  /** The height the widget's content needs, in CSS pixels. */
+  'widget:fit': (height: number) => void
   'settings:open': () => void
 }
 

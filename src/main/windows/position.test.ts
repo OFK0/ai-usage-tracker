@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { anchorTopRight, clampToWorkArea } from './position'
+import { anchorTopRight, clampToWorkArea, fitHeight } from './position'
 
 const size = { width: 340, height: 420 }
 
@@ -40,5 +40,34 @@ describe('clampToWorkArea', () => {
     const workArea = { x: 0, y: 0, width: 200, height: 200 }
 
     expect(clampToWorkArea({ x: -500, y: -500 }, workArea, size)).toEqual({ x: 0, y: 0 })
+  })
+})
+
+describe('fitHeight', () => {
+  const workArea = { x: 0, y: 0, width: 1920, height: 1040 }
+  const limits = { min: 120, max: 640, margin: 16 }
+
+  it('gives the window the height its content asks for', () => {
+    expect(fitHeight(236.4, workArea, limits)).toBe(236)
+  })
+
+  it('never goes below the minimum', () => {
+    expect(fitHeight(40, workArea, limits)).toBe(120)
+  })
+
+  it('stops at the maximum and lets the content scroll from there', () => {
+    expect(fitHeight(2000, workArea, limits)).toBe(640)
+  })
+
+  it('stays within a short display', () => {
+    const laptop = { x: 0, y: 0, width: 1366, height: 400 }
+
+    expect(fitHeight(2000, laptop, limits)).toBe(368)
+  })
+
+  it('keeps the minimum even when the display is shorter than that', () => {
+    const tiny = { x: 0, y: 0, width: 800, height: 100 }
+
+    expect(fitHeight(300, tiny, limits)).toBe(120)
   })
 })

@@ -2,9 +2,11 @@ import { BrowserWindow, screen } from 'electron'
 import { debounce } from '../lib/debounce'
 import { windowState } from '../store'
 import { hardenWindow, loadRenderer, secureWebPreferences } from './common'
-import { anchorTopRight, clampToWorkArea, type Point } from './position'
+import { anchorTopRight, clampToWorkArea, fitHeight, type Point } from './position'
 
-export const WIDGET_SIZE = { width: 340, height: 420 }
+/** Width is fixed; height follows the content, which the renderer reports. */
+export const WIDGET_SIZE = { width: 340, height: 220 }
+const HEIGHT_LIMITS = { min: 120, max: 640, margin: 16 }
 
 let widget: BrowserWindow | null = null
 
@@ -98,11 +100,29 @@ export function showWidgetWindow(): void {
   // A saved or dragged position can end up off screen when displays change.
   const bounds = window.getBounds()
   const { workArea } = screen.getDisplayMatching(bounds)
-  const { x, y } = clampToWorkArea(bounds, workArea, WIDGET_SIZE)
+  const { x, y } = clampToWorkArea(bounds, workArea, bounds)
   window.setPosition(x, y)
 
   window.show()
   window.focus()
+}
+
+/**
+ * Sizes the widget to the height its content needs. The top edge stays put so
+ * the widget grows downwards, unless that would run it off the bottom of the
+ * screen, in which case it moves up just enough to stay on it.
+ */
+export function fitWidgetToContent(contentHeight: number): void {
+  const window = getWidgetWindow()
+  if (!window) return
+
+  const bounds = window.getBounds()
+  const { workArea } = screen.getDisplayMatching(bounds)
+  const height = fitHeight(contentHeight, workArea, HEIGHT_LIMITS)
+  if (height === bounds.height) return
+
+  const { x, y } = clampToWorkArea(bounds, workArea, { width: bounds.width, height })
+  window.setBounds({ x, y, width: bounds.width, height })
 }
 
 export function hideWidgetWindow(): void {
