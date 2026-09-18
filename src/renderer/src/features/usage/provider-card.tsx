@@ -2,16 +2,33 @@ import type { Credits, LimitWindow, ProviderSnapshot } from '@shared/usage'
 import { Progress } from '@/components/ui/progress'
 import { formatMoney } from '@/lib/format'
 import { cn } from '@/lib/utils'
-import { providerName, resetText, statusText, windowLabel } from './labels'
+import {
+  activityText,
+  hasReset,
+  providerName,
+  resetText,
+  spendText,
+  statusText,
+  windowLabel
+} from './labels'
+
+function usageLabel(window: LimitWindow, resetSinceFetch: boolean): string {
+  if (resetSinceFetch) return 'Reset'
+  if (window.unlimited) return 'Unlimited'
+  if (window.exhausted) return 'Limit reached'
+  return `${Math.round(window.usedPercent)}%`
+}
 
 function WindowRow({
   window,
   provider,
-  now
+  now,
+  fresh
 }: {
   window: LimitWindow
   provider: string
   now: number
+  fresh: boolean
 }): React.JSX.Element {
   const label = windowLabel(window)
 
@@ -24,22 +41,28 @@ function WindowRow({
     )
   }
 
-  const reset = resetText(window, now)
+  // Once a window has reset, numbers from before it are no longer true.
+  const resetSinceFetch = !fresh && hasReset(window, now)
+  const reset = resetText(window, now, fresh)
 
   return (
     <div className="flex flex-col gap-1">
       <div className="flex justify-between text-xs">
         <span>{label}</span>
-        <span className={cn(window.exhausted && 'text-destructive font-medium')}>
-          {window.unlimited
-            ? 'Unlimited'
-            : window.exhausted
-              ? 'Limit reached'
-              : `${Math.round(window.usedPercent)}%`}
+        <span
+          className={cn(
+            window.exhausted && !resetSinceFetch && 'text-destructive font-medium',
+            resetSinceFetch && 'text-muted-foreground'
+          )}
+        >
+          {usageLabel(window, resetSinceFetch)}
         </span>
       </div>
       {!window.unlimited && (
-        <Progress value={window.usedPercent} aria-label={`${provider} ${label} usage`} />
+        <Progress
+          value={resetSinceFetch ? 0 : window.usedPercent}
+          aria-label={`${provider} ${label} usage`}
+        />
       )}
       {reset && <p className="text-muted-foreground text-[11px]">{reset}</p>}
     </div>
@@ -67,6 +90,7 @@ export function ProviderCard({
 }): React.JSX.Element {
   const name = providerName(snapshot.providerId)
   const status = statusText(snapshot, now)
+  const fresh = snapshot.status === 'ok'
 
   return (
     <li className="flex flex-col gap-2">
@@ -86,10 +110,23 @@ export function ProviderCard({
       )}
 
       {snapshot.windows.map((window) => (
-        <WindowRow key={window.key} window={window} provider={name} now={now} />
+        <WindowRow key={window.key} window={window} provider={name} now={now} fresh={fresh} />
       ))}
 
+      {snapshot.activity && (
+        <p className="text-muted-foreground text-[11px]" title="From the local session logs">
+          {activityText(snapshot.providerId, snapshot.activity, now)}
+        </p>
+      )}
+
       {snapshot.credits?.enabled && <CreditsRow credits={snapshot.credits} />}
+
+      {snapshot.apiSpend && (
+        <div className="flex justify-between gap-2 text-xs" title="Anthropic API, UTC days">
+          <span>API spend</span>
+          <span>{spendText(snapshot.apiSpend)}</span>
+        </div>
+      )}
     </li>
   )
 }
