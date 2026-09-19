@@ -212,6 +212,26 @@ describe('failures', () => {
     expect(claude.read).toHaveBeenCalledTimes(4)
   })
 
+  it('never asks again straight away, even when Retry-After says 0', async () => {
+    const rateLimited = (): ProviderError =>
+      new ProviderError('rate_limited', 'HTTP 429', { retryAfterMs: 0 })
+    const claude = scriptedProvider('claude', rateLimited(), rateLimited(), reading())
+    start(claude)
+    await vi.advanceTimersByTimeAsync(0)
+    expect(claude.read).toHaveBeenCalledTimes(1)
+
+    // At least the normal interval, then twice that.
+    await vi.advanceTimersByTimeAsync(59_999)
+    expect(claude.read).toHaveBeenCalledTimes(1)
+    await vi.advanceTimersByTimeAsync(1)
+    expect(claude.read).toHaveBeenCalledTimes(2)
+
+    await vi.advanceTimersByTimeAsync(119_999)
+    expect(claude.read).toHaveBeenCalledTimes(2)
+    await vi.advanceTimersByTimeAsync(1)
+    expect(claude.read).toHaveBeenCalledTimes(3)
+  })
+
   it('waits as long as Retry-After says when rate limited', async () => {
     const claude = scriptedProvider(
       'claude',
