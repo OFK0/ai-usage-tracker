@@ -9,7 +9,10 @@ describe('ProviderMark', () => {
       const { container } = render(<ProviderMark provider={provider} />)
       const mark = container.querySelector(`[data-provider="${provider}"]`)
       expect(mark?.textContent).toBe('')
-      return mark?.querySelector('path')?.getAttribute('d')
+      return (
+        mark?.querySelector('path')?.getAttribute('d') ??
+        mark?.querySelector('img')?.getAttribute('src')
+      )
     })
 
     expect(new Set(drawn).size).toBe(PROVIDER_IDS.length)

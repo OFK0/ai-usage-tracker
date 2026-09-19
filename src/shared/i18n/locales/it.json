@@ -52,12 +52,14 @@
     "signIn": {
       "claude": "Apri Claude Code per aggiornare l'utilizzo",
       "codex": "Apri Codex CLI per aggiornare l'utilizzo",
-      "copilot": "Accedi a GitHub per vedere l'utilizzo"
+      "copilot": "Accedi a GitHub per vedere l'utilizzo",
+      "antigravity": "Apri Antigravity per vedere l'utilizzo"
     },
     "notInstalled": {
       "claude": "Claude Code non trovato",
       "codex": "Codex CLI non trovato",
-      "copilot": "Nessun accesso a GitHub trovato"
+      "copilot": "Nessun accesso a GitHub trovato",
+      "antigravity": "Antigravity non trovato"
     },
     "disconnected": "Non collegato",
     "error": "Impossibile caricare l'utilizzo"
@@ -141,6 +143,10 @@
         "connectHelp": "Legge l'accesso di GitHub CLI (gh) o, in mancanza, quello dell'estensione Copilot del tuo editor, per mostrare le tue quote Copilot. A GitHub viene inviata solo la richiesta delle quote.",
         "key": "Token GitHub",
         "keyHelp": "Facoltativo. Usato al posto di questi accessi, anche se GitHub non è collegato. Salvato cifrato su questo computer."
+      },
+      "antigravity": {
+        "connect": "Collega Antigravity",
+        "connectHelp": "Legge le tue quote direttamente da Antigravity mentre è in esecuzione, tramite una connessione che non lascia questo computer."
       }
     },
     "secret": {

@@ -8,14 +8,16 @@ import { formatDuration, formatMoney, formatNumber } from '@/lib/format'
 const PROVIDER_NAMES: Record<ProviderId, string> = {
   claude: 'Claude',
   codex: 'Codex',
-  copilot: 'Copilot'
+  copilot: 'Copilot',
+  antigravity: 'Antigravity'
 }
 
 /** What the user has to open or sign in to for each provider. */
 const PROVIDER_TOOLS: Record<ProviderId, string> = {
   claude: 'Claude Code',
   codex: 'Codex CLI',
-  copilot: 'GitHub'
+  copilot: 'GitHub',
+  antigravity: 'Antigravity'
 }
 
 /** The API an Admin key reads spend from, for providers that take one. */

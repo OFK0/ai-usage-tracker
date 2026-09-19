@@ -231,6 +231,20 @@ describe('Codex', () => {
   })
 })
 
+describe('Antigravity', () => {
+  it('connects Antigravity with a switch alone, since there is no key to give it', async () => {
+    render(<SettingsApp />)
+    const section = await screen.findByRole('region', { name: 'Antigravity' })
+
+    await userEvent.click(within(section).getByRole('switch', { name: 'Connect Antigravity' }))
+
+    expect(api.settings.update).toHaveBeenCalledWith({
+      providers: { antigravity: { connected: true } }
+    })
+    expect(within(section).queryByRole('button', { name: 'Save' })).toBeNull()
+  })
+})
+
 describe('testing a connection', () => {
   it('checks just that provider now', async () => {
     const section = await claudeSection()

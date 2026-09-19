@@ -51,12 +51,14 @@
     "signIn": {
       "claude": "Open Claude Code to update usage",
       "codex": "Open Codex CLI to update usage",
-      "copilot": "Sign in to GitHub to see usage"
+      "copilot": "Sign in to GitHub to see usage",
+      "antigravity": "Open Antigravity to see usage"
     },
     "notInstalled": {
       "claude": "Claude Code not found",
       "codex": "Codex CLI not found",
-      "copilot": "No GitHub sign-in found"
+      "copilot": "No GitHub sign-in found",
+      "antigravity": "Antigravity not found"
     },
     "disconnected": "Not connected",
     "error": "Couldn't load usage"
@@ -138,6 +140,10 @@
         "connectHelp": "Reads the sign-in of the GitHub CLI (gh), or else of the Copilot extension in your editor, to show your Copilot quotas. Only the quota request itself goes to GitHub.",
         "key": "GitHub token",
         "keyHelp": "Optional. Used instead of those sign-ins, even when GitHub isn't connected. Stored encrypted on this computer."
+      },
+      "antigravity": {
+        "connect": "Connect Antigravity",
+        "connectHelp": "Reads your quotas from Antigravity itself while it's running, over a connection that never leaves this computer."
       }
     },
     "secret": {

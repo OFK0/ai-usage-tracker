@@ -53,12 +53,14 @@
     "signIn": {
       "claude": "Откройте Claude Code, чтобы обновить данные",
       "codex": "Откройте Codex CLI, чтобы обновить данные",
-      "copilot": "Войдите в GitHub, чтобы увидеть данные"
+      "copilot": "Войдите в GitHub, чтобы увидеть данные",
+      "antigravity": "Откройте Antigravity, чтобы увидеть данные"
     },
     "notInstalled": {
       "claude": "Claude Code не найден",
       "codex": "Codex CLI не найден",
-      "copilot": "Вход в GitHub не найден"
+      "copilot": "Вход в GitHub не найден",
+      "antigravity": "Antigravity не найден"
     },
     "disconnected": "Не подключено",
     "error": "Не удалось загрузить данные"
@@ -144,6 +146,10 @@
         "connectHelp": "Читает данные входа GitHub CLI (gh), а если его нет — расширения Copilot в вашем редакторе, чтобы показать квоты Copilot. В GitHub отправляется только сам запрос квот.",
         "key": "Токен GitHub",
         "keyHelp": "Необязательно. Используется вместо этих данных входа, даже если GitHub не подключён. Хранится в зашифрованном виде на этом компьютере."
+      },
+      "antigravity": {
+        "connect": "Подключить Antigravity",
+        "connectHelp": "Считывает квоты прямо из Antigravity, пока он запущен, по соединению, которое не выходит за пределы этого компьютера."
       }
     },
     "secret": {

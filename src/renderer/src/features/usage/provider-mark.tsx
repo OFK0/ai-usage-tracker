@@ -1,10 +1,11 @@
 import type { ProviderId } from '@shared/app-info'
-import { ClaudeLogo, CodexLogo, CopilotLogo } from './provider-logos'
+import { AntigravityLogo, ClaudeLogo, CodexLogo, CopilotLogo } from './provider-logos'
 
 const LOGOS: Record<ProviderId, (props: { className?: string }) => React.JSX.Element> = {
   claude: ClaudeLogo,
   codex: CodexLogo,
-  copilot: CopilotLogo
+  copilot: CopilotLogo,
+  antigravity: AntigravityLogo
 }
 
 /** The provider's logo on a small tile, wherever the provider is named. */

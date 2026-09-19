@@ -31,14 +31,24 @@ type SecretKind = 'key' | 'token'
 
 /**
  * What the optional secret under each provider's connect switch is: an Admin
- * API key for Claude and Codex, which adds API spend, and a GitHub token for
- * Copilot, used in place of the CLI's sign-in.
+ * API key for Claude and Codex, which adds API spend, a GitHub token for
+ * Copilot, used in place of the CLI's sign-in, and nothing for Antigravity,
+ * which is read from the running app.
  */
 const SECRET_KIND = {
   claude: 'key',
   codex: 'key',
-  copilot: 'token'
-} as const satisfies Record<ProviderId, SecretKind>
+  copilot: 'token',
+  antigravity: null
+} as const satisfies Record<ProviderId, SecretKind | null>
+
+type ProviderWithSecret = {
+  [P in ProviderId]: (typeof SECRET_KIND)[P] extends null ? never : P
+}[ProviderId]
+
+function hasSecret(provider: ProviderId): provider is ProviderWithSecret {
+  return SECRET_KIND[provider] !== null
+}
 
 const STORAGE_UNAVAILABLE = {
   'encryption-unavailable': 'encryption',
@@ -233,12 +243,14 @@ function ProviderSection({
         />
       </div>
 
-      <SecretField
-        provider={provider}
-        kind={SECRET_KIND[provider]}
-        label={t(`settings.provider.${provider}.key`)}
-        help={t(`settings.provider.${provider}.keyHelp`)}
-      />
+      {hasSecret(provider) && (
+        <SecretField
+          provider={provider}
+          kind={SECRET_KIND[provider]}
+          label={t(`settings.provider.${provider}.key`)}
+          help={t(`settings.provider.${provider}.keyHelp`)}
+        />
+      )}
 
       <div className="flex justify-end">
         {/* A provider that isn't shown isn't polled either, so there'd be nothing to test. */}

@@ -13,6 +13,8 @@ For each provider you connect:
 - **Copilot**: the monthly chat, code completion and premium request quotas,
   with the raw count ("26 of 2,000"). A quota your plan doesn't include shows as
   "Not in plan", never as used up.
+- **Antigravity**: the 5 hour and weekly limits of each model group (Gemini,
+  and Claude and GPT), while Antigravity is running.
 
 Each limit has a bar that turns amber and then red as it fills, and a countdown
 to when it resets. The plan (Pro, Plus, Free…) shows next to the name. When a
@@ -48,11 +50,12 @@ the sign-in each official tool already keeps on your machine, and that's what th
 connect switch lets the app read. So first sign in to the tool itself:
 `claude`, `codex`, or `gh auth login` for Copilot.
 
-| Provider | The connect switch reads                                                                                                           | Optional field in Settings | What that adds                              |
-| -------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------------------------------------- |
-| Claude   | Claude Code's sign-in: the macOS keychain, or `~/.claude/.credentials.json` (`$CLAUDE_CONFIG_DIR`). Its session logs as a fallback | Anthropic Admin API key    | API spend, from Anthropic's cost report     |
-| Codex    | Codex CLI's sign-in: `~/.codex/auth.json` (`$CODEX_HOME`). Its session logs as a fallback                                          | OpenAI Admin API key       | API spend, from OpenAI's organization costs |
-| Copilot  | The GitHub CLI's sign-in (`gh auth token`), or else the Copilot editor extension's (`github-copilot/apps.json`)                    | GitHub token               | Used instead of those sign-ins              |
+| Provider    | The connect switch reads                                                                                                           | Optional field in Settings | What that adds                              |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------------------------------------- |
+| Claude      | Claude Code's sign-in: the macOS keychain, or `~/.claude/.credentials.json` (`$CLAUDE_CONFIG_DIR`). Its session logs as a fallback | Anthropic Admin API key    | API spend, from Anthropic's cost report     |
+| Codex       | Codex CLI's sign-in: `~/.codex/auth.json` (`$CODEX_HOME`). Its session logs as a fallback                                          | OpenAI Admin API key       | API spend, from OpenAI's organization costs |
+| Copilot     | The GitHub CLI's sign-in (`gh auth token`), or else the Copilot editor extension's (`github-copilot/apps.json`)                    | GitHub token               | Used instead of those sign-ins              |
+| Antigravity | Antigravity's own language server on 127.0.0.1, found from its process while it runs                                               | None                       |                                             |
 
 ### The optional fields
 
@@ -84,6 +87,11 @@ is wrong.
   libsecret on Linux). On Linux without a keyring they can't be saved at all
   rather than be stored weakly. The settings window only ever gets back the
   last four characters.
+- Antigravity is only ever talked to on 127.0.0.1. The app finds its language
+  server's process, reads the token that server was started with from its
+  command line, and asks it for the quotas. Nothing about it leaves this
+  computer. Its backend has been seen reporting 100% left whatever the use, so
+  treat a suspiciously full quota with care.
 - Turning a connect switch off drops what was read from that tool.
 - Settings live in `%APPDATA%\AI Usage Tracker` on Windows,
   `~/Library/Application Support/AI Usage Tracker` on macOS and
