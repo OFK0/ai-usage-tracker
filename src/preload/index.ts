@@ -65,7 +65,8 @@ const api = {
   },
   usage: {
     get: (): Promise<ProviderSnapshot[]> => invoke('usage:get'),
-    refresh: (): Promise<ProviderSnapshot[]> => invoke('usage:refresh'),
+    refresh: (provider?: ProviderId): Promise<ProviderSnapshot[]> =>
+      provider === undefined ? invoke('usage:refresh') : invoke('usage:refresh', provider),
     onChange: (listener: (snapshots: ProviderSnapshot[]) => void): (() => void) =>
       subscribe('usage:changed', listener)
   }

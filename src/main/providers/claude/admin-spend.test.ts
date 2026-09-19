@@ -1,12 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from 'vitest'
-import {
-  COST_REPORT_URL,
-  createAdminSpendReader,
-  parseCostReport,
-  SPEND_CACHE_MS,
-  summarizeSpend
-} from './admin-spend'
+import { SPEND_CACHE_MS, summarizeSpend } from '../spend'
+import { COST_REPORT_URL, createAdminSpendReader, parseCostReport } from './admin-spend'
 
 const NOW = Date.parse('2026-09-18T15:00:00Z')
 

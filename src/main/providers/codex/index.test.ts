@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from 'vitest'
+import type { ApiSpend } from '@shared/usage'
 import { ProviderError } from '../types'
 import usageFixture from './__fixtures__/wham-usage.json'
 import type { CodexAuth } from './auth'
@@ -32,6 +33,7 @@ function provider(
     auth?: CodexAuth
     fetch?: (url: string, init: RequestInit) => Promise<Response>
     log?: LoggedRateLimits | null
+    spend?: ApiSpend | null
   } = {}
 ) {
   let clock = NOW
@@ -42,7 +44,10 @@ function provider(
       Promise.resolve<CodexAuth>(options.auth ?? { accessToken: 'eyJ.a', accountId: 'acc-1' })
     ),
     fetch: vi.fn(options.fetch ?? (() => Promise.resolve(Response.json(usageFixture)))),
-    readLoggedLimits: vi.fn(() => Promise.resolve(options.log === undefined ? logged : options.log))
+    readLoggedLimits: vi.fn(() =>
+      Promise.resolve(options.log === undefined ? logged : options.log)
+    ),
+    readApiSpend: vi.fn(() => Promise.resolve(options.spend ?? null))
   }
   const p = createCodexProvider({ ...deps, userAgent: 'ai-usage-tracker/0.1.0', now: () => clock })
   return {
@@ -173,6 +178,20 @@ describe('createCodexProvider', () => {
     answer = status(503)
     const error = await failure(p.read())
 
-    expect(error.salvage).toBeNull()
+    expect(error.salvage?.windows).toBeUndefined()
+  })
+
+  it('adds API spend when an admin key is set', async () => {
+    const spend = { currency: 'USD', today: 0.5, month: 4 }
+
+    expect((await provider({ spend }).read()).apiSpend).toEqual(spend)
+  })
+
+  it('still shows API spend while Codex is not connected', async () => {
+    const spend = { currency: 'USD', today: 0, month: 12 }
+
+    const error = await failure(provider({ connected: false, spend }).read())
+
+    expect(error.salvage?.apiSpend).toEqual(spend)
   })
 })

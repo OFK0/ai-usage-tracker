@@ -28,7 +28,9 @@ export function registerIpcHandlers(): void {
   })
 
   handle('usage:get', () => usagePoller.snapshots())
-  handle('usage:refresh', () => usagePoller.refresh())
+  handle('usage:refresh', (provider) =>
+    usagePoller.refresh(provider === undefined ? undefined : parseProviderId(provider))
+  )
 
   listen('widget:hide', () => hideWidgetWindow())
   listen('widget:fit', (height) => {

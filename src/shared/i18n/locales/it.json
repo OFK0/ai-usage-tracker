@@ -21,7 +21,7 @@
     "fromSessionLogs": "Dai log di sessione locali",
     "credits": "Crediti",
     "apiSpend": "Spesa API",
-    "apiSpendSource": "API Anthropic, giorni UTC"
+    "apiSpendSource": "{{api}}, giorni UTC"
   },
   "window": {
     "session": "Sessione",
@@ -122,6 +122,8 @@
       "connecting": "Connessione…",
       "connected": "Collegato",
       "connectedPlan": "Collegato · {{plan}}",
+      "test": "Verifica connessione",
+      "checking": "Verifica in corso…",
       "claude": {
         "connect": "Collega Claude Code",
         "connectHelp": "Legge l'accesso che Claude Code conserva su questo computer per mostrare i limiti del tuo piano, e i suoi log di sessione quando l'API di utilizzo non è raggiungibile. Ad Anthropic viene inviata solo la richiesta di utilizzo. Il sistema potrebbe chiedere l'autorizzazione la prima volta.",
@@ -130,7 +132,9 @@
       },
       "codex": {
         "connect": "Collega Codex CLI",
-        "connectHelp": "Legge l'accesso che Codex CLI conserva su questo computer per mostrare i limiti del tuo piano, e i suoi log di sessione quando l'API di utilizzo non è raggiungibile. A OpenAI viene inviata solo la richiesta di utilizzo."
+        "connectHelp": "Legge l'accesso che Codex CLI conserva su questo computer per mostrare i limiti del tuo piano, e i suoi log di sessione quando l'API di utilizzo non è raggiungibile. A OpenAI viene inviata solo la richiesta di utilizzo.",
+        "key": "Chiave API Admin di OpenAI",
+        "keyHelp": "Facoltativa. Aggiunge la tua spesa API di questo mese. Salvata cifrata su questo computer."
       },
       "copilot": {
         "connect": "Collega GitHub",

@@ -19,6 +19,7 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { useUsage } from '@/features/usage/hooks'
 import { providerName, statusText } from '@/features/usage/labels'
+import { ProviderMark } from '@/features/usage/provider-mark'
 import { i18n } from '@/i18n'
 import { formatPercent } from '@/lib/format'
 import { useDebouncedCallback } from '@/lib/use-debounced-callback'
@@ -29,23 +30,15 @@ import { ipcErrorMessage, useSecret, useSettings } from './hooks'
 type SecretKind = 'key' | 'token'
 
 /**
- * Providers with a connect switch, and what the optional secret next to it is:
- * an Anthropic Admin API key for Claude, a GitHub token for Copilot, none yet
- * for Codex.
+ * What the optional secret under each provider's connect switch is: an Admin
+ * API key for Claude and Codex, which adds API spend, and a GitHub token for
+ * Copilot, used in place of the CLI's sign-in.
  */
 const SECRET_KIND = {
   claude: 'key',
-  codex: null,
+  codex: 'key',
   copilot: 'token'
-} as const satisfies Record<ProviderId, SecretKind | null>
-
-type ProviderWithSecret = {
-  [P in ProviderId]: (typeof SECRET_KIND)[P] extends null ? never : P
-}[ProviderId]
-
-function hasSecret(provider: ProviderId): provider is ProviderWithSecret {
-  return SECRET_KIND[provider] !== null
-}
+} as const satisfies Record<ProviderId, SecretKind>
 
 const STORAGE_UNAVAILABLE = {
   'encryption-unavailable': 'encryption',
@@ -184,6 +177,17 @@ function ProviderSection({
   const { t } = useTranslation()
   const name = providerName(provider)
   const connectId = useId()
+  const [checking, setChecking] = useState(false)
+
+  async function testConnection(): Promise<void> {
+    setChecking(true)
+    try {
+      // The summary above follows along through the usage updates.
+      await window.api.usage.refresh(provider)
+    } finally {
+      setChecking(false)
+    }
+  }
 
   return (
     <section
@@ -191,11 +195,15 @@ function ProviderSection({
       className="bg-card border-border flex flex-col gap-4 rounded-lg border p-4"
     >
       <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="text-sm font-medium">{name}</p>
-          <p className="text-muted-foreground text-xs">
-            {connectionSummary(provider, settings, snapshot)}
-          </p>
+        <div className="flex min-w-0 items-center gap-2.5">
+          <ProviderMark name={name} />
+          <div className="min-w-0">
+            <p className="text-sm font-medium">{name}</p>
+            {/* The technical reason, for when the summary isn't enough. */}
+            <p className="text-muted-foreground text-xs" title={snapshot?.detail ?? undefined}>
+              {connectionSummary(provider, settings, snapshot)}
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <span aria-hidden className="text-muted-foreground text-xs">
@@ -223,14 +231,25 @@ function ProviderSection({
         />
       </div>
 
-      {hasSecret(provider) && (
-        <SecretField
-          provider={provider}
-          kind={SECRET_KIND[provider]}
-          label={t(`settings.provider.${provider}.key`)}
-          help={t(`settings.provider.${provider}.keyHelp`)}
-        />
-      )}
+      <SecretField
+        provider={provider}
+        kind={SECRET_KIND[provider]}
+        label={t(`settings.provider.${provider}.key`)}
+        help={t(`settings.provider.${provider}.keyHelp`)}
+      />
+
+      <div className="flex justify-end">
+        {/* A provider that isn't shown isn't polled either, so there'd be nothing to test. */}
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          disabled={checking || !settings.enabled}
+          onClick={() => void testConnection()}
+        >
+          {checking ? t('settings.provider.checking') : t('settings.provider.test')}
+        </Button>
+      </div>
     </section>
   )
 }

@@ -1,21 +1,6 @@
-import type { ApiSpend } from '@shared/usage'
-import { errorMessage } from '../../lib/http'
+import { createSpendReader, type AdminSpendDeps, type CostPage, type SpendReader } from '../spend'
 
 export const COST_REPORT_URL = 'https://api.anthropic.com/v1/organizations/cost_report'
-/** Cost reports lag behind real usage by a while, so asking often gains nothing. */
-export const SPEND_CACHE_MS = 15 * 60_000
-const MAX_PAGES = 3
-
-export interface CostBucket {
-  startingAt: number
-  currency: string
-  amount: number
-}
-
-interface CostPage {
-  buckets: CostBucket[]
-  nextPage: string | null
-}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -51,54 +36,14 @@ export function parseCostReport(body: unknown): CostPage {
   return { buckets, nextPage: nextPage ? (body['next_page'] as string) : null }
 }
 
-function startOfUtcDay(time: number): number {
-  const date = new Date(time)
-  return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
-}
-
-export function startOfUtcMonth(time: number): number {
-  const date = new Date(time)
-  return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1)
-}
-
-export function summarizeSpend(buckets: CostBucket[], now: number): ApiSpend {
-  const today = startOfUtcDay(now)
-  const month = startOfUtcMonth(now)
-  const inMonth = buckets.filter((bucket) => bucket.startingAt >= month)
-  const sum = (items: CostBucket[]): number =>
-    Math.round(items.reduce((total, item) => total + item.amount, 0) * 100) / 100
-
-  return {
-    currency: inMonth[0]?.currency ?? 'USD',
-    today: sum(inMonth.filter((bucket) => bucket.startingAt >= today)),
-    month: sum(inMonth)
-  }
-}
-
-export interface AdminSpendDeps {
-  /** The Admin API key from settings, or null when none is stored. */
-  readKey: () => Promise<string | null>
-  fetch: (url: string, init: RequestInit) => Promise<Response>
-  userAgent: string
-  now?: () => number
-}
-
-export interface AdminSpendReader {
-  /** Month-to-date spend, or null when no Admin API key is set. */
-  read(signal: AbortSignal): Promise<ApiSpend | null>
-}
-
-export function createAdminSpendReader(deps: AdminSpendDeps): AdminSpendReader {
-  const now = deps.now ?? Date.now
-  let cached: { key: string; spend: ApiSpend; fetchedAt: number } | null = null
-
-  async function fetchSpend(key: string, signal: AbortSignal): Promise<ApiSpend> {
-    const buckets: CostBucket[] = []
-    let page: string | null = null
-
-    for (let i = 0; i < MAX_PAGES; i++) {
+/** Anthropic's Admin API cost report, in the shared spend reader. */
+export function createAdminSpendReader(deps: AdminSpendDeps): SpendReader {
+  return createSpendReader({
+    readKey: deps.readKey,
+    now: deps.now,
+    fetchPage: async (key, monthStart, page, signal) => {
       const url = new URL(COST_REPORT_URL)
-      url.searchParams.set('starting_at', new Date(startOfUtcMonth(now())).toISOString())
+      url.searchParams.set('starting_at', new Date(monthStart).toISOString())
       url.searchParams.set('bucket_width', '1d')
       url.searchParams.set('limit', '31')
       if (page) url.searchParams.set('page', page)
@@ -113,38 +58,7 @@ export function createAdminSpendReader(deps: AdminSpendDeps): AdminSpendReader {
         signal
       })
       if (!response.ok) throw new Error(`Cost report returned HTTP ${response.status}`)
-
-      const parsed = parseCostReport(await response.json())
-      buckets.push(...parsed.buckets)
-      page = parsed.nextPage
-      if (!page) break
+      return parseCostReport(await response.json())
     }
-
-    return summarizeSpend(buckets, now())
-  }
-
-  return {
-    async read(signal) {
-      const key = await deps.readKey()
-      if (!key) {
-        cached = null
-        return null
-      }
-
-      if (cached?.key === key && now() - cached.fetchedAt < SPEND_CACHE_MS) {
-        return cached.spend
-      }
-
-      try {
-        const spend = await fetchSpend(key, signal)
-        cached = { key, spend, fetchedAt: now() }
-        return spend
-      } catch (error) {
-        // Spend is a side panel. A failure here keeps the last figures for the
-        // same key rather than hiding them, and never fails the usage read.
-        if (cached?.key === key) return cached.spend
-        throw new Error(`Couldn't read API spend: ${errorMessage(error)}`, { cause: error })
-      }
-    }
-  }
+  })
 }
