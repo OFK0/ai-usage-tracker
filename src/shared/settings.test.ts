@@ -51,12 +51,20 @@ describe('normalizeSettings', () => {
     expect(settings.refreshIntervalSeconds).toBe(30)
   })
 
+  it('shows Claude and Copilot by default, and Codex only once turned on', () => {
+    const { providers } = defaultSettings()
+
+    expect(providers.claude.enabled).toBe(true)
+    expect(providers.copilot.enabled).toBe(true)
+    expect(providers.codex.enabled).toBe(false)
+  })
+
   it('reads provider flags and ignores providers it does not know', () => {
     const settings = normalizeSettings({
-      providers: { codex: { enabled: false }, gemini: { enabled: false } }
+      providers: { claude: { enabled: false }, gemini: { enabled: false } }
     })
 
-    expect(settings.providers.codex.enabled).toBe(false)
+    expect(settings.providers.claude.enabled).toBe(false)
     expect(settings.providers).not.toHaveProperty('gemini')
   })
 
@@ -138,9 +146,9 @@ describe('mergeSettings', () => {
   })
 
   it('merges provider flags without touching the others', () => {
-    const next = mergeSettings(defaultSettings(), { providers: { codex: { enabled: false } } })
+    const next = mergeSettings(defaultSettings(), { providers: { copilot: { enabled: false } } })
 
-    expect(next.providers.codex.enabled).toBe(false)
+    expect(next.providers.copilot.enabled).toBe(false)
     expect(next.providers.claude.enabled).toBe(true)
   })
 
