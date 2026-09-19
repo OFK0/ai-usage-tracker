@@ -26,7 +26,10 @@ function useOpenCount(): number {
   return count
 }
 
-/** The tray icon's gauge, drawn in the accent gradient. It sweeps in each time the widget opens. */
+/**
+ * The tray glyph (design/tray-glyph-accent.svg), drawn in the accent gradient.
+ * It sweeps in each time the widget opens.
+ */
 function GaugeMark({ sweep }: { sweep: number }): React.JSX.Element {
   const gradient = useId()
   const still = useStillMotion()
@@ -41,10 +44,11 @@ function GaugeMark({ sweep }: { sweep: number }): React.JSX.Element {
       </defs>
       <motion.path
         key={sweep}
-        d="M4.1 12.2A5.6 5.6 0 1 1 11.9 12.2"
+        // A 250° dial about (8, 9), radius 5: the same numbers as the tray glyph.
+        d="M3.904 11.868A5 5 0 1 1 12.096 11.868"
         fill="none"
         stroke={`url(#${gradient})`}
-        strokeWidth="2.6"
+        strokeWidth="4"
         strokeLinecap="round"
         initial={{ pathLength: still ? 1 : 0 }}
         animate={{ pathLength: 1 }}

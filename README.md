@@ -168,8 +168,10 @@ packaging setup get the same build on their pull request, without the release.
 
 ### Icons
 
-The tray icons and `build/icon.png` are drawn by `scripts/generate-tray-icons.mjs`
-and `scripts/generate-app-icon.mjs`, which write raw RGBA and encode PNG with
+The SVG sources for the app icon and the tray glyph are in [`design/`](design/),
+with the numbers behind them. The tray icons and `build/icon.png` are drawn from
+the same numbers by `scripts/generate-tray-icons.mjs` and
+`scripts/generate-app-icon.mjs`, which write raw RGBA and encode PNG with
 `node:zlib`, so no image tooling is needed. electron-builder derives the `.ico`,
 `.icns` and Linux sizes from `build/icon.png`.
 

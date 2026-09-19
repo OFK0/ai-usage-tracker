@@ -50,6 +50,9 @@ The tray glyph, on a 16 grid:
   `@1x`.
 - The tray icon is static — see `src/main/tray/index.ts` — so it carries
   identity, not a reading.
+- The widget's header draws the same glyph, in the accent gradient
+  (`GaugeMark` in `src/renderer/src/App.tsx`). It's hand-copied, so a change
+  to the glyph goes there too.
 
 ## Regenerating
 
