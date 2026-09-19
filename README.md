@@ -95,6 +95,11 @@ Output goes to `release/<version>/`. The app icon is generated into
 `build/icon.png` by `npm run generate:icons`, and electron-builder derives the
 `.ico`, `.icns` and Linux sizes from it.
 
+Pushing a `v*` tag that matches the version in `package.json` builds all of
+them on GitHub Actions and attaches them to a draft release, to publish by
+hand once it's checked. Changes to the packaging setup get the same build on
+their pull request, without the release.
+
 v1 isn't code signed, so the first launch asks for a click-through:
 
 - Windows: SmartScreen says it protected your PC. Choose More info, then
