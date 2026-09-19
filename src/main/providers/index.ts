@@ -12,6 +12,9 @@ import {
   readClaudeCredentials
 } from './claude/credentials'
 import { createSessionLog } from './claude/session-log'
+import { createCodexProvider } from './codex'
+import { codexHome, readCodexAuth } from './codex/auth'
+import { createSessionLog as createCodexSessionLog } from './codex/session-log'
 import { createCopilotProvider } from './copilot'
 import {
   createEditorProbe,
@@ -37,6 +40,9 @@ export function createProviders(): UsageProvider[] {
     userAgent
   })
 
+  const codexDir = codexHome(process.env, homedir())
+  const codexLog = createCodexSessionLog(join(codexDir, 'sessions'))
+
   const probeGh = createGhProbe()
   const probeEditor = createEditorProbe(editorConfigDir(process.platform, process.env, homedir()))
 
@@ -52,6 +58,14 @@ export function createProviders(): UsageProvider[] {
         return summarizeActivity(await claudeLog.collect(now), now, knownResetAt)
       },
       readApiSpend: (signal) => claudeSpend.read(signal),
+      userAgent
+    }),
+    createCodexProvider({
+      isConnected: () => settingsRepository.get().providers.codex.connected,
+      forgetLocalData: () => codexLog.clear(),
+      readAuth: () => readCodexAuth(codexDir),
+      fetch,
+      readLoggedLimits: () => codexLog.latest(),
       userAgent
     }),
     createCopilotProvider({

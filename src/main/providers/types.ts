@@ -1,5 +1,12 @@
 import type { ProviderId } from '@shared/app-info'
-import type { ApiSpend, Credits, LimitWindow, LocalActivity, SnapshotSource } from '@shared/usage'
+import type {
+  ApiSpend,
+  Credits,
+  LimitWindow,
+  LocalActivity,
+  ProviderSnapshot,
+  SnapshotSource
+} from '@shared/usage'
 
 /** What a provider returns on success. The poller turns it into a snapshot. */
 export interface ProviderReading {
@@ -29,8 +36,14 @@ export type ProviderErrorKind =
   | 'unavailable'
   | 'unexpected_response'
 
-/** Facts a provider still knows after its main source failed, such as local logs. */
-export type Salvage = Partial<Pick<ProviderReading, 'activity' | 'apiSpend'>>
+/**
+ * Facts a provider still knows after its main source failed, such as local
+ * logs. Limits read back from a log come with the time they were true as
+ * `fetchedAt`, so they show as stale from then rather than as fresh.
+ */
+export type Salvage = Partial<
+  Pick<ProviderSnapshot, 'activity' | 'apiSpend' | 'windows' | 'planLabel' | 'source' | 'fetchedAt'>
+>
 
 export class ProviderError extends Error {
   readonly retryAfterMs: number | null

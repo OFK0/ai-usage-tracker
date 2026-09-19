@@ -128,6 +128,10 @@
         "key": "Chiave API Admin di Anthropic",
         "keyHelp": "Facoltativa. Aggiunge la tua spesa API di questo mese. Salvata cifrata su questo computer."
       },
+      "codex": {
+        "connect": "Collega Codex CLI",
+        "connectHelp": "Legge l'accesso che Codex CLI conserva su questo computer per mostrare i limiti del tuo piano, e i suoi log di sessione quando l'API di utilizzo non è raggiungibile. A OpenAI viene inviata solo la richiesta di utilizzo."
+      },
       "copilot": {
         "connect": "Collega GitHub",
         "connectHelp": "Legge l'accesso di GitHub CLI (gh) o, in mancanza, quello dell'estensione Copilot del tuo editor, per mostrare le tue quote Copilot. A GitHub viene inviata solo la richiesta delle quote.",

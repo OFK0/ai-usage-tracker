@@ -1,0 +1,6 @@
+{"timestamp":"2025-09-19T08:00:00.000Z","type":"session_meta","payload":{"id":"5973b6c0-94b8-487b-a530-2aeb6098ae0e","cwd":"/home/ada/project","cli_version":"0.40.0"}}
+{"timestamp":"2025-09-19T08:00:05.000Z","type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"count the token_count events"}]}}
+{"timestamp":"2025-09-19T08:00:09.000Z","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":1200,"output_tokens":300}},"rate_limits":{"primary":{"used_percent":8.0,"window_minutes":300,"resets_at":1758283200},"secondary":{"used_percent":30.0,"window_minutes":10080,"resets_at":1758621600},"plan_type":"plus"}}}
+{"timestamp":"2025-09-19T08:05:00.000Z","type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Done."}]}}
+{"timestamp":"2025-09-19T08:05:02.000Z","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":2400,"output_tokens":700}},"rate_limits":{"primary":{"used_percent":11.0,"window_minutes":300,"resets_at":1758283200},"secondary":{"used_percent":33.0,"window_minutes":10080,"resets_at":1758621600},"plan_type":"plus"}}}
+{"timestamp":"2025-09-19T08:05:03.000Z","type":"event_msg","payload":{"type":"agent_message","message":"Done."}}

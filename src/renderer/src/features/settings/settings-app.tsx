@@ -30,17 +30,21 @@ type SecretKind = 'key' | 'token'
 
 /**
  * Providers with a connect switch, and what the optional secret next to it is:
- * an Anthropic Admin API key for Claude, a GitHub token for Copilot.
+ * an Anthropic Admin API key for Claude, a GitHub token for Copilot, none yet
+ * for Codex.
  */
 const SECRET_KIND = {
   claude: 'key',
+  codex: null,
   copilot: 'token'
-} as const satisfies Partial<Record<ProviderId, SecretKind>>
+} as const satisfies Record<ProviderId, SecretKind | null>
 
-type ConnectableProvider = keyof typeof SECRET_KIND
+type ProviderWithSecret = {
+  [P in ProviderId]: (typeof SECRET_KIND)[P] extends null ? never : P
+}[ProviderId]
 
-function isConnectable(provider: ProviderId): provider is ConnectableProvider {
-  return provider in SECRET_KIND
+function hasSecret(provider: ProviderId): provider is ProviderWithSecret {
+  return SECRET_KIND[provider] !== null
 }
 
 const STORAGE_UNAVAILABLE = {
@@ -205,29 +209,27 @@ function ProviderSection({
         </div>
       </div>
 
-      {isConnectable(provider) && (
-        <>
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex flex-col gap-1">
-              <Label htmlFor={connectId}>{t(`settings.provider.${provider}.connect`)}</Label>
-              <p className="text-muted-foreground text-xs">
-                {t(`settings.provider.${provider}.connectHelp`)}
-              </p>
-            </div>
-            <Switch
-              id={connectId}
-              checked={settings.connected}
-              onCheckedChange={(connected) => onChange({ connected })}
-            />
-          </div>
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <Label htmlFor={connectId}>{t(`settings.provider.${provider}.connect`)}</Label>
+          <p className="text-muted-foreground text-xs">
+            {t(`settings.provider.${provider}.connectHelp`)}
+          </p>
+        </div>
+        <Switch
+          id={connectId}
+          checked={settings.connected}
+          onCheckedChange={(connected) => onChange({ connected })}
+        />
+      </div>
 
-          <SecretField
-            provider={provider}
-            kind={SECRET_KIND[provider]}
-            label={t(`settings.provider.${provider}.key`)}
-            help={t(`settings.provider.${provider}.keyHelp`)}
-          />
-        </>
+      {hasSecret(provider) && (
+        <SecretField
+          provider={provider}
+          kind={SECRET_KIND[provider]}
+          label={t(`settings.provider.${provider}.key`)}
+          help={t(`settings.provider.${provider}.keyHelp`)}
+        />
       )}
     </section>
   )

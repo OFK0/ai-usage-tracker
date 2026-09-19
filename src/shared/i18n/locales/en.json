@@ -125,6 +125,10 @@
         "key": "Anthropic Admin API key",
         "keyHelp": "Optional. Adds your API spend for this month. Stored encrypted on this computer."
       },
+      "codex": {
+        "connect": "Connect Codex CLI",
+        "connectHelp": "Reads the sign-in Codex CLI keeps on this computer to show your plan limits, and its session logs when the usage API can't be reached. Only the usage request itself goes to OpenAI."
+      },
       "copilot": {
         "connect": "Connect GitHub",
         "connectHelp": "Reads the sign-in of the GitHub CLI (gh), or else of the Copilot extension in your editor, to show your Copilot quotas. Only the quota request itself goes to GitHub.",
