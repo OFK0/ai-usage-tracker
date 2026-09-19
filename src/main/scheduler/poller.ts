@@ -133,7 +133,10 @@ export function createPoller(options: PollerOptions): Poller {
 
     state.failures += 1
     const exponential = Math.min(baseInterval() * 2 ** (state.failures - 1), MAX_BACKOFF_MS)
-    const delay = Math.min(failure.retryAfterMs ?? exponential, MAX_RETRY_AFTER_MS)
+    // Retry-After can make us wait longer than our own backoff, never shorter.
+    // Servers do answer 429 with "Retry-After: 0"; taken literally, that would
+    // ask again at once, get another 429, and never stop.
+    const delay = Math.min(Math.max(failure.retryAfterMs ?? 0, exponential), MAX_RETRY_AFTER_MS)
 
     if (failure.kind === 'rate_limited') {
       state.backoffUntil = now() + delay
