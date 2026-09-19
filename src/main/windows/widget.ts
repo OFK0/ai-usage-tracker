@@ -71,6 +71,15 @@ export function createWidgetWindow(): BrowserWindow {
 
   applyWidgetSettings(settingsRepository.get())
 
+  if (process.platform === 'darwin') {
+    // Follows the user across desktops, but stays out of fullscreen Spaces,
+    // which is all it takes on macOS to keep it off fullscreen apps.
+    widget.setVisibleOnAllWorkspaces(true, {
+      visibleOnFullScreen: false,
+      skipTransformProcessType: true
+    })
+  }
+
   // The widget appears on its own, often at login, so it must not take focus
   // away from whatever the user is doing. Opening it from the tray does focus it.
   widget.on('ready-to-show', () => widget?.showInactive())
@@ -128,10 +137,15 @@ export function hideWidgetWindow(): void {
   getWidgetWindow()?.hide()
 }
 
+/** Shows the widget without taking focus from whatever the user is doing. */
+export function showWidgetInactive(): void {
+  getWidgetWindow()?.showInactive()
+}
+
 /** Applies the settings that belong to the window rather than to what it shows. */
 export function applyWidgetSettings(settings: Settings): void {
   // 'floating' sits above normal windows without covering menus or the screen
-  // saver. Keeping the widget off fullscreen spaces is handled separately.
+  // saver. Staying off fullscreen apps is up to the fullscreen guard.
   getWidgetWindow()?.setAlwaysOnTop(settings.alwaysOnTop, 'floating')
 }
 
