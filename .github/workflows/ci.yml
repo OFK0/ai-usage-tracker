@@ -40,3 +40,10 @@ jobs:
 
       - name: Test
         run: npm run test
+
+      - name: Build
+        run: npx electron-vite build
+
+      # Linux runners have no display, so the app gets a virtual one.
+      - name: Smoke test the app
+        run: ${{ runner.os == 'Linux' && 'xvfb-run --auto-servernum ' || '' }}npx playwright test

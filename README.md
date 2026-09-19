@@ -82,6 +82,7 @@ npm run dev
 | `npm run format`    | Format with Prettier                 |
 | `npm run typecheck` | Typecheck main, preload and renderer |
 | `npm run test`      | Run the test suite                   |
+| `npm run test:e2e`  | Build, then smoke test the real app  |
 
 ## Installers
 

@@ -24,8 +24,18 @@ async function exists(path: string): Promise<boolean> {
  *
  * Nothing is deleted, and once the new folder has settings of its own this does
  * nothing, so it is safe to run on every start.
+ *
+ * Only the app's own data folder takes them over. A folder given with
+ * --user-data-dir, as tests do, starts fresh rather than with someone's
+ * settings, connected providers included.
  */
-export async function migrateLegacySettings(appData: string, userData: string): Promise<boolean> {
+export async function migrateLegacySettings(
+  appData: string,
+  userData: string,
+  appName: string
+): Promise<boolean> {
+  if (userData !== join(appData, appName)) return false
+
   const from = join(appData, LEGACY_FOLDER, 'config.json')
   const to = join(userData, 'config.json')
 
