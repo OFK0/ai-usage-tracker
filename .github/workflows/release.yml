@@ -1,0 +1,107 @@
+name: Release
+
+on:
+  # A version tag builds every installer and puts them on a draft release.
+  push:
+    tags: ['v*']
+  # A change to the packaging builds them too, as a check, without releasing.
+  pull_request:
+    paths:
+      - electron-builder.yml
+      - build/**
+      - scripts/before-pack.cjs
+      - .github/workflows/release.yml
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package:
+    name: Package (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: --win
+          - os: macos-latest
+            platform: --mac
+          - os: ubuntu-latest
+            platform: --linux
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Package
+        run: npx electron-builder ${{ matrix.platform }} --publish never
+        env:
+          # There's no signing certificate yet, so don't go looking for one.
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+          # macOS signs ad hoc, with no secrets involved, so pull requests
+          # check that too instead of skipping signing.
+          CSC_FOR_PULL_REQUEST: true
+
+      - name: List installers
+        shell: bash
+        run: ls -l release/*/*.{exe,dmg,zip,AppImage,deb} 2>/dev/null || true
+
+      # Only a release needs the files, and only until it has them: they add up
+      # to over a gigabyte, which would eat into the Actions storage quota.
+      - uses: actions/upload-artifact@v4
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          name: installers-${{ runner.os }}
+          retention-days: 1
+          path: |
+            release/*/*.exe
+            release/*/*.dmg
+            release/*/*.zip
+            release/*/*.AppImage
+            release/*/*.deb
+          if-no-files-found: error
+
+  release:
+    name: Draft release
+    needs: package
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check the tag matches package.json
+        run: |
+          version="v$(node -p "require('./package.json').version")"
+          if [ "$version" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME doesn't match package.json ($version)" >&2
+            exit 1
+          fi
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: installers
+          merge-multiple: true
+
+      # A draft, so the release is looked over before anyone can see it.
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" installers/* \
+            --draft \
+            --generate-notes \
+            --title "$GITHUB_REF_NAME"

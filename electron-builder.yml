@@ -34,12 +34,16 @@ win:
 
 nsis:
   artifactName: ${name}-${version}-setup-${arch}.${ext}
+  # One installer per architecture, not a second one bundling both.
+  buildUniversalInstaller: false
   oneClick: true
   perMachine: false
   deleteAppDataOnUninstall: false
 
 mac:
   category: public.app-category.developer-tools
+  # The zip; the dmg is named below.
+  artifactName: ${name}-${version}-${arch}-mac.${ext}
   target:
     - target: dmg
       arch: [x64, arm64]
