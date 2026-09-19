@@ -138,6 +138,18 @@ describe('Appearance', () => {
     await vi.waitFor(() => expect(root.lang).toBe('de'))
   })
 
+  it('lays the page out right to left for Arabic, and back again', async () => {
+    stubMedia()
+    stubSettings({ language: 'ar' })
+    render(<Appearance>content</Appearance>)
+
+    await vi.waitFor(() => expect(root.dir).toBe('rtl'))
+
+    act(() => pushSettings({ ...defaultSettings(), language: 'en' }))
+
+    expect(root.dir).toBe('ltr')
+  })
+
   it('switches language as soon as the setting changes', async () => {
     stubMedia()
     render(<Appearance>content</Appearance>)
