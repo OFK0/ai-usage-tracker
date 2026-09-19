@@ -1,52 +1,124 @@
 # AI Usage Tracker
 
-A small desktop widget that shows how much of your LLM coding allowance is left, for
-Claude Code, Codex and GitHub Copilot, without opening a CLI or an IDE panel.
+A small desktop widget that shows how much of your AI coding allowance is left,
+for Claude Code, Codex and GitHub Copilot, without opening a CLI or an IDE panel.
 
-## Where the numbers come from
+## What it shows
 
-Nothing is read until you connect a provider in Settings. Each provider has a
-connect switch, off by default, and the widget points you there until it's on.
+For each provider you connect:
 
-Subscription limits (Claude Pro/Max, ChatGPT Plus, Copilot) aren't exposed
-through pay-as-you-go API keys, which only report API spend. The session and
-weekly windows come from the sign-in the official CLI already keeps on your
-machine, so that's what connecting allows the app to read:
+- **Claude**: the 5 hour session and the weekly limits, per model where your
+  plan has them, and extra usage credits if they're on.
+- **Codex**: the 5 hour and the weekly limits.
+- **Copilot**: the monthly chat, code completion and premium request quotas,
+  with the raw count ("26 of 2,000"). A quota your plan doesn't include shows as
+  "Not in plan", never as used up.
 
-| Provider | What connecting reads                                                                                            |
-| -------- | ---------------------------------------------------------------------------------------------------------------- |
-| Claude   | Claude Code's sign-in (the macOS keychain, or `~/.claude/.credentials.json`), and its session logs as a fallback |
-| Codex    | Codex CLI's sign-in (`~/.codex/auth.json`, or under `$CODEX_HOME`), and its session logs as a fallback           |
-| Copilot  | The GitHub CLI's sign-in (`gh auth token`), or else the Copilot extension's (`github-copilot/apps.json`)         |
+Each limit has a bar that turns amber and then red as it fills, and a countdown
+to when it resets. The plan (Pro, Plus, Free…) shows next to the name. When a
+provider can't be reached, the last numbers stay on screen, greyed out, with how
+old they are. With an Admin API key, Claude and Codex also show API spend for
+today and this month.
 
-For Copilot you can also paste a
-GitHub token in Settings; it's used instead of those sign-ins and works without
-the connect switch, since you gave it to the app yourself.
+The widget lives in the tray. Click the tray icon to show or hide it; right-click
+for Refresh, Settings and Quit.
 
-Pasting a long-lived token instead doesn't work for Claude: `claude setup-token`
-only grants the `user:inference` scope, and the usage endpoint needs
-`user:profile`.
+## Install
 
-The sign-in is read but never written, never logged, and only ever sent to the
-provider it belongs to. The optional Anthropic and OpenAI Admin API keys in
-Settings add your API spend for Claude and Codex. Keys and tokens entered in Settings are encrypted with the OS keychain
-through Electron's `safeStorage`.
+Installers are on the [Releases](https://github.com/OFK0/ai-usage-tracker/releases)
+page: NSIS for Windows (x64, arm64), dmg or zip for macOS (Intel, Apple silicon),
+AppImage or deb for Linux. To build them yourself, see [Development](#development).
 
-## Launch at login
+The app isn't code signed yet, so the first launch asks for a click-through:
 
-Settings → General → Launch at login.
+- **Windows**: SmartScreen says it protected your PC. Choose More info, then
+  Run anyway.
+- **macOS**: the app is signed ad hoc only, so Gatekeeper won't open it from a
+  double-click. Right-click it and choose Open, or run
+  `xattr -dr com.apple.quarantine "/Applications/AI Usage Tracker.app"`.
+
+## Connecting providers
+
+Nothing is read until you connect a provider in Settings. Each one has a connect
+switch, off by default, and the widget points you there until it's on.
+
+Subscription limits (Claude Pro/Max, ChatGPT Plus/Pro, Copilot) aren't available
+through API keys, which only know about pay-as-you-go spend. The limits come from
+the sign-in each official tool already keeps on your machine, and that's what the
+connect switch lets the app read. So first sign in to the tool itself:
+`claude`, `codex`, or `gh auth login` for Copilot.
+
+| Provider | The connect switch reads                                                                                                           | Optional field in Settings | What that adds                              |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------------------------------------- |
+| Claude   | Claude Code's sign-in: the macOS keychain, or `~/.claude/.credentials.json` (`$CLAUDE_CONFIG_DIR`). Its session logs as a fallback | Anthropic Admin API key    | API spend, from Anthropic's cost report     |
+| Codex    | Codex CLI's sign-in: `~/.codex/auth.json` (`$CODEX_HOME`). Its session logs as a fallback                                          | OpenAI Admin API key       | API spend, from OpenAI's organization costs |
+| Copilot  | The GitHub CLI's sign-in (`gh auth token`), or else the Copilot editor extension's (`github-copilot/apps.json`)                    | GitHub token               | Used instead of those sign-ins              |
+
+### The optional fields
+
+- **Admin API keys** are only for API spend. You don't need one for your plan's
+  limits. They're organization keys, so only an organization admin can create
+  them: in the [Anthropic Console](https://console.anthropic.com/settings/admin-keys)
+  (`sk-ant-admin…`) or the [OpenAI dashboard](https://platform.openai.com/settings/organization/admin-keys)
+  (`sk-admin-…`). A regular API key won't work there. Spend is counted in UTC
+  days and refreshed every 15 minutes at most, since the reports lag behind
+  anyway. It shows even while the provider isn't connected, since you gave the
+  key to the app yourself.
+- **GitHub token**: used for Copilot instead of the GitHub CLI's or the
+  editor's sign-in, and it works without the connect switch. The one
+  `gh auth token` prints works.
+- There's no token field for Claude's limits: `claude setup-token` only grants
+  the `user:inference` scope, and the usage endpoint needs `user:profile`.
+
+Test connection, under each provider, checks it straight away instead of at
+the next refresh. Hover the status line for the technical reason when something
+is wrong.
+
+### What happens to your data
+
+- Sign-ins are read, never written, never logged, and only ever sent to the
+  provider they belong to. Refresh tokens are left alone: each tool renews its
+  own sign-in when you use it, and until then the widget asks you to open it.
+- Keys and tokens typed into Settings are encrypted with the OS keychain
+  through Electron's `safeStorage` (DPAPI on Windows, the Keychain on macOS,
+  libsecret on Linux). On Linux without a keyring they can't be saved at all
+  rather than be stored weakly. The settings window only ever gets back the
+  last four characters.
+- Turning a connect switch off drops what was read from that tool.
+- Settings live in `%APPDATA%\AI Usage Tracker` on Windows,
+  `~/Library/Application Support/AI Usage Tracker` on macOS and
+  `~/.config/AI Usage Tracker` on Linux.
+
+## How often it refreshes
+
+Every minute while the widget is showing, which you can change from 30 seconds
+to 30 minutes. While it's hidden, at most every 5 minutes. It also checks again
+right after a limit resets. When a provider fails it backs off, up to 30 minutes,
+and when a provider rate limits it, it waits as long as asked.
+
+## Settings
+
+- **General**: language, launch at login.
+- **Appearance**: theme (system, light or dark), accent colour, reduce motion.
+- **Widget**: always on top, opacity (fully opaque while the pointer is over
+  it), refresh interval.
+- **Providers**: show in widget, connect, the optional field, test connection.
+
+The app is in English, Turkish, French, German, Italian, Russian and Arabic,
+with a right-to-left layout for Arabic. It follows the system language unless
+you pick one.
+
+### Launch at login
 
 - Windows and macOS: a login item through Electron. On Windows it's a value
-  under `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, and switching
-  it off in Task Manager shows up as off in the app too.
+  under `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, and switching it
+  off in Task Manager shows up as off in the app too.
 - Linux: `~/.config/autostart/ai-usage-tracker.desktop` (or under
   `$XDG_CONFIG_HOME`). Inside an AppImage it points at the AppImage file.
 - macOS only runs login items reliably for signed and notarized apps, so an
   unsigned build may not start at login.
-- In development it registers Electron plus the project folder, which starts
-  the last build in `out/`.
 
-## Staying on top
+### Staying on top
 
 With Always on top on, the widget floats above other windows but keeps out of
 the way of fullscreen apps:
@@ -61,72 +133,56 @@ the way of fullscreen apps:
 - Linux: window managers differ too much to tell reliably, so the widget just
   stays on top.
 
-## Requirements
-
-- Node.js 20 or newer
-- npm 10 or newer
-
 ## Development
+
+Needs Node.js 20 or newer and npm 10 or newer.
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Scripts
+| Script                   | Purpose                                    |
+| ------------------------ | ------------------------------------------ |
+| `npm run dev`            | Start the app with hot reload              |
+| `npm run build`          | Typecheck and build for production         |
+| `npm run lint`           | Run ESLint                                 |
+| `npm run format`         | Format with Prettier                       |
+| `npm run typecheck`      | Typecheck main, preload and renderer       |
+| `npm run test`           | Run the unit and component tests           |
+| `npm run test:e2e`       | Build, then smoke test the real app        |
+| `npm run dist:win`       | NSIS installers, x64 and arm64             |
+| `npm run dist:mac`       | dmg and zip, x64 and arm64 (on macOS)      |
+| `npm run dist:linux`     | AppImage and deb (on Linux)                |
+| `npm run generate:icons` | Redraw the tray icons and `build/icon.png` |
 
-| Script              | Purpose                              |
-| ------------------- | ------------------------------------ |
-| `npm run dev`       | Start the app with hot reload        |
-| `npm run build`     | Typecheck and build for production   |
-| `npm run lint`      | Run ESLint                           |
-| `npm run format`    | Format with Prettier                 |
-| `npm run typecheck` | Typecheck main, preload and renderer |
-| `npm run test`      | Run the test suite                   |
-| `npm run test:e2e`  | Build, then smoke test the real app  |
+In development, launch at login registers Electron plus the project folder,
+which starts the last build in `out/`.
 
-## Installers
+### Releases
 
-```bash
-npm run dist:win     # NSIS installer, x64 and arm64
-npm run dist:mac     # dmg and zip, x64 and arm64 (on macOS)
-npm run dist:linux   # AppImage and deb (on Linux)
-```
+Installers go to `release/<version>/`. Pushing a `v*` tag that matches the
+version in `package.json` builds all of them on GitHub Actions and attaches them
+to a draft release, to publish by hand once it's checked. Changes to the
+packaging setup get the same build on their pull request, without the release.
 
-Output goes to `release/<version>/`. The app icon is generated into
-`build/icon.png` by `npm run generate:icons`, and electron-builder derives the
-`.ico`, `.icns` and Linux sizes from it.
+### Icons
 
-Pushing a `v*` tag that matches the version in `package.json` builds all of
-them on GitHub Actions and attaches them to a draft release, to publish by
-hand once it's checked. Changes to the packaging setup get the same build on
-their pull request, without the release.
+The tray icons and `build/icon.png` are drawn by `scripts/generate-tray-icons.mjs`
+and `scripts/generate-app-icon.mjs`, which write raw RGBA and encode PNG with
+`node:zlib`, so no image tooling is needed. electron-builder derives the `.ico`,
+`.icns` and Linux sizes from `build/icon.png`.
 
-v1 isn't code signed, so the first launch asks for a click-through:
+### Git hooks
 
-- Windows: SmartScreen says it protected your PC. Choose More info, then
-  Run anyway.
-- macOS: the app is signed ad hoc only, so Gatekeeper won't open it from a
-  double-click. Right-click it and choose Open, or run
-  `xattr -dr com.apple.quarantine "/Applications/AI Usage Tracker.app"`.
+- `commit-msg` checks the Conventional Commits format with commitlint
+- `pre-commit` runs lint-staged (ESLint, then Prettier, on staged files)
+- `pre-push` runs the typecheck and the tests
 
-## Tray icons
+### Tech stack
 
-The tray icons are drawn procedurally by `scripts/generate-tray-icons.mjs`, which
-writes raw RGBA and encodes PNG with `node:zlib`, so no image tooling is needed.
-Run `npm run generate:icons` after changing the shape or the accent colour.
-
-## Git hooks
-
-Husky runs three hooks:
-
-- `commit-msg` validates the Conventional Commits format with commitlint
-- `pre-commit` runs lint-staged (ESLint then Prettier on staged files)
-- `pre-push` runs the typecheck and the test suite
-
-## Tech stack
-
-Electron, electron-vite, React, TypeScript, Tailwind CSS v4, shadcn/ui, Vitest.
+Electron, electron-vite, React, TypeScript, Tailwind CSS v4, shadcn/ui, Motion,
+i18next, koffi, Vitest, Playwright, electron-builder.
 
 ## License
 
