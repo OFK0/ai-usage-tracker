@@ -163,8 +163,14 @@ which starts the last build in `out/`.
 
 Installers go to `release/<version>/`. Pushing a `v*` tag that matches the
 version in `package.json` builds all of them on GitHub Actions and attaches them
-to a draft release, to publish by hand once it's checked. Changes to the
-packaging setup get the same build on their pull request, without the release.
+to a draft release, to publish by hand once it's checked. The release notes come
+from `docs/releases/<tag>.md`, written before tagging, or GitHub generates them
+if there's no such file. Changes to the packaging setup get the same build on
+their pull request, without the release.
+
+If a release run fails after the tag is pushed, run the Release workflow by hand
+with that tag. It builds the tagged code with the current workflow and fills in
+the draft the failed run left behind.
 
 ### Icons
 
