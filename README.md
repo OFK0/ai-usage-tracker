@@ -31,6 +31,20 @@ provider it belongs to. The optional Anthropic Admin API key in Settings adds yo
 API spend. Keys and tokens entered in Settings are encrypted with the OS keychain
 through Electron's `safeStorage`.
 
+## Launch at login
+
+Settings → General → Launch at login.
+
+- Windows and macOS: a login item through Electron. On Windows it's a value
+  under `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, and switching
+  it off in Task Manager shows up as off in the app too.
+- Linux: `~/.config/autostart/ai-usage-tracker.desktop` (or under
+  `$XDG_CONFIG_HOME`). Inside an AppImage it points at the AppImage file.
+- macOS only runs login items reliably for signed and notarized apps, so an
+  unsigned build may not start at login.
+- In development it registers Electron plus the project folder, which starts
+  the last build in `out/`.
+
 ## Requirements
 
 - Node.js 20 or newer

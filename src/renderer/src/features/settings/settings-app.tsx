@@ -242,6 +242,7 @@ function GeneralSection({
 }): React.JSX.Element {
   const { t } = useTranslation()
   const languageId = useId()
+  const launchId = useId()
   const systemLanguage = resolveLanguage('system', window.api.locale.systemLanguages)
 
   return (
@@ -267,6 +268,18 @@ function GeneralSection({
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <Label htmlFor={launchId}>{t('settings.launchAtLogin.label')}</Label>
+          <p className="text-muted-foreground text-xs">{t('settings.launchAtLogin.help')}</p>
+        </div>
+        <Switch
+          id={launchId}
+          checked={settings.launchAtLogin}
+          onCheckedChange={(launchAtLogin) => void update({ launchAtLogin })}
+        />
       </div>
     </section>
   )

@@ -81,6 +81,10 @@
       "label": "Dil",
       "system": "Sistem ({{language}})"
     },
+    "launchAtLogin": {
+      "label": "Oturum açılınca başlat",
+      "help": "Bu bilgisayarda oturum açtığınızda widget'ı başlatır."
+    },
     "theme": {
       "label": "Tema",
       "system": "Sistem",

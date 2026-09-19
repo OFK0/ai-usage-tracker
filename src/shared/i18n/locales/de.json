@@ -81,6 +81,10 @@
       "label": "Sprache",
       "system": "System ({{language}})"
     },
+    "launchAtLogin": {
+      "label": "Bei der Anmeldung starten",
+      "help": "Startet das Widget, wenn Sie sich an diesem Computer anmelden."
+    },
     "theme": {
       "label": "Design",
       "system": "System",

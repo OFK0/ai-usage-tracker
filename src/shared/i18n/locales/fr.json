@@ -82,6 +82,10 @@
       "label": "Langue",
       "system": "Système ({{language}})"
     },
+    "launchAtLogin": {
+      "label": "Lancer à l'ouverture de session",
+      "help": "Démarre le widget quand vous ouvrez une session sur cet ordinateur."
+    },
     "theme": {
       "label": "Thème",
       "system": "Système",
