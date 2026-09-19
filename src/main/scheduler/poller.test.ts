@@ -229,6 +229,18 @@ describe('failures', () => {
     expect(claude.read).toHaveBeenCalledTimes(2)
   })
 
+  it('can refresh one provider on its own', async () => {
+    const claude = scriptedProvider('claude', reading())
+    const codex = scriptedProvider('codex', reading())
+    const p = start(claude, codex)
+    await vi.advanceTimersByTimeAsync(0)
+
+    await p.refresh('codex')
+
+    expect(claude.read).toHaveBeenCalledTimes(1)
+    expect(codex.read).toHaveBeenCalledTimes(2)
+  })
+
   it('treats an unexpected exception as transient and keeps other providers running', async () => {
     const claude = scriptedProvider('claude', new TypeError('boom'))
     const codex = scriptedProvider('codex', reading(10))

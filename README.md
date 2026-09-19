@@ -16,8 +16,11 @@ machine, so that's what connecting allows the app to read:
 | Provider | What connecting reads                                                                                            |
 | -------- | ---------------------------------------------------------------------------------------------------------------- |
 | Claude   | Claude Code's sign-in (the macOS keychain, or `~/.claude/.credentials.json`), and its session logs as a fallback |
+| Copilot  | The GitHub CLI's sign-in (`gh auth token`), or else the Copilot extension's (`github-copilot/apps.json`)         |
 
-Codex and Copilot follow the same rule when they land.
+Codex follows the same rule when it lands. For Copilot you can also paste a
+GitHub token in Settings; it's used instead of those sign-ins and works without
+the connect switch, since you gave it to the app yourself.
 
 Pasting a long-lived token instead doesn't work for Claude: `claude setup-token`
 only grants the `user:inference` scope, and the usage endpoint needs
@@ -25,7 +28,8 @@ only grants the `user:inference` scope, and the usage endpoint needs
 
 The sign-in is read but never written, never logged, and only ever sent to the
 provider it belongs to. The optional Anthropic Admin API key in Settings adds your
-API spend; it's encrypted with the OS keychain through Electron's `safeStorage`.
+API spend. Keys and tokens entered in Settings are encrypted with the OS keychain
+through Electron's `safeStorage`.
 
 ## Requirements
 

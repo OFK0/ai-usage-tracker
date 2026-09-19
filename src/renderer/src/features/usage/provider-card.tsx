@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import { SETTLE } from '@/theme/motion'
 import {
   activityText,
+  countText,
   hasReset,
   providerName,
   resetText,
@@ -127,6 +128,8 @@ function WindowRow({
   const label = windowLabel(window)
   const reading = describeWindow(window, now, fresh)
   const reset = window.applicable ? resetText(window, now, fresh) : null
+  // A count from before a reset is as out of date as the percentage.
+  const count = reading.resetSinceFetch ? null : countText(window)
 
   return (
     <div className="flex flex-col gap-1">
@@ -142,7 +145,12 @@ function WindowRow({
           label={`${provider} ${label} usage`}
         />
       )}
-      {reset && <RollingText text={reset} className="text-muted-foreground text-[11px]" />}
+      {(reset || count) && (
+        <div className="text-muted-foreground flex items-baseline justify-between gap-3 text-[11px]">
+          {reset ? <RollingText text={reset} /> : <span />}
+          {count && <span className="tabular-nums">{count}</span>}
+        </div>
+      )}
     </div>
   )
 }

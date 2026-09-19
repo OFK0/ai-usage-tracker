@@ -18,8 +18,11 @@ export interface PollerOptions {
 export interface Poller {
   start(): void
   stop(): void
-  /** Polls every enabled provider now, except ones still inside a rate-limit backoff. */
-  refresh(): Promise<ProviderSnapshot[]>
+  /**
+   * Polls every enabled provider now, or just `only`, except ones still inside
+   * a rate-limit backoff.
+   */
+  refresh(only?: ProviderId): Promise<ProviderSnapshot[]>
   setVisible(visible: boolean): void
   /** Picks up changed settings: enabled providers and the refresh interval. */
   reconfigure(): void
@@ -235,9 +238,10 @@ export function createPoller(options: PollerOptions): Poller {
       }
     },
 
-    async refresh() {
+    async refresh(only) {
       await Promise.all(
         enabledStates()
+          .filter((state) => only === undefined || state.provider.id === only)
           // Asking again while rate limited would only extend the ban.
           .filter((state) => state.backoffUntil <= now())
           .map((state) => poll(state))

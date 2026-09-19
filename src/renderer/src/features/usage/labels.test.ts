@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { LimitWindow, LocalActivity, ProviderSnapshot } from '@shared/usage'
-import { activityText, resetText, spendText, statusText, windowLabel } from './labels'
+import { activityText, countText, resetText, spendText, statusText, windowLabel } from './labels'
 
 const NOW = Date.parse('2026-09-18T10:00:00Z')
 const MINUTE = 60_000
@@ -104,6 +104,29 @@ describe('statusText', () => {
     expect(statusText(snapshot({ providerId: 'codex', status: 'not_installed' }), NOW)).toBe(
       'Codex CLI not found'
     )
+  })
+
+  it('asks for a GitHub sign-in, since there is no tool to open for Copilot', () => {
+    expect(statusText(snapshot({ providerId: 'copilot', status: 'unauthenticated' }), NOW)).toBe(
+      'Sign in to GitHub to see usage'
+    )
+    expect(statusText(snapshot({ providerId: 'copilot', status: 'not_installed' }), NOW)).toBe(
+      'No GitHub sign-in found'
+    )
+  })
+})
+
+describe('countText', () => {
+  it('shows the raw count behind the percentage', () => {
+    expect(countText(window({ used: 1250, limit: 2000 }), 'en-US')).toBe('1,250 of 2,000')
+  })
+
+  it.each([
+    ['there is no count', window()],
+    ['the quota is not in the plan', window({ used: 0, limit: 0, applicable: false })],
+    ['the quota is unlimited', window({ used: 3, limit: 0, unlimited: true })]
+  ])('says nothing when %s', (_, w) => {
+    expect(countText(w)).toBeNull()
   })
 })
 

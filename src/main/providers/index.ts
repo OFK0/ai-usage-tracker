@@ -12,6 +12,13 @@ import {
   readClaudeCredentials
 } from './claude/credentials'
 import { createSessionLog } from './claude/session-log'
+import { createCopilotProvider } from './copilot'
+import {
+  createEditorProbe,
+  createGhProbe,
+  editorConfigDir,
+  resolveCopilotToken
+} from './copilot/token'
 import type { UsageProvider } from './types'
 
 export function createProviders(): UsageProvider[] {
@@ -30,6 +37,9 @@ export function createProviders(): UsageProvider[] {
     userAgent
   })
 
+  const probeGh = createGhProbe()
+  const probeEditor = createEditorProbe(editorConfigDir(process.platform, process.env, homedir()))
+
   return [
     createClaudeProvider({
       isConnected: () => settingsRepository.get().providers.claude.connected,
@@ -42,6 +52,18 @@ export function createProviders(): UsageProvider[] {
         return summarizeActivity(await claudeLog.collect(now), now, knownResetAt)
       },
       readApiSpend: (signal) => claudeSpend.read(signal),
+      userAgent
+    }),
+    createCopilotProvider({
+      resolveToken: () =>
+        resolveCopilotToken({
+          // For Copilot the stored key is a GitHub token, used in place of gh's.
+          readSavedToken: () => secretVault.read('copilot'),
+          isConnected: () => settingsRepository.get().providers.copilot.connected,
+          probeGh,
+          probeEditor
+        }),
+      fetch,
       userAgent
     })
   ]
