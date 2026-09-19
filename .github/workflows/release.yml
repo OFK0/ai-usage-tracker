@@ -11,11 +11,23 @@ on:
       - build/**
       - scripts/before-pack.cjs
       - .github/workflows/release.yml
+  # By hand. Given a tag, it builds that tag's code and finishes its release
+  # with this workflow: re-running a failed release run would use the workflow
+  # as it was at the tag.
   workflow_dispatch:
+    inputs:
+      tag:
+        description: An existing tag to build and release, such as v0.1.0
+        required: false
+        default: ''
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ github.ref }}-${{ inputs.tag }}
   cancel-in-progress: true
+
+env:
+  # The tag being released, if any: the one pushed, or the one asked for.
+  RELEASE_TAG: ${{ inputs.tag || (startsWith(github.ref, 'refs/tags/v') && github.ref_name) || '' }}
 
 jobs:
   package:
@@ -33,6 +45,8 @@ jobs:
             platform: --linux
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.RELEASE_TAG || github.ref }}
 
       - uses: actions/setup-node@v5
         with:
@@ -61,7 +75,7 @@ jobs:
       # Only a release needs the files, and only until it has them: they add up
       # to over a gigabyte, which would eat into the Actions storage quota.
       - uses: actions/upload-artifact@v4
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: env.RELEASE_TAG != ''
         with:
           name: installers-${{ runner.os }}
           retention-days: 1
@@ -76,18 +90,23 @@ jobs:
   release:
     name: Draft release
     needs: package
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.tag != '')
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
     steps:
+      # The workflow's own checkout, for the release notes in docs/releases/.
       - uses: actions/checkout@v5
 
       - name: Check the tag matches package.json
         run: |
-          version="v$(node -p "require('./package.json').version")"
-          if [ "$version" != "$GITHUB_REF_NAME" ]; then
-            echo "Tag $GITHUB_REF_NAME doesn't match package.json ($version)" >&2
+          git fetch --quiet --depth=1 origin "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
+          version="v$(git show "$RELEASE_TAG:package.json" | node -p "JSON.parse(require('fs').readFileSync(0, 'utf8')).version")"
+          if [ "$version" != "$RELEASE_TAG" ]; then
+            echo "Tag $RELEASE_TAG doesn't match package.json ($version)" >&2
             exit 1
           fi
 
@@ -97,11 +116,25 @@ jobs:
           merge-multiple: true
 
       # A draft, so the release is looked over before anyone can see it.
-      - name: Create the release
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Create or fill in the draft release
         run: |
-          gh release create "$GITHUB_REF_NAME" installers/* \
-            --draft \
-            --generate-notes \
-            --title "$GITHUB_REF_NAME"
+          # upload-artifact keeps paths below release/, so the installers come
+          # back a folder deep (installers/0.1.0/...). Take the files wherever
+          # they are.
+          mapfile -t files < <(find installers -type f)
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No installers to release" >&2
+            exit 1
+          fi
+          printf 'Releasing %s\n' "${files[@]}"
+
+          notes="docs/releases/$RELEASE_TAG.md"
+          if gh release view "$RELEASE_TAG" > /dev/null 2>&1; then
+            # A run that failed halfway leaves its draft behind: fill that one in.
+            gh release upload "$RELEASE_TAG" "${files[@]}" --clobber
+            if [ -f "$notes" ]; then gh release edit "$RELEASE_TAG" --notes-file "$notes"; fi
+          elif [ -f "$notes" ]; then
+            gh release create "$RELEASE_TAG" "${files[@]}" --draft --title "$RELEASE_TAG" --notes-file "$notes"
+          else
+            gh release create "$RELEASE_TAG" "${files[@]}" --draft --title "$RELEASE_TAG" --generate-notes
+          fi
