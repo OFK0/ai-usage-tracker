@@ -33,7 +33,7 @@ const api = {
   },
   usage: {
     get: vi.fn((): Promise<ProviderSnapshot[]> => Promise.resolve([])),
-    refresh: vi.fn(() => Promise.resolve([])),
+    refresh: vi.fn((): Promise<ProviderSnapshot[]> => Promise.resolve([])),
     onChange: vi.fn(() => () => {})
   }
 }
@@ -208,15 +208,60 @@ describe('language', () => {
 })
 
 describe('Codex', () => {
-  it('connects Codex CLI only when the user turns it on, with no key to enter', async () => {
+  async function codexSection(): Promise<HTMLElement> {
     render(<SettingsApp />)
-    const section = await screen.findByRole('region', { name: 'Codex' })
+    return screen.findByRole('region', { name: 'Codex' })
+  }
+
+  it('connects Codex CLI only when the user turns it on', async () => {
+    const section = await codexSection()
 
     await userEvent.click(within(section).getByRole('switch', { name: 'Connect Codex CLI' }))
 
     expect(api.settings.update).toHaveBeenCalledWith({ providers: { codex: { connected: true } } })
-    expect(within(section).queryByRole('textbox')).toBeNull()
-    expect(within(section).queryByRole('button', { name: 'Save' })).toBeNull()
+  })
+
+  it('saves an OpenAI Admin API key under Codex', async () => {
+    const section = await codexSection()
+
+    await userEvent.type(within(section).getByLabelText('OpenAI Admin API key'), 'sk-admin-abc123')
+    await userEvent.click(within(section).getByRole('button', { name: 'Save' }))
+
+    expect(api.secrets.save).toHaveBeenCalledWith('codex', 'sk-admin-abc123')
+  })
+})
+
+describe('testing a connection', () => {
+  it('checks just that provider now', async () => {
+    const section = await claudeSection()
+
+    await userEvent.click(within(section).getByRole('button', { name: 'Test connection' }))
+
+    expect(api.usage.refresh).toHaveBeenCalledWith('claude')
+  })
+
+  it('shows it is checking until the answer is in', async () => {
+    let answer: (snapshots: ProviderSnapshot[]) => void = () => {}
+    api.usage.refresh.mockImplementationOnce(
+      () =>
+        new Promise<ProviderSnapshot[]>((resolve) => {
+          answer = resolve
+        })
+    )
+    const section = await claudeSection()
+
+    await userEvent.click(within(section).getByRole('button', { name: 'Test connection' }))
+
+    expect(within(section).getByRole('button', { name: 'Checking…' })).toBeDisabled()
+    answer([])
+    expect(await within(section).findByRole('button', { name: 'Test connection' })).toBeEnabled()
+  })
+
+  it('has nothing to test for a provider hidden from the widget, since it is not polled', async () => {
+    api.settings.get.mockResolvedValueOnce(withClaude({ enabled: false }))
+    const section = await claudeSection()
+
+    expect(within(section).getByRole('button', { name: 'Test connection' })).toBeDisabled()
   })
 })
 

@@ -17,10 +17,12 @@ import {
   hasReset,
   providerName,
   resetText,
+  spendSourceText,
   spendText,
   statusText,
   windowLabel
 } from './labels'
+import { ProviderMark } from './provider-mark'
 import { UsageBar } from './usage-bar'
 import { headlineWindow, usageLevel, type UsageLevel } from './usage-level'
 
@@ -175,17 +177,6 @@ function DetailRow({
   )
 }
 
-function Monogram({ name }: { name: string }): React.JSX.Element {
-  return (
-    <span
-      aria-hidden
-      className="accent-gradient text-primary-foreground grid size-6 shrink-0 place-items-center rounded-md text-xs font-bold shadow-sm"
-    >
-      {name.charAt(0)}
-    </span>
-  )
-}
-
 export function ProviderCard({
   snapshot,
   now,
@@ -219,7 +210,7 @@ export function ProviderCard({
       className="flex flex-col gap-2.5 py-3 first:pt-0 last:pb-0"
     >
       <div className="flex items-center gap-2.5">
-        <Monogram name={name} />
+        <ProviderMark name={name} />
 
         <div className="flex min-w-0 flex-1 flex-col">
           <div className="flex items-center gap-1.5">
@@ -318,7 +309,7 @@ export function ProviderCard({
               <DetailRow
                 label={t('card.apiSpend')}
                 value={spendText(apiSpend)}
-                title={t('card.apiSpendSource')}
+                title={spendSourceText(providerId)}
               />
             )}
           </motion.div>

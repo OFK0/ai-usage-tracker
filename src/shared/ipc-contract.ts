@@ -18,8 +18,8 @@ export interface InvokeChannels {
   'secrets:save': (provider: ProviderId, token: string) => TokenInfo
   'secrets:clear': (provider: ProviderId) => TokenInfo
   'usage:get': () => ProviderSnapshot[]
-  /** Resolves once every provider that could be asked has answered. */
-  'usage:refresh': () => ProviderSnapshot[]
+  /** Asks every provider, or just `provider`, and resolves once they have answered. */
+  'usage:refresh': (provider?: ProviderId) => ProviderSnapshot[]
 }
 
 /** Renderer tells main, no answer. */

@@ -21,7 +21,7 @@
     "fromSessionLogs": "From the local session logs",
     "credits": "Credits",
     "apiSpend": "API spend",
-    "apiSpendSource": "Anthropic API, UTC days"
+    "apiSpendSource": "{{api}}, UTC days"
   },
   "window": {
     "session": "Session",
@@ -119,6 +119,8 @@
       "connecting": "Connecting…",
       "connected": "Connected",
       "connectedPlan": "Connected · {{plan}}",
+      "test": "Test connection",
+      "checking": "Checking…",
       "claude": {
         "connect": "Connect Claude Code",
         "connectHelp": "Reads the sign-in Claude Code keeps on this computer to show your plan limits, and its session logs when the usage API can't be reached. Only the usage request itself goes to Anthropic. Your system may ask for permission the first time.",
@@ -127,7 +129,9 @@
       },
       "codex": {
         "connect": "Connect Codex CLI",
-        "connectHelp": "Reads the sign-in Codex CLI keeps on this computer to show your plan limits, and its session logs when the usage API can't be reached. Only the usage request itself goes to OpenAI."
+        "connectHelp": "Reads the sign-in Codex CLI keeps on this computer to show your plan limits, and its session logs when the usage API can't be reached. Only the usage request itself goes to OpenAI.",
+        "key": "OpenAI Admin API key",
+        "keyHelp": "Optional. Adds your API spend for this month. Stored encrypted on this computer."
       },
       "copilot": {
         "connect": "Connect GitHub",

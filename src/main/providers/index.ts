@@ -13,6 +13,7 @@ import {
 } from './claude/credentials'
 import { createSessionLog } from './claude/session-log'
 import { createCodexProvider } from './codex'
+import { createOpenAiSpendReader } from './codex/admin-spend'
 import { codexHome, readCodexAuth } from './codex/auth'
 import { createSessionLog as createCodexSessionLog } from './codex/session-log'
 import { createCopilotProvider } from './copilot'
@@ -42,6 +43,12 @@ export function createProviders(): UsageProvider[] {
 
   const codexDir = codexHome(process.env, homedir())
   const codexLog = createCodexSessionLog(join(codexDir, 'sessions'))
+  const codexSpend = createOpenAiSpendReader({
+    // The key stored for Codex in settings is the OpenAI Admin API key.
+    readKey: () => Promise.resolve(secretVault.read('codex')),
+    fetch,
+    userAgent
+  })
 
   const probeGh = createGhProbe()
   const probeEditor = createEditorProbe(editorConfigDir(process.platform, process.env, homedir()))
@@ -66,6 +73,7 @@ export function createProviders(): UsageProvider[] {
       readAuth: () => readCodexAuth(codexDir),
       fetch,
       readLoggedLimits: () => codexLog.latest(),
+      readApiSpend: (signal) => codexSpend.read(signal),
       userAgent
     }),
     createCopilotProvider({

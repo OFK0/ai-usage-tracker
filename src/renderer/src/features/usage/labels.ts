@@ -18,6 +18,12 @@ const PROVIDER_TOOLS: Record<ProviderId, string> = {
   copilot: 'GitHub'
 }
 
+/** The API an Admin key reads spend from, for providers that take one. */
+const SPEND_APIS: Partial<Record<ProviderId, string>> = {
+  claude: 'Anthropic API',
+  codex: 'OpenAI API'
+}
+
 type WindowKey = keyof (typeof en)['window']
 
 export function providerName(id: ProviderId): string {
@@ -76,6 +82,11 @@ export function activityText(providerId: ProviderId, activity: LocalActivity, no
     messages: i18n.t('activity.messages', { count: block.messages }),
     duration: endsIn
   })
+}
+
+/** Where API spend comes from, for the tooltip next to it. */
+export function spendSourceText(providerId: ProviderId): string {
+  return i18n.t('card.apiSpendSource', { api: SPEND_APIS[providerId] ?? providerName(providerId) })
 }
 
 export function spendText(spend: ApiSpend, locale?: string): string {

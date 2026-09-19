@@ -1,3 +1,4 @@
+import type { ApiSpend } from '@shared/usage'
 import { errorMessage, parseRetryAfter } from '../../lib/http'
 import { ProviderError, type ProviderReading, type UsageProvider } from '../types'
 import type { CodexAuth } from './auth'
@@ -16,6 +17,8 @@ export interface CodexProviderDeps {
   fetch: (url: string, init: RequestInit) => Promise<Response>
   /** The limits Codex last wrote to its session log. */
   readLoggedLimits: () => Promise<LoggedRateLimits | null>
+  /** API spend from OpenAI's Admin API, or null when no admin key is set. */
+  readApiSpend: (signal: AbortSignal) => Promise<ApiSpend | null>
   userAgent: string
   now?: () => number
 }
@@ -27,7 +30,7 @@ export function createCodexProvider(deps: CodexProviderDeps): UsageProvider {
   // When the API last answered, so the log is only used when it knows better.
   let lastApiReadAt = 0
 
-  async function readApi(signal: AbortSignal): Promise<ProviderReading> {
+  async function readApi(signal: AbortSignal): Promise<Omit<ProviderReading, 'apiSpend'>> {
     const auth = await deps.readAuth()
 
     if ('missing' in auth) {
@@ -98,38 +101,49 @@ export function createCodexProvider(deps: CodexProviderDeps): UsageProvider {
     }
 
     const { planLabel, windows } = parseCodexUsage(body, now())
-    return { source: 'oauth', planLabel, windows, credits: null, activity: null, apiSpend: null }
+    return { source: 'oauth', planLabel, windows, credits: null, activity: null }
   }
 
   return {
     id: 'codex',
 
     read: async (signal) => {
+      // Spend comes from a different API with a key the user typed in, so it
+      // neither waits for nor depends on the usage read, or on being connected.
+      const apiSpend = deps.readApiSpend(signal).catch(() => null)
+
       if (!deps.isConnected()) {
         rejectedToken = null
         lastApiReadAt = 0
         deps.forgetLocalData()
-        throw new ProviderError('disconnected', 'Codex is not connected in settings')
+        throw new ProviderError('disconnected', 'Codex is not connected in settings', {
+          salvage: { apiSpend: await apiSpend }
+        })
       }
 
       try {
         const reading = await readApi(signal)
         lastApiReadAt = now()
-        return reading
+        return { ...reading, apiSpend: await apiSpend }
       } catch (error) {
         const failure =
           error instanceof ProviderError
             ? error
             : new ProviderError('unavailable', errorMessage(error))
-        if (failure.kind === 'not_installed') throw failure
+        if (failure.kind === 'not_installed') {
+          throw failure.withSalvage({ apiSpend: await apiSpend })
+        }
 
         // Codex logs the limits after every turn, so with the API out of reach
         // the log still says where things stood, as of its last turn. Only
         // worth showing if that's newer than what the API last said.
         const logged = await deps.readLoggedLimits().catch(() => null)
-        if (!logged || logged.observedAt <= lastApiReadAt) throw failure
+        if (!logged || logged.observedAt <= lastApiReadAt) {
+          throw failure.withSalvage({ apiSpend: await apiSpend })
+        }
 
         throw failure.withSalvage({
+          apiSpend: await apiSpend,
           source: 'local',
           windows: logged.windows,
           fetchedAt: new Date(logged.observedAt).toISOString(),

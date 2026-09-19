@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import type { LimitWindow, LocalActivity, ProviderSnapshot } from '@shared/usage'
 import { i18n } from '@/i18n'
-import { activityText, countText, resetText, spendText, statusText, windowLabel } from './labels'
+import {
+  activityText,
+  countText,
+  resetText,
+  spendSourceText,
+  spendText,
+  statusText,
+  windowLabel
+} from './labels'
 
 const NOW = Date.parse('2026-09-18T10:00:00Z')
 const MINUTE = 60_000
@@ -121,6 +129,13 @@ describe('statusText', () => {
     expect(statusText(snapshot({ providerId: 'copilot', status: 'not_installed' }), NOW)).toBe(
       'No GitHub sign-in found'
     )
+  })
+})
+
+describe('spendSourceText', () => {
+  it('names the API each Admin key reads spend from', () => {
+    expect(spendSourceText('claude')).toBe('Anthropic API, UTC days')
+    expect(spendSourceText('codex')).toBe('OpenAI API, UTC days')
   })
 })
 

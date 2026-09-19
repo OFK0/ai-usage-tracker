@@ -21,7 +21,7 @@
     "fromSessionLogs": "Aus den lokalen Sitzungsprotokollen",
     "credits": "Guthaben",
     "apiSpend": "API-Kosten",
-    "apiSpendSource": "Anthropic API, UTC-Tage"
+    "apiSpendSource": "{{api}}, UTC-Tage"
   },
   "window": {
     "session": "Sitzung",
@@ -119,6 +119,8 @@
       "connecting": "Verbinde…",
       "connected": "Verbunden",
       "connectedPlan": "Verbunden · {{plan}}",
+      "test": "Verbindung testen",
+      "checking": "Wird geprüft…",
       "claude": {
         "connect": "Claude Code verbinden",
         "connectHelp": "Liest die Anmeldung, die Claude Code auf diesem Computer speichert, um Ihre Tariflimits anzuzeigen, und seine Sitzungsprotokolle, wenn die Nutzungs-API nicht erreichbar ist. Nur die Nutzungsanfrage selbst geht an Anthropic. Ihr System fragt beim ersten Mal eventuell nach einer Berechtigung.",
@@ -127,7 +129,9 @@
       },
       "codex": {
         "connect": "Codex CLI verbinden",
-        "connectHelp": "Liest die Anmeldung, die Codex CLI auf diesem Computer speichert, um Ihre Tariflimits anzuzeigen, und seine Sitzungsprotokolle, wenn die Nutzungs-API nicht erreichbar ist. Nur die Nutzungsanfrage selbst geht an OpenAI."
+        "connectHelp": "Liest die Anmeldung, die Codex CLI auf diesem Computer speichert, um Ihre Tariflimits anzuzeigen, und seine Sitzungsprotokolle, wenn die Nutzungs-API nicht erreichbar ist. Nur die Nutzungsanfrage selbst geht an OpenAI.",
+        "key": "OpenAI Admin-API-Schlüssel",
+        "keyHelp": "Optional. Ergänzt Ihre API-Kosten für diesen Monat. Wird verschlüsselt auf diesem Computer gespeichert."
       },
       "copilot": {
         "connect": "GitHub verbinden",

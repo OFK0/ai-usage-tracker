@@ -28,8 +28,8 @@ only grants the `user:inference` scope, and the usage endpoint needs
 `user:profile`.
 
 The sign-in is read but never written, never logged, and only ever sent to the
-provider it belongs to. The optional Anthropic Admin API key in Settings adds your
-API spend. Keys and tokens entered in Settings are encrypted with the OS keychain
+provider it belongs to. The optional Anthropic and OpenAI Admin API keys in
+Settings add your API spend for Claude and Codex. Keys and tokens entered in Settings are encrypted with the OS keychain
 through Electron's `safeStorage`.
 
 ## Launch at login
