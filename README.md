@@ -16,9 +16,10 @@ machine, so that's what connecting allows the app to read:
 | Provider | What connecting reads                                                                                            |
 | -------- | ---------------------------------------------------------------------------------------------------------------- |
 | Claude   | Claude Code's sign-in (the macOS keychain, or `~/.claude/.credentials.json`), and its session logs as a fallback |
+| Codex    | Codex CLI's sign-in (`~/.codex/auth.json`, or under `$CODEX_HOME`), and its session logs as a fallback           |
 | Copilot  | The GitHub CLI's sign-in (`gh auth token`), or else the Copilot extension's (`github-copilot/apps.json`)         |
 
-Codex follows the same rule when it lands. For Copilot you can also paste a
+For Copilot you can also paste a
 GitHub token in Settings; it's used instead of those sign-ins and works without
 the connect switch, since you gave it to the app yourself.
 

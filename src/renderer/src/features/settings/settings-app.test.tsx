@@ -207,6 +207,19 @@ describe('language', () => {
   })
 })
 
+describe('Codex', () => {
+  it('connects Codex CLI only when the user turns it on, with no key to enter', async () => {
+    render(<SettingsApp />)
+    const section = await screen.findByRole('region', { name: 'Codex' })
+
+    await userEvent.click(within(section).getByRole('switch', { name: 'Connect Codex CLI' }))
+
+    expect(api.settings.update).toHaveBeenCalledWith({ providers: { codex: { connected: true } } })
+    expect(within(section).queryByRole('textbox')).toBeNull()
+    expect(within(section).queryByRole('button', { name: 'Save' })).toBeNull()
+  })
+})
+
 describe('Copilot', () => {
   async function copilotSection(): Promise<HTMLElement> {
     render(<SettingsApp />)

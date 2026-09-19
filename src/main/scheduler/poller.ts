@@ -161,8 +161,9 @@ export function createPoller(options: PollerOptions): Poller {
       const base = state.lastGood ?? emptySnapshot(id)
       return { ...base, status: 'unauthenticated', ...salvaged }
     }
-    if (state.lastGood) {
-      return { ...state.lastGood, status: 'stale', ...salvaged }
+    // Limits recovered from a log are as good as a last read, just as old.
+    if (state.lastGood || failure.salvage?.windows?.length) {
+      return { ...(state.lastGood ?? emptySnapshot(id)), status: 'stale', ...salvaged }
     }
     return { ...emptySnapshot(id), status: 'error', ...salvaged }
   }

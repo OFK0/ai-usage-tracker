@@ -125,6 +125,10 @@
         "key": "Anthropic Admin-API-Schlüssel",
         "keyHelp": "Optional. Ergänzt Ihre API-Kosten für diesen Monat. Wird verschlüsselt auf diesem Computer gespeichert."
       },
+      "codex": {
+        "connect": "Codex CLI verbinden",
+        "connectHelp": "Liest die Anmeldung, die Codex CLI auf diesem Computer speichert, um Ihre Tariflimits anzuzeigen, und seine Sitzungsprotokolle, wenn die Nutzungs-API nicht erreichbar ist. Nur die Nutzungsanfrage selbst geht an OpenAI."
+      },
       "copilot": {
         "connect": "GitHub verbinden",
         "connectHelp": "Liest die Anmeldung der GitHub CLI (gh) oder andernfalls die der Copilot-Erweiterung in Ihrem Editor, um Ihre Copilot-Kontingente anzuzeigen. Nur die Kontingentanfrage selbst geht an GitHub.",

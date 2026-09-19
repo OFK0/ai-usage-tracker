@@ -241,6 +241,21 @@ describe('failures', () => {
     expect(codex.read).toHaveBeenCalledTimes(2)
   })
 
+  it('shows limits recovered from a log as stale, from when they were logged', async () => {
+    const loggedAt = '2025-09-19T08:00:00.000Z'
+    const codex = scriptedProvider(
+      'codex',
+      new ProviderError('unavailable', 'HTTP 503', {
+        salvage: { source: 'local', windows: reading(40).windows, fetchedAt: loggedAt }
+      })
+    )
+    start(codex)
+    await vi.advanceTimersByTimeAsync(0)
+
+    expect(latest()[0]).toMatchObject({ status: 'stale', source: 'local', fetchedAt: loggedAt })
+    expect(latest()[0]?.windows[0]?.usedPercent).toBe(40)
+  })
+
   it('treats an unexpected exception as transient and keeps other providers running', async () => {
     const claude = scriptedProvider('claude', new TypeError('boom'))
     const codex = scriptedProvider('codex', reading(10))

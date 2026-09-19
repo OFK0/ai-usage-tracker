@@ -125,6 +125,10 @@
         "key": "Anthropic Admin API anahtarı",
         "keyHelp": "İsteğe bağlı. Bu ayki API harcamanızı ekler. Bu bilgisayarda şifreli saklanır."
       },
+      "codex": {
+        "connect": "Codex CLI'ı bağla",
+        "connectHelp": "Plan limitlerinizi göstermek için Codex CLI'ın bu bilgisayarda tuttuğu oturumu, kullanım API'sine ulaşılamadığında da oturum kayıtlarını okur. OpenAI'a yalnızca kullanım isteğinin kendisi gider."
+      },
       "copilot": {
         "connect": "GitHub'ı bağla",
         "connectHelp": "Copilot kotalarınızı göstermek için GitHub CLI'ın (gh) ya da o yoksa düzenleyicinizdeki Copilot eklentisinin oturumunu okur. GitHub'a yalnızca kota isteğinin kendisi gider.",
