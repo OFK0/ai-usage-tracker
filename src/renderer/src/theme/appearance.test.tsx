@@ -1,5 +1,6 @@
 import { act, render } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { i18n } from '@/i18n'
 import { defaultSettings, type Settings } from '@shared/settings'
 import { Appearance } from './appearance'
 
@@ -43,6 +44,7 @@ let pushSettings: (settings: Settings) => void = () => {}
 
 function stubSettings(settings: Partial<Settings> = {}): void {
   vi.stubGlobal('api', {
+    locale: { language: 'en', systemLanguages: ['de-DE'] },
     settings: {
       get: vi.fn(() => Promise.resolve({ ...defaultSettings(), accentHue: 200, ...settings })),
       onChange: vi.fn((listener: (next: Settings) => void) => {
@@ -115,5 +117,35 @@ describe('Appearance', () => {
     act(() => media.set('reducedMotion', true))
 
     expect(root.dataset['motion']).toBe('reduce')
+  })
+
+  it('shows the language the user picked', async () => {
+    stubMedia()
+    stubSettings({ language: 'fr' })
+
+    render(<Appearance>content</Appearance>)
+
+    await vi.waitFor(() => expect(root.lang).toBe('fr'))
+    expect(i18n.language).toBe('fr')
+  })
+
+  it('follows the system language when set to', async () => {
+    stubMedia()
+    stubSettings({ language: 'system' })
+
+    render(<Appearance>content</Appearance>)
+
+    await vi.waitFor(() => expect(root.lang).toBe('de'))
+  })
+
+  it('switches language as soon as the setting changes', async () => {
+    stubMedia()
+    render(<Appearance>content</Appearance>)
+    await vi.waitFor(() => expect(root.lang).toBe('de'))
+
+    act(() => pushSettings({ ...defaultSettings(), language: 'ru' }))
+
+    expect(root.lang).toBe('ru')
+    expect(i18n.t('settings.title')).toBe('Настройки')
   })
 })

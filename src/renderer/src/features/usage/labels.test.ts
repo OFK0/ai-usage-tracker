@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { LimitWindow, LocalActivity, ProviderSnapshot } from '@shared/usage'
+import { i18n } from '@/i18n'
 import { activityText, countText, resetText, spendText, statusText, windowLabel } from './labels'
 
 const NOW = Date.parse('2026-09-18T10:00:00Z')
@@ -67,6 +68,13 @@ describe('resetText', () => {
     expect(resetText(window({ resetsAt }), NOW)).toBe('Resets in 2h 40m')
   })
 
+  it('reads naturally in another language', async () => {
+    await i18n.changeLanguage('tr')
+    const resetsAt = new Date(NOW + (2 * 60 + 40) * MINUTE).toISOString()
+
+    expect(resetText(window({ resetsAt }), NOW)).toBe('2 sa 40 dk sonra sıfırlanır')
+  })
+
   it('says it is resetting once the time has passed', () => {
     expect(resetText(window({ resetsAt: new Date(NOW - 1000).toISOString() }), NOW)).toBe(
       'Resetting…'
@@ -118,7 +126,7 @@ describe('statusText', () => {
 
 describe('countText', () => {
   it('shows the raw count behind the percentage', () => {
-    expect(countText(window({ used: 1250, limit: 2000 }), 'en-US')).toBe('1,250 of 2,000')
+    expect(countText(window({ used: 1250, limit: 2000 }))).toBe('1,250 of 2,000')
   })
 
   it.each([
@@ -131,6 +139,14 @@ describe('countText', () => {
 })
 
 describe('activityText', () => {
+  it('uses the plural form the language needs', async () => {
+    await i18n.changeLanguage('ru')
+
+    expect(activityText('claude', activity({ messages: 3 }), NOW)).toBe(
+      '3 сообщения в этой сессии · закончится через 2 ч 40 мин'
+    )
+  })
+
   it('counts messages and shows when the window ends', () => {
     expect(activityText('claude', activity({}), NOW)).toBe(
       '42 messages this session · ends in 2h 40m'

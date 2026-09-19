@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import type { ProviderId } from '@shared/app-info'
 import type { LimitWindow, ProviderSnapshot } from '@shared/usage'
 import { AnimatedPercent } from '@/components/animated-percent'
 import { RollingText } from '@/components/rolling-text'
 import { Button } from '@/components/ui/button'
-import { formatMoney } from '@/lib/format'
+import { i18n } from '@/i18n'
+import { formatMoney, formatPercent } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { SETTLE } from '@/theme/motion'
 import {
@@ -82,12 +84,12 @@ function describeWindow(window: LimitWindow, now: number, fresh: boolean): Windo
     resetSinceFetch
   })
 
-  if (resetSinceFetch) return plain('Reset', 0)
-  if (!window.applicable) return plain('Not in plan', 0)
-  if (window.unlimited) return plain('Unlimited', 0)
-  if (window.exhausted) return plain('Limit reached', 100)
+  if (resetSinceFetch) return plain(i18n.t('card.reset'), 0)
+  if (!window.applicable) return plain(i18n.t('card.notInPlan'), 0)
+  if (window.unlimited) return plain(i18n.t('card.unlimited'), 0)
+  if (window.exhausted) return plain(i18n.t('card.limitReached'), 100)
   return {
-    text: `${Math.round(window.usedPercent)}%`,
+    text: formatPercent(window.usedPercent),
     percent: window.usedPercent,
     level,
     value: window.usedPercent,
@@ -125,6 +127,7 @@ function WindowRow({
   now: number
   fresh: boolean
 }): React.JSX.Element {
+  const { t } = useTranslation()
   const label = windowLabel(window)
   const reading = describeWindow(window, now, fresh)
   const reset = window.applicable ? resetText(window, now, fresh) : null
@@ -142,7 +145,7 @@ function WindowRow({
           value={reading.value}
           level={reading.level}
           stale={!fresh}
-          label={`${provider} ${label} usage`}
+          label={t('card.barLabel', { provider, window: label })}
         />
       )}
       {(reset || count) && (
@@ -193,6 +196,7 @@ export function ProviderCard({
   /** Position in the list, used to stagger the cards as they come in. */
   index?: number
 }): React.JSX.Element {
+  const { t } = useTranslation()
   const { providerId, windows, credits, activity, apiSpend } = snapshot
   const name = providerName(providerId)
   const status = statusText(snapshot, now)
@@ -244,7 +248,7 @@ export function ProviderCard({
             variant="ghost"
             className="text-muted-foreground size-6"
             aria-expanded={!compact}
-            aria-label={compact ? `Show ${name} details` : `Hide ${name} details`}
+            aria-label={t(compact ? 'card.showDetails' : 'card.hideDetails', { name })}
             onClick={toggle}
           >
             <ChevronDown
@@ -264,7 +268,7 @@ export function ProviderCard({
           className="self-start"
           onClick={() => window.api.settings.open()}
         >
-          Connect in settings
+          {t('card.connect')}
         </Button>
       )}
 
@@ -275,7 +279,7 @@ export function ProviderCard({
               value={summary.value}
               level={summary.level}
               stale={!fresh}
-              label={`${name} ${windowLabel(headline)} usage`}
+              label={t('card.barLabel', { provider: name, window: windowLabel(headline) })}
             />
             <p className="text-muted-foreground text-[11px]">
               {windowLabel(headline)}
@@ -291,27 +295,30 @@ export function ProviderCard({
             ))}
 
             {activity && (
-              <p className="text-muted-foreground text-[11px]" title="From the local session logs">
+              <p className="text-muted-foreground text-[11px]" title={t('card.fromSessionLogs')}>
                 {activityText(providerId, activity, now)}
               </p>
             )}
 
             {credits?.enabled && (
               <DetailRow
-                label="Credits"
+                label={t('card.credits')}
                 value={
                   credits.limit === null
                     ? formatMoney(credits.used, credits.currency)
-                    : `${formatMoney(credits.used, credits.currency)} of ${formatMoney(credits.limit, credits.currency)}`
+                    : t('common.xOfY', {
+                        used: formatMoney(credits.used, credits.currency),
+                        limit: formatMoney(credits.limit, credits.currency)
+                      })
                 }
               />
             )}
 
             {apiSpend && (
               <DetailRow
-                label="API spend"
+                label={t('card.apiSpend')}
                 value={spendText(apiSpend)}
-                title="Anthropic API, UTC days"
+                title={t('card.apiSpendSource')}
               />
             )}
           </motion.div>

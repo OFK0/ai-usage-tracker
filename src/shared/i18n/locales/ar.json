@@ -1,0 +1,167 @@
+{
+  "common": {
+    "xOfY": "{{used}} من {{limit}}"
+  },
+  "widget": {
+    "refresh": "تحديث الاستخدام",
+    "openSettings": "فتح الإعدادات",
+    "hide": "إخفاء الأداة",
+    "loading": "جارٍ تحميل الاستخدام",
+    "noProviders": "لا يوجد مزوّدون مفعّلون."
+  },
+  "card": {
+    "reset": "أُعيد الضبط",
+    "notInPlan": "غير مشمول في الخطة",
+    "unlimited": "غير محدود",
+    "limitReached": "تم بلوغ الحد",
+    "showDetails": "إظهار تفاصيل {{name}}",
+    "hideDetails": "إخفاء تفاصيل {{name}}",
+    "connect": "الربط من الإعدادات",
+    "barLabel": "استخدام {{provider}}: {{window}}",
+    "fromSessionLogs": "من سجلات الجلسات المحلية",
+    "credits": "الرصيد",
+    "apiSpend": "إنفاق API",
+    "apiSpendSource": "Anthropic API، الأيام بتوقيت UTC"
+  },
+  "window": {
+    "session": "الجلسة",
+    "weekly": "أسبوعي",
+    "weekly_opus": "أسبوعي · Opus",
+    "weekly_sonnet": "أسبوعي · Sonnet",
+    "chat": "الدردشة",
+    "completions": "إكمال الشيفرة",
+    "premium_interactions": "الطلبات المميزة"
+  },
+  "reset": {
+    "in": "يُعاد الضبط بعد {{duration}}",
+    "resetting": "جارٍ إعادة الضبط…",
+    "waiting": "أُعيد الضبط · بانتظار بيانات جديدة"
+  },
+  "activity": {
+    "none": "لا نشاط في {{tool}} خلال آخر 5 ساعات",
+    "session": "{{messages}} في هذه الجلسة · تنتهي بعد {{duration}}",
+    "messages_zero": "{{count}} رسالة",
+    "messages_one": "رسالة واحدة",
+    "messages_two": "رسالتان",
+    "messages_few": "{{count}} رسائل",
+    "messages_many": "{{count}} رسالة",
+    "messages_other": "{{count}} رسالة"
+  },
+  "spend": "{{today}} اليوم · {{month}} هذا الشهر",
+  "status": {
+    "loading": "جارٍ التحميل…",
+    "stale": "تعذّر التحديث",
+    "staleSince": "تعذّر التحديث · آخر تحديث قبل {{duration}}",
+    "signIn": {
+      "claude": "افتح Claude Code لتحديث الاستخدام",
+      "codex": "افتح Codex CLI لتحديث الاستخدام",
+      "copilot": "سجّل الدخول إلى GitHub لعرض الاستخدام"
+    },
+    "notInstalled": {
+      "claude": "لم يُعثر على Claude Code",
+      "codex": "لم يُعثر على Codex CLI",
+      "copilot": "لم يُعثر على تسجيل دخول إلى GitHub"
+    },
+    "disconnected": "غير مربوط",
+    "error": "تعذّر تحميل الاستخدام"
+  },
+  "duration": {
+    "underMinute": "<1 د",
+    "m": "{{m}} د",
+    "h": "{{h}} س",
+    "hm": "{{h}} س و{{m}} د",
+    "d": "{{d}} ي",
+    "dh": "{{d}} ي و{{h}} س"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "section": {
+      "general": "عام",
+      "appearance": "المظهر",
+      "widget": "الأداة",
+      "providers": "المزوّدون"
+    },
+    "language": {
+      "label": "اللغة",
+      "system": "لغة النظام ({{language}})"
+    },
+    "theme": {
+      "label": "السمة",
+      "system": "النظام",
+      "light": "فاتح",
+      "dark": "داكن"
+    },
+    "accent": "لون التمييز",
+    "reduceMotion": {
+      "label": "تقليل الحركة",
+      "help": "يوقف الرسوم المتحركة الزخرفية. وإذا طلب نظامك حركة أقل فسيُراعى ذلك في كل الأحوال."
+    },
+    "alwaysOnTop": {
+      "label": "دائمًا في المقدمة",
+      "help": "يُبقي الأداة فوق النوافذ الأخرى. عند إيقافه، يؤدي النقر على أيقونة علبة النظام إلى إحضار الأداة إلى المقدمة."
+    },
+    "opacity": {
+      "label": "العتامة",
+      "help": "تصبح الأداة معتمة بالكامل عندما يكون المؤشر فوقها."
+    },
+    "refresh": {
+      "label": "التحديث",
+      "help": "عدد مرات التحقق من الاستخدام أثناء ظهور الأداة. وعند إخفائها يكون التحقق مرة كل 5 دقائق على الأكثر.",
+      "everyMinute": "كل دقيقة",
+      "minutes_zero": "كل {{count}} دقيقة",
+      "minutes_one": "كل دقيقة",
+      "minutes_two": "كل دقيقتين",
+      "minutes_few": "كل {{count}} دقائق",
+      "minutes_many": "كل {{count}} دقيقة",
+      "minutes_other": "كل {{count}} دقيقة",
+      "seconds_zero": "كل {{count}} ثانية",
+      "seconds_one": "كل ثانية",
+      "seconds_two": "كل ثانيتين",
+      "seconds_few": "كل {{count}} ثوانٍ",
+      "seconds_many": "كل {{count}} ثانية",
+      "seconds_other": "كل {{count}} ثانية"
+    },
+    "provider": {
+      "showInWidget": "إظهار في الأداة",
+      "showInWidgetLabel": "إظهار {{name}} في الأداة",
+      "connecting": "جارٍ الربط…",
+      "connected": "مربوط",
+      "connectedPlan": "مربوط · {{plan}}",
+      "claude": {
+        "connect": "ربط Claude Code",
+        "connectHelp": "يقرأ بيانات تسجيل الدخول التي يحفظها Claude Code على هذا الحاسوب لعرض حدود خطتك، وسجلات جلساته عند تعذّر الوصول إلى واجهة الاستخدام. لا يُرسل إلى Anthropic سوى طلب الاستخدام نفسه. قد يطلب نظامك الإذن في المرة الأولى.",
+        "key": "مفتاح Anthropic Admin API",
+        "keyHelp": "اختياري. يضيف إنفاقك على API لهذا الشهر. يُحفظ مشفّرًا على هذا الحاسوب."
+      },
+      "copilot": {
+        "connect": "ربط GitHub",
+        "connectHelp": "يقرأ تسجيل دخول GitHub CLI (gh)، أو تسجيل دخول إضافة Copilot في محرّرك إن لم يوجد، لعرض حصص Copilot. لا يُرسل إلى GitHub سوى طلب الحصص نفسه.",
+        "key": "رمز GitHub",
+        "keyHelp": "اختياري. يُستخدم بدلًا من تسجيلات الدخول هذه، حتى لو لم يكن GitHub مربوطًا. يُحفظ مشفّرًا على هذا الحاسوب."
+      }
+    },
+    "secret": {
+      "save": "حفظ",
+      "remove": "إزالة",
+      "key": {
+        "paste": "الصق مفتاحك",
+        "saved": "مفتاح محفوظ ينتهي بـ {{hint}}",
+        "savedNoHint": "هناك مفتاح محفوظ"
+      },
+      "token": {
+        "paste": "الصق رمزك",
+        "saved": "رمز محفوظ ينتهي بـ {{hint}}",
+        "savedNoHint": "هناك رمز محفوظ"
+      },
+      "unavailable": {
+        "encryption": "التخزين الآمن غير متاح على هذا النظام، لذا لا يمكن حفظ المفاتيح.",
+        "keyring": "لم يُعثر على حلقة مفاتيح للنظام (مثل GNOME Keyring أو KWallet)، لذا لا يمكن تخزين المفاتيح بأمان."
+      },
+      "invalid": {
+        "empty": "الصق مفتاحًا أو رمزًا أولًا.",
+        "tooLong": "هذا أطول من أن يكون مفتاحًا أو رمزًا.",
+        "whitespace": "لا تحتوي المفاتيح والرموز على مسافات. تحقّق مما لصقته."
+      }
+    }
+  }
+}

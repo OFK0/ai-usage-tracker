@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
 import type { ProviderId } from '@shared/app-info'
+import { parseLocaleArguments } from '@shared/i18n/language'
 import type {
   EventArgs,
   EventChannel,
@@ -43,6 +44,8 @@ function subscribe<C extends EventChannel>(
  * read a stored token back out.
  */
 const api = {
+  /** The window's language and the system's, as the main process passed them in. */
+  locale: parseLocaleArguments(process.argv),
   widget: {
     hide: (): void => send('widget:hide'),
     fit: (height: number): void => send('widget:fit', height)

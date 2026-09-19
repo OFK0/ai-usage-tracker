@@ -39,6 +39,7 @@ function claude(overrides: Partial<ProviderSnapshot> = {}): ProviderSnapshot {
 
 let pushUsage: (snapshots: ProviderSnapshot[]) => void
 const api = {
+  locale: { language: 'en', systemLanguages: ['en-US'] },
   widget: { hide: vi.fn(), fit: vi.fn() },
   settings: {
     open: vi.fn(),

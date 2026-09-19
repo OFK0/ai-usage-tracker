@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { RotateCw, Settings, X } from 'lucide-react'
 import { AnimatePresence, motion, useAnimate } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { useSettings } from '@/features/settings/hooks'
 import { useNow, useUsage } from '@/features/usage/hooks'
@@ -55,8 +56,9 @@ function GaugeMark({ sweep }: { sweep: number }): React.JSX.Element {
 
 /** Placeholder rows while the first reading is on its way. */
 function LoadingRows(): React.JSX.Element {
+  const { t } = useTranslation()
   return (
-    <div role="status" aria-label="Loading usage" className="flex flex-col gap-3">
+    <div role="status" aria-label={t('widget.loading')} className="flex flex-col gap-3">
       <div className="flex items-center gap-2.5">
         <div className="skeleton size-6 rounded-md" />
         <div className="skeleton h-3 w-24" />
@@ -70,6 +72,7 @@ function LoadingRows(): React.JSX.Element {
 }
 
 export default function App(): React.JSX.Element {
+  const { t } = useTranslation()
   const { snapshots, refreshing, refresh } = useUsage()
   const { settings } = useSettings()
   const now = useNow()
@@ -118,7 +121,7 @@ export default function App(): React.JSX.Element {
               className="no-drag text-muted-foreground size-6"
               size="icon"
               variant="ghost"
-              aria-label="Refresh usage"
+              aria-label={t('widget.refresh')}
               disabled={refreshing}
               onClick={() => void refresh()}
             >
@@ -128,7 +131,7 @@ export default function App(): React.JSX.Element {
               className="no-drag text-muted-foreground size-6"
               size="icon"
               variant="ghost"
-              aria-label="Open settings"
+              aria-label={t('widget.openSettings')}
               onClick={() => window.api.settings.open()}
             >
               <Settings className="size-3.5" />
@@ -137,7 +140,7 @@ export default function App(): React.JSX.Element {
               className="no-drag text-muted-foreground size-6"
               size="icon"
               variant="ghost"
-              aria-label="Hide widget"
+              aria-label={t('widget.hide')}
               onClick={() => window.api.widget.hide()}
             >
               <X className="size-3.5" />
@@ -150,7 +153,7 @@ export default function App(): React.JSX.Element {
             {loading ? (
               <LoadingRows />
             ) : snapshots.length === 0 ? (
-              <p className="text-muted-foreground text-xs">No providers are enabled.</p>
+              <p className="text-muted-foreground text-xs">{t('widget.noProviders')}</p>
             ) : (
               <ul className="divide-border/60 flex flex-col divide-y">
                 <AnimatePresence initial>

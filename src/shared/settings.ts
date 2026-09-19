@@ -6,6 +6,10 @@ export type Theme = (typeof THEMES)[number]
 export const LANGUAGES = ['en', 'tr', 'fr', 'de', 'it', 'ru', 'ar'] as const
 export type Language = (typeof LANGUAGES)[number]
 
+/** What the user picks: a language, or whatever the system uses. */
+export const LANGUAGE_SETTINGS = ['system', ...LANGUAGES] as const
+export type LanguageSetting = (typeof LANGUAGE_SETTINGS)[number]
+
 export interface ProviderSettings {
   /** Whether the provider is polled and shown at all. */
   enabled: boolean
@@ -25,7 +29,7 @@ export interface Settings {
   theme: Theme
   /** Hue in degrees, fed into the --accent-h CSS token. */
   accentHue: number
-  language: Language
+  language: LanguageSetting
   /** Whole-window opacity, applied with BrowserWindow.setOpacity. */
   opacity: number
   alwaysOnTop: boolean
@@ -51,7 +55,7 @@ export function defaultSettings(): Settings {
   return {
     theme: 'system',
     accentHue: 250,
-    language: 'en',
+    language: 'system',
     opacity: 1,
     alwaysOnTop: true,
     launchAtLogin: false,
@@ -102,7 +106,7 @@ function readOption<T extends string>(options: readonly T[], value: unknown): T 
 const FIELD_READERS: { [K in FieldKey]: (value: unknown) => Settings[K] | undefined } = {
   theme: (value) => readOption(THEMES, value),
   accentHue: (value) => readNumber(value, SETTINGS_RANGES.accentHue),
-  language: (value) => readOption(LANGUAGES, value),
+  language: (value) => readOption(LANGUAGE_SETTINGS, value),
   opacity: (value) => readNumber(value, SETTINGS_RANGES.opacity),
   alwaysOnTop: readBoolean,
   launchAtLogin: readBoolean,

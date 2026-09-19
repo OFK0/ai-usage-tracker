@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatDuration, formatMoney } from './format'
+import { formatDuration, formatMoney, formatPercent } from './format'
 
 const MINUTE = 60_000
 const HOUR = 60 * MINUTE
@@ -28,5 +28,12 @@ describe('formatMoney', () => {
 
   it('still shows the amount for a currency Intl does not know', () => {
     expect(formatMoney(3, 'NOT-A-CODE')).toBe('3.00 NOT-A-CODE')
+  })
+})
+
+describe('formatPercent', () => {
+  it('puts the sign where the language does', () => {
+    expect(formatPercent(24.4, 'en')).toBe('24%')
+    expect(formatPercent(24.6, 'tr')).toBe('%25')
   })
 })
