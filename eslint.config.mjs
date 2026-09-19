@@ -63,12 +63,21 @@ export default tseslint.config(
       '*.config.{js,mjs,ts}',
       'electron.vite.config.ts',
       'vitest.config.ts',
-      'scripts/**/*.mjs'
+      'scripts/**/*.{mjs,cjs}'
     ],
     languageOptions: {
       globals: { ...globals.node }
     },
     extends: [tseslint.configs.disableTypeChecked]
+  },
+
+  {
+    // electron-builder hooks are loaded with require().
+    files: ['scripts/**/*.cjs'],
+    languageOptions: { sourceType: 'commonjs' },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off'
+    }
   },
 
   prettier

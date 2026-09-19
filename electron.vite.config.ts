@@ -5,9 +5,10 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   main: {
-    // electron-store is ESM-only while the main process builds to CommonJS, so
-    // it is bundled instead of being loaded from node_modules at runtime.
-    plugins: [externalizeDepsPlugin({ exclude: ['electron-store'] })],
+    // Only `dependencies` stay external, to be loaded from node_modules and
+    // shipped by electron-builder. Everything in devDependencies is bundled,
+    // electron-store included, which is ESM-only while main builds to CommonJS.
+    plugins: [externalizeDepsPlugin()],
     resolve: {
       alias: {
         '@shared': resolve('src/shared'),

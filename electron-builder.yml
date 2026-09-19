@@ -1,0 +1,69 @@
+appId: com.ofk0.ai-usage-tracker
+productName: AI Usage Tracker
+copyright: Copyright © 2026 OFK0
+
+directories:
+  buildResources: build
+  output: release/${version}
+
+# Vite has bundled everything into out/ already. electron-builder adds the few
+# dependencies the main process still loads from node_modules on its own.
+# resources/ holds the tray icons, which the main bundle loads by path.
+files:
+  - out/**/*
+  - resources/**/*
+  - package.json
+
+# koffi's native binary can't be loaded from inside the asar archive, and the
+# tray on Linux hands its icon to the desktop by file path.
+asarUnpack:
+  - '**/*.node'
+  - resources/**
+
+# Nothing needs compiling: koffi comes with prebuilt binaries per platform.
+npmRebuild: false
+# Fetches koffi's binary for the architecture being built, if it isn't this one.
+beforePack: scripts/before-pack.cjs
+
+publish: null
+
+win:
+  target:
+    - target: nsis
+      arch: [x64, arm64]
+
+nsis:
+  artifactName: ${name}-${version}-setup-${arch}.${ext}
+  oneClick: true
+  perMachine: false
+  deleteAppDataOnUninstall: false
+
+mac:
+  category: public.app-category.developer-tools
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+    - target: zip
+      arch: [x64, arm64]
+  # v1 is unsigned. Apple silicon won't run an app with no signature at all, so
+  # it's signed ad hoc, which only works with the hardened runtime off.
+  identity: '-'
+  hardenedRuntime: false
+  extendInfo:
+    # A tray app: no Dock icon, not even for a moment while it starts.
+    LSUIElement: true
+
+dmg:
+  artifactName: ${name}-${version}-${arch}.${ext}
+
+linux:
+  target: [AppImage, deb]
+  category: Utility
+  synopsis: Usage limits for Claude, Codex and GitHub Copilot
+  maintainer: OFK0 <OFK0@users.noreply.github.com>
+
+appImage:
+  artifactName: ${name}-${version}-${arch}.${ext}
+
+deb:
+  artifactName: ${name}_${version}_${arch}.${ext}
