@@ -51,6 +51,13 @@ export const SETTINGS_RANGES = {
   refreshIntervalSeconds: { min: 30, max: 3600 }
 } as const
 
+/** Which providers a fresh install shows in the widget; the rest are a switch away. */
+const SHOWN_BY_DEFAULT: Record<ProviderId, boolean> = {
+  claude: true,
+  codex: false,
+  copilot: true
+}
+
 export function defaultSettings(): Settings {
   return {
     theme: 'system',
@@ -62,7 +69,7 @@ export function defaultSettings(): Settings {
     refreshIntervalSeconds: 60,
     reduceMotion: false,
     providers: Object.fromEntries(
-      PROVIDER_IDS.map((id) => [id, { enabled: true, connected: false }])
+      PROVIDER_IDS.map((id) => [id, { enabled: SHOWN_BY_DEFAULT[id], connected: false }])
     ) as Record<ProviderId, ProviderSettings>
   }
 }

@@ -127,8 +127,10 @@ function SecretField({
           })
         }}
       >
+        {/* As tall as the small buttons beside it, and at the size of the text around it. */}
         <Input
           id={inputId}
+          className="h-8 text-sm"
           type="password"
           autoComplete="off"
           spellCheck={false}
