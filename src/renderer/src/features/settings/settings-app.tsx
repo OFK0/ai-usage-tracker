@@ -461,7 +461,8 @@ function WidgetSection({
 
 function SectionHeading({ children }: { children: string }): React.JSX.Element {
   return (
-    <h2 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+    // Letter spacing would pull Arabic's joined letters apart.
+    <h2 className="text-muted-foreground text-xs font-medium tracking-wide uppercase rtl:tracking-normal">
       {children}
     </h2>
   )

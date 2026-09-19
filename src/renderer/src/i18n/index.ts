@@ -1,5 +1,6 @@
 import { createInstance } from 'i18next'
 import { initReactI18next } from 'react-i18next'
+import { textDirection } from '@shared/i18n/language'
 import { i18nOptions } from '@shared/i18n/resources'
 import type { Language } from '@shared/settings'
 
@@ -15,8 +16,12 @@ export function uiLocale(): string {
   return i18n.language
 }
 
-/** Switches the UI language and tells the document, for fonts, hyphenation and screen readers. */
+/**
+ * Switches the UI language and tells the document: `lang` for fonts and screen
+ * readers, `dir` so the layout mirrors for a right-to-left language.
+ */
 export function applyLanguage(language: Language): void {
   if (i18n.language !== language) void i18n.changeLanguage(language)
   document.documentElement.lang = language
+  document.documentElement.dir = textDirection(language)
 }
