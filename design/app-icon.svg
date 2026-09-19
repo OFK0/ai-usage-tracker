@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="AI Usage Tracker">
+  <title>AI Usage Tracker</title>
+
+  <defs>
+    <!-- .accent-gradient: linear-gradient(135deg, var(--gradient-from), var(--gradient-to))
+         at the default accent hue of 250, resolved from the oklch tokens in
+         src/renderer/src/assets/main.css. The app icon is fixed, so it always
+         uses the light-mode pair. -->
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1289E7" />
+      <stop offset="1" stop-color="#5D5DDD" />
+    </linearGradient>
+
+    <!-- .widget-surface: the soft wash of light the widget carries in its
+         top-left corner, here struck from the corner of the body. -->
+    <radialGradient id="glow" gradientUnits="userSpaceOnUse" cx="100" cy="100" r="741.6">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.22" />
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- The body, on the macOS icon grid: an 824 square centred in 1024, leaving
+       100 of margin, with a 185 corner radius. Windows and Linux use the same
+       artwork. -->
+  <g id="body">
+    <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#accent)" />
+    <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#glow)" />
+  </g>
+
+  <!-- The gauge: a dial of 250 degrees, open at the bottom, struck from
+       (512, 564) — low enough that the mark's own bounding box is centred in
+       the body, rather than the circle it is cut from. The track is the whole
+       allowance; the sweep over it is what is left. Below about 32px the track
+       falls away and the sweep carries the silhouette on its own. -->
+  <g id="gauge" fill="none" stroke="#FFFFFF" stroke-width="128" stroke-linecap="round">
+    <path id="track" opacity="0.38" d="M313.765 702.805A242 242 0 1 1 710.235 702.805" />
+    <path id="remaining" d="M313.765 702.805A242 242 0 0 1 633 354.422" />
+  </g>
+</svg>
