@@ -154,5 +154,12 @@
         "whitespace": "Chiavi e token non contengono mai spazi. Controlla cosa hai incollato."
       }
     }
+  },
+  "tray": {
+    "showWidget": "Mostra widget",
+    "hideWidget": "Nascondi widget",
+    "refresh": "Aggiorna",
+    "settings": "Impostazioni…",
+    "quit": "Esci"
   }
 }

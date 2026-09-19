@@ -151,5 +151,12 @@
         "whitespace": "Anahtar ve token'larda boşluk olmaz. Yapıştırılanı kontrol edin."
       }
     }
+  },
+  "tray": {
+    "showWidget": "Widget'ı göster",
+    "hideWidget": "Widget'ı gizle",
+    "refresh": "Yenile",
+    "settings": "Ayarlar…",
+    "quit": "Çık"
   }
 }

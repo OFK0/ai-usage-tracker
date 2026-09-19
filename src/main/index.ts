@@ -1,6 +1,7 @@
 import { app, BrowserWindow } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { APP_ID, PROVIDER_IDS } from '@shared/app-info'
+import { applyLanguage } from './i18n'
 import { registerIpcHandlers } from './ipc'
 import { broadcast } from './ipc/typed'
 import { settingsRepository } from './store'
@@ -41,9 +42,11 @@ if (!app.requestSingleInstanceLock()) {
     registerIpcHandlers()
 
     let previous = settingsRepository.get()
+    applyLanguage(previous.language)
     applyTheme(previous)
     settingsRepository.onChange((settings) => {
       broadcast('settings:changed', settings)
+      applyLanguage(settings.language)
       applyTheme(settings)
       applyWidgetSettings(settings)
       usagePoller.reconfigure()

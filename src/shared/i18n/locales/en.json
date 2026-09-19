@@ -151,5 +151,12 @@
         "whitespace": "Keys and tokens never contain spaces. Check what was pasted."
       }
     }
+  },
+  "tray": {
+    "showWidget": "Show widget",
+    "hideWidget": "Hide widget",
+    "refresh": "Refresh",
+    "settings": "Settings…",
+    "quit": "Quit"
   }
 }
