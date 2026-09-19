@@ -5,7 +5,9 @@
     "vitest.config.ts",
     "src/main/**/*",
     "src/preload/**/*",
-    "src/shared/**/*"
+    "src/shared/**/*",
+    "playwright.config.ts",
+    "e2e/**/*"
   ],
   "compilerOptions": {
     "composite": true,

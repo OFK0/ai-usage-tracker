@@ -30,8 +30,12 @@ if (!app.requestSingleInstanceLock()) {
     electronApp.setAppUserModelId(APP_ID)
 
     // Before anything reads the settings, so a renamed install starts with them.
-    await migrateLegacySettings(app.getPath('appData'), app.getPath('userData')).catch(
-      (error: unknown) => console.error('Could not carry settings over from the old name', error)
+    await migrateLegacySettings(
+      app.getPath('appData'),
+      app.getPath('userData'),
+      app.getName()
+    ).catch((error: unknown) =>
+      console.error('Could not carry settings over from the old name', error)
     )
 
     // The widget is a tray application, so it does not belong in the dock.
