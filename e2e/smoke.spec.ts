@@ -37,7 +37,11 @@ test.beforeEach(async () => {
 })
 
 test.afterEach(async () => {
-  await app.close()
+  // On macOS runners closing now and then never finishes, after the test itself
+  // has passed. The process is ours, so it's ended outright rather than waited on.
+  const child = app.process()
+  await Promise.race([app.close(), new Promise((resolve) => setTimeout(resolve, 10_000))])
+  if (child.exitCode === null) child.kill()
   await rm(userData, { recursive: true, force: true })
 })
 
