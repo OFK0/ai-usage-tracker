@@ -184,6 +184,48 @@ describe('appearance', () => {
   })
 })
 
+describe('widget', () => {
+  async function widgetSection(): Promise<HTMLElement> {
+    render(<SettingsApp />)
+    return screen.findByRole('region', { name: 'Widget' })
+  }
+
+  it('turns always-on-top off', async () => {
+    const section = await widgetSection()
+
+    await userEvent.click(within(section).getByRole('switch', { name: 'Always on top' }))
+
+    expect(api.settings.update).toHaveBeenCalledWith({ alwaysOnTop: false })
+  })
+
+  it('saves opacity once the slider settles', async () => {
+    const section = await widgetSection()
+    const slider = within(section).getByLabelText('Opacity')
+
+    fireEvent.change(slider, { target: { value: '80' } })
+    fireEvent.change(slider, { target: { value: '60' } })
+
+    expect(within(section).getByText('60%')).toBeInTheDocument()
+    await vi.waitFor(() => expect(api.settings.update).toHaveBeenCalledTimes(1))
+    expect(api.settings.update).toHaveBeenCalledWith({ opacity: 0.6 })
+  })
+
+  it('changes how often usage is checked', async () => {
+    const section = await widgetSection()
+
+    await userEvent.selectOptions(within(section).getByLabelText('Refresh'), 'Every 5 minutes')
+
+    expect(api.settings.update).toHaveBeenCalledWith({ refreshIntervalSeconds: 300 })
+  })
+
+  it('still shows an interval that is not one of the presets', async () => {
+    api.settings.get.mockResolvedValueOnce({ ...defaultSettings(), refreshIntervalSeconds: 90 })
+    const section = await widgetSection()
+
+    expect(within(section).getByLabelText('Refresh')).toHaveDisplayValue('Every 90 seconds')
+  })
+})
+
 describe('ipcErrorMessage', () => {
   it('keeps a message that has no wrapper', () => {
     expect(ipcErrorMessage(new Error('plain'))).toBe('plain')

@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { RotateCw, Settings, X } from 'lucide-react'
 import { AnimatePresence, motion, useAnimate } from 'motion/react'
 import { Button } from '@/components/ui/button'
+import { useSettings } from '@/features/settings/hooks'
 import { useNow, useUsage } from '@/features/usage/hooks'
 import { ProviderCard } from '@/features/usage/provider-card'
 import { useFitWindowToContent } from '@/lib/use-fit-window'
@@ -70,6 +71,7 @@ function LoadingRows(): React.JSX.Element {
 
 export default function App(): React.JSX.Element {
   const { snapshots, refreshing, refresh } = useUsage()
+  const { settings } = useSettings()
   const now = useNow()
   const still = useStillMotion()
   const openCount = useOpenCount()
@@ -95,7 +97,12 @@ export default function App(): React.JSX.Element {
     (snapshots.length > 0 && snapshots.every((snapshot) => snapshot.status === 'loading'))
 
   return (
-    <div className="flex h-screen w-screen flex-col p-2">
+    // Translucent at rest if the user asked for it, fully opaque while the
+    // pointer is over it so it's readable the moment you look at it closely.
+    <div
+      className="flex h-screen w-screen flex-col p-2 opacity-(--widget-opacity) transition-opacity duration-300 hover:opacity-100"
+      style={{ '--widget-opacity': settings?.opacity ?? 1 } as React.CSSProperties}
+    >
       {/* Takes its natural height, capped at the window, which main keeps sized to it. */}
       <section
         ref={shell}

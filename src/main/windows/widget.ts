@@ -1,8 +1,10 @@
 import { BrowserWindow, screen } from 'electron'
+import type { Settings } from '@shared/settings'
 import { debounce } from '../lib/debounce'
-import { windowState } from '../store'
+import { settingsRepository, windowState } from '../store'
 import { hardenWindow, loadRenderer, secureWebPreferences } from './common'
 import { anchorTopRight, clampToWorkArea, fitHeight, type Point } from './position'
+import { trayClickAction } from './tray-click'
 
 /** Width is fixed; height follows the content, which the renderer reports. */
 export const WIDGET_SIZE = { width: 340, height: 220 }
@@ -64,13 +66,10 @@ export function createWidgetWindow(): BrowserWindow {
     minimizable: false,
     fullscreenable: false,
     skipTaskbar: true,
-    alwaysOnTop: true,
     webPreferences: secureWebPreferences()
   })
 
-  // 'floating' sits above normal windows without covering menus or the screen
-  // saver. Keeping the widget off fullscreen spaces is handled separately.
-  widget.setAlwaysOnTop(true, 'floating')
+  applyWidgetSettings(settingsRepository.get())
 
   // The widget appears on its own, often at login, so it must not take focus
   // away from whatever the user is doing. Opening it from the tray does focus it.
@@ -129,14 +128,23 @@ export function hideWidgetWindow(): void {
   getWidgetWindow()?.hide()
 }
 
+/** Applies the settings that belong to the window rather than to what it shows. */
+export function applyWidgetSettings(settings: Settings): void {
+  // 'floating' sits above normal windows without covering menus or the screen
+  // saver. Keeping the widget off fullscreen spaces is handled separately.
+  getWidgetWindow()?.setAlwaysOnTop(settings.alwaysOnTop, 'floating')
+}
+
 export function toggleWidgetWindow(): void {
   const window = getWidgetWindow()
+  const action = trayClickAction({
+    visible: window?.isVisible() ?? false,
+    focused: window?.isFocused() ?? false,
+    alwaysOnTop: window?.isAlwaysOnTop() ?? true
+  })
 
-  if (window?.isVisible()) {
-    window.hide()
-  } else {
-    showWidgetWindow()
-  }
+  if (action === 'hide') window?.hide()
+  else showWidgetWindow()
 }
 
 export function isWidgetVisible(): boolean {

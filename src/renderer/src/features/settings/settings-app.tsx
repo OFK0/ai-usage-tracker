@@ -295,6 +295,109 @@ function AppearanceSection({
   )
 }
 
+const REFRESH_INTERVALS = [30, 60, 120, 300, 600, 900, 1800]
+
+function intervalLabel(seconds: number): string {
+  // Anything that isn't whole minutes stays in seconds, so no two options can
+  // end up with the same label.
+  if (seconds < 60 || seconds % 60 !== 0) return `Every ${seconds} seconds`
+  const minutes = seconds / 60
+  return minutes === 1 ? 'Every minute' : `Every ${minutes} minutes`
+}
+
+function WidgetSection({
+  settings,
+  update
+}: {
+  settings: Settings
+  update: (patch: SettingsPatch) => Promise<void>
+}): React.JSX.Element {
+  // Same as the accent: follow the slider on screen, save once it settles.
+  const [draftOpacity, setDraftOpacity] = useState<number | null>(null)
+  const saveOpacity = useDebouncedCallback((opacity: number) => {
+    void update({ opacity }).finally(() => setDraftOpacity(null))
+  }, 150)
+  const opacity = draftOpacity ?? settings.opacity
+  const onTopId = useId()
+  const opacityId = useId()
+  const intervalId = useId()
+
+  // A hand-edited interval that isn't one of the presets still shows up.
+  const intervals = REFRESH_INTERVALS.includes(settings.refreshIntervalSeconds)
+    ? REFRESH_INTERVALS
+    : [...REFRESH_INTERVALS, settings.refreshIntervalSeconds].sort((a, b) => a - b)
+
+  return (
+    <section
+      aria-label="Widget"
+      className="bg-card border-border flex flex-col gap-4 rounded-lg border p-4"
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <Label htmlFor={onTopId}>Always on top</Label>
+          <p className="text-muted-foreground text-xs">
+            Keeps the widget above other windows. When it's off, clicking the tray icon brings the
+            widget to the front.
+          </p>
+        </div>
+        <Switch
+          id={onTopId}
+          checked={settings.alwaysOnTop}
+          onCheckedChange={(alwaysOnTop) => void update({ alwaysOnTop })}
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor={opacityId}>Opacity</Label>
+          <span className="text-muted-foreground text-xs tabular-nums">
+            {Math.round(opacity * 100)}%
+          </span>
+        </div>
+        <input
+          id={opacityId}
+          type="range"
+          min={SETTINGS_RANGES.opacity.min * 100}
+          max={SETTINGS_RANGES.opacity.max * 100}
+          step={5}
+          value={Math.round(opacity * 100)}
+          className="accent-primary w-full"
+          onChange={(event) => {
+            const next = Number(event.target.value) / 100
+            setDraftOpacity(next)
+            saveOpacity(next)
+          }}
+        />
+        <p className="text-muted-foreground text-xs">
+          The widget turns fully opaque while the pointer is over it.
+        </p>
+      </div>
+
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <Label htmlFor={intervalId}>Refresh</Label>
+          <p className="text-muted-foreground text-xs">
+            How often usage is checked while the widget is showing. Hidden, it checks every 5
+            minutes at most.
+          </p>
+        </div>
+        <select
+          id={intervalId}
+          value={settings.refreshIntervalSeconds}
+          className="border-input bg-background rounded-md border px-2 py-1 text-xs"
+          onChange={(event) => void update({ refreshIntervalSeconds: Number(event.target.value) })}
+        >
+          {intervals.map((seconds) => (
+            <option key={seconds} value={seconds}>
+              {intervalLabel(seconds)}
+            </option>
+          ))}
+        </select>
+      </div>
+    </section>
+  )
+}
+
 export function SettingsApp(): React.JSX.Element {
   const { settings, update } = useSettings()
   const { snapshots } = useUsage()
@@ -314,6 +417,15 @@ export function SettingsApp(): React.JSX.Element {
               Appearance
             </h2>
             <AppearanceSection settings={settings} update={update} />
+          </div>
+        )}
+
+        {settings && (
+          <div className="flex flex-col gap-3">
+            <h2 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+              Widget
+            </h2>
+            <WidgetSection settings={settings} update={update} />
           </div>
         )}
 

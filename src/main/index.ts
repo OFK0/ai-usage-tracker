@@ -9,7 +9,12 @@ import { applyTheme } from './theme'
 import { createTray, destroyTray } from './tray'
 import { usagePoller } from './usage'
 import { openSettingsWindow } from './windows/settings'
-import { createWidgetWindow, onWidgetVisibilityChange, showWidgetWindow } from './windows/widget'
+import {
+  applyWidgetSettings,
+  createWidgetWindow,
+  onWidgetVisibilityChange,
+  showWidgetWindow
+} from './windows/widget'
 
 // A second launch should surface the widget that is already running rather than
 // start a rival instance with its own tray icon.
@@ -40,6 +45,7 @@ if (!app.requestSingleInstanceLock()) {
     settingsRepository.onChange((settings) => {
       broadcast('settings:changed', settings)
       applyTheme(settings)
+      applyWidgetSettings(settings)
       usagePoller.reconfigure()
 
       // Connecting or disconnecting a provider should show straight away, not

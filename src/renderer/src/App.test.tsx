@@ -1,6 +1,7 @@
 import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { defaultSettings } from '@shared/settings'
 import type { LimitWindow, ProviderSnapshot } from '@shared/usage'
 import App from './App'
 
@@ -39,7 +40,11 @@ function claude(overrides: Partial<ProviderSnapshot> = {}): ProviderSnapshot {
 let pushUsage: (snapshots: ProviderSnapshot[]) => void
 const api = {
   widget: { hide: vi.fn(), fit: vi.fn() },
-  settings: { open: vi.fn() },
+  settings: {
+    open: vi.fn(),
+    get: vi.fn(() => Promise.resolve(defaultSettings())),
+    onChange: vi.fn(() => () => {})
+  },
   usage: {
     get: vi.fn(() => Promise.resolve([claude()])),
     refresh: vi.fn(() => Promise.resolve([claude()])),
@@ -174,6 +179,17 @@ describe('App', () => {
     render(<App />)
 
     expect(await screen.findByRole('progressbar')).toHaveAttribute('data-level', 'critical')
+  })
+
+  it('is as translucent as the settings say', async () => {
+    api.settings.get.mockResolvedValueOnce({ ...defaultSettings(), opacity: 0.6 })
+    const { container } = render(<App />)
+
+    await vi.waitFor(() =>
+      expect(
+        (container.firstElementChild as HTMLElement).style.getPropertyValue('--widget-opacity')
+      ).toBe('0.6')
+    )
   })
 
   it('opens settings from the header', async () => {
