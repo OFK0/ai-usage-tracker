@@ -1,14 +1,15 @@
 // Generates build/icon.png, which electron-builder turns into the .ico, .icns
-// and Linux icon sizes. The tray's gauge, in white, on the accent gradient the
-// UI uses at its default hue.
+// and Linux icon sizes. This reproduces design/app-icon.svg, which is the
+// drawing of record: the same numbers, in the same order. Change them there
+// first, then here.
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { encodePng } from './png.mjs'
 
 const SIZE = 1024
-// macOS expects the shape inset from the canvas; Windows and Linux are fine with it.
-const MARGIN = 80
+// The macOS icon grid: an 824 square centred in 1024, with a 185 corner radius.
+const MARGIN = 100
 const BODY = SIZE - MARGIN * 2
-const RADIUS = 190
+const RADIUS = 185
 const SAMPLES = 4
 
 /** oklch to 8-bit sRGB, so the icon matches the CSS tokens exactly. */
@@ -29,29 +30,37 @@ function oklch(L, C, h) {
   })
 }
 
-// --gradient-from and --gradient-to in light mode, at the default hue of 250.
+// --gradient-from and --gradient-to in light mode, at the default hue of 250,
+// which is #1289e7 and #5d5ddd. The app icon is fixed, so it never follows the
+// accent the user picks.
 const FROM = oklch(0.62, 0.17, 250)
 const TO = oklch(0.55, 0.19, 278)
 
-const centre = SIZE / 2
-// The gauge: a 270° arc open at the bottom, with round ends, and a filled part.
-// Its open bottom makes it look high when truly centred, so it sits a bit lower.
-const ARC_CENTRE_Y = centre + BODY * 0.035
-const ARC_RADIUS = BODY * 0.27
-const HALF_WIDTH = BODY * 0.045
-const START = (135 * Math.PI) / 180
-const SPAN = (270 * Math.PI) / 180
-const FILLED = 0.62
+const CENTRE = SIZE / 2
+// The gauge: a 250 degree dial open at the bottom. It is struck from a centre
+// below the middle of the body, so that the mark's own bounding box ends up
+// centred rather than the circle it is cut from.
+const ARC_CENTRE_X = 512
+const ARC_CENTRE_Y = 564
+const ARC_RADIUS = 242
+const HALF_WIDTH = 64
+const START = (145 * Math.PI) / 180
+const SPAN = (250 * Math.PI) / 180
+// How much of the dial the solid sweep covers, and how present the rest of the
+// dial is behind it. The track falls away below about 32px, leaving the sweep
+// to carry the silhouette.
+const REMAINING = 0.62
+const TRACK_ALPHA = 0.38
 
 function insideRoundedSquare(x, y) {
-  const dx = Math.max(Math.abs(x - centre) - (BODY / 2 - RADIUS), 0)
-  const dy = Math.max(Math.abs(y - centre) - (BODY / 2 - RADIUS), 0)
+  const dx = Math.max(Math.abs(x - CENTRE) - (BODY / 2 - RADIUS), 0)
+  const dy = Math.max(Math.abs(y - CENTRE) - (BODY / 2 - RADIUS), 0)
   return Math.hypot(dx, dy) <= RADIUS
 }
 
-/** How far along the arc a point sits (0 to 1), or null outside its stroke. */
+/** Inside the dial's stroke, up to the given portion of its sweep. */
 function onArc(x, y, portion) {
-  const dx = x - centre
+  const dx = x - ARC_CENTRE_X
   const dy = y - ARC_CENTRE_Y
   const end = START + SPAN * portion
   const cap = (angle) =>
@@ -77,8 +86,8 @@ function sample(x, y) {
   const over = (alpha) => {
     colour = colour.map((c) => c + (255 - c) * alpha)
   }
-  if (onArc(x, y, 1)) over(0.3)
-  if (onArc(x, y, FILLED)) over(1)
+  if (onArc(x, y, 1)) over(TRACK_ALPHA)
+  if (onArc(x, y, REMAINING)) over(1)
   return colour
 }
 

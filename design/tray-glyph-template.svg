@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" role="img" aria-label="AI Usage Tracker">
+  <title>AI Usage Tracker</title>
+
+  <!-- The macOS template variant: black on transparent only, so the menu bar
+       can recolour it for light and dark. -->
+
+  <!-- The app icon's dial, simplified to one flat shape. Drawn on the 16 grid
+       so its edges land on whole pixels: centre (8, 9), radius 5, stroke 4,
+       which puts the outer edge at x=1 and x=15 and the top at y=2. Every
+       number doubles exactly for @2x, so 32 is as sharp as 16. -->
+  <path
+    d="M3.904 11.868A5 5 0 1 1 12.096 11.868"
+    fill="none"
+    stroke="#000000"
+    stroke-width="4"
+    stroke-linecap="round"
+  />
+</svg>
