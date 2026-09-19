@@ -83,6 +83,26 @@ npm run dev
 | `npm run typecheck` | Typecheck main, preload and renderer |
 | `npm run test`      | Run the test suite                   |
 
+## Installers
+
+```bash
+npm run dist:win     # NSIS installer, x64 and arm64
+npm run dist:mac     # dmg and zip, x64 and arm64 (on macOS)
+npm run dist:linux   # AppImage and deb (on Linux)
+```
+
+Output goes to `release/<version>/`. The app icon is generated into
+`build/icon.png` by `npm run generate:icons`, and electron-builder derives the
+`.ico`, `.icns` and Linux sizes from it.
+
+v1 isn't code signed, so the first launch asks for a click-through:
+
+- Windows: SmartScreen says it protected your PC. Choose More info, then
+  Run anyway.
+- macOS: the app is signed ad hoc only, so Gatekeeper won't open it from a
+  double-click. Right-click it and choose Open, or run
+  `xattr -dr com.apple.quarantine "/Applications/AI Usage Tracker.app"`.
+
 ## Tray icons
 
 The tray icons are drawn procedurally by `scripts/generate-tray-icons.mjs`, which
