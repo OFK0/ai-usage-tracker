@@ -12,8 +12,20 @@ export function registerIpcHandlers(): void {
 
   handle('secrets:status', () => secretVault.status())
   handle('secrets:describe', (provider) => secretVault.describe(parseProviderId(provider)))
-  handle('secrets:save', (provider, token) => secretVault.save(parseProviderId(provider), token))
-  handle('secrets:clear', (provider) => secretVault.clear(parseProviderId(provider)))
+  // A new or removed key can change what the provider shows, so it is read
+  // again straight away rather than at the next poll.
+  handle('secrets:save', (provider, token) => {
+    const id = parseProviderId(provider)
+    const info = secretVault.save(id, token)
+    void usagePoller.refresh(id)
+    return info
+  })
+  handle('secrets:clear', (provider) => {
+    const id = parseProviderId(provider)
+    const info = secretVault.clear(id)
+    void usagePoller.refresh(id)
+    return info
+  })
 
   handle('usage:get', () => usagePoller.snapshots())
   handle('usage:refresh', () => usagePoller.refresh())

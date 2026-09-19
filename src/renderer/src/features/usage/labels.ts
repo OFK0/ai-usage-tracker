@@ -17,11 +17,30 @@ const PROVIDER_TOOLS: Record<ProviderId, string> = {
   copilot: 'GitHub'
 }
 
+/**
+ * What to do about a sign-in that is missing or no longer accepted. Claude Code
+ * and Codex renew their own sign-in when opened; GitHub's has to be redone.
+ */
+const SIGN_IN_TEXT: Record<ProviderId, string> = {
+  claude: 'Open Claude Code to update usage',
+  codex: 'Open Codex CLI to update usage',
+  copilot: 'Sign in to GitHub to see usage'
+}
+
+const NOT_INSTALLED_TEXT: Record<ProviderId, string> = {
+  claude: 'Claude Code not found',
+  codex: 'Codex CLI not found',
+  copilot: 'No GitHub sign-in found'
+}
+
 const WINDOW_LABELS = new Map([
   ['session', 'Session'],
   ['weekly', 'Weekly'],
   ['weekly_opus', 'Weekly · Opus'],
-  ['weekly_sonnet', 'Weekly · Sonnet']
+  ['weekly_sonnet', 'Weekly · Sonnet'],
+  ['chat', 'Chat'],
+  ['completions', 'Code completions'],
+  ['premium_interactions', 'Premium requests']
 ])
 
 export function providerName(id: ProviderId): string {
@@ -53,6 +72,15 @@ export function resetText(window: LimitWindow, now: number, fresh = true): strin
   return `Resets in ${formatDuration(Date.parse(window.resetsAt) - now)}`
 }
 
+/** The raw count behind the percentage, for providers that report one. */
+export function countText(window: LimitWindow, locale?: string): string | null {
+  if (window.used === null || window.limit === null || !window.applicable || window.unlimited) {
+    return null
+  }
+  const format = new Intl.NumberFormat(locale)
+  return `${format.format(window.used)} of ${format.format(window.limit)}`
+}
+
 export function activityText(providerId: ProviderId, activity: LocalActivity, now: number): string {
   const { block } = activity
   if (!block) return `No ${PROVIDER_TOOLS[providerId]} activity in the last 5 hours`
@@ -72,8 +100,6 @@ export function spendText(spend: ApiSpend, locale?: string): string {
 
 /** A line under the provider name, or null when there is nothing to say. */
 export function statusText(snapshot: ProviderSnapshot, now: number): string | null {
-  const tool = PROVIDER_TOOLS[snapshot.providerId]
-
   switch (snapshot.status) {
     case 'loading':
       return 'Loading…'
@@ -86,10 +112,9 @@ export function statusText(snapshot: ProviderSnapshot, now: number): string | nu
         : `Couldn't refresh · updated ${formatDuration(age)} ago`
     }
     case 'unauthenticated':
-      // Usually the sign-in has just expired, and opening the tool renews it.
-      return `Open ${tool} to update usage`
+      return SIGN_IN_TEXT[snapshot.providerId]
     case 'not_installed':
-      return `${tool} not found`
+      return NOT_INSTALLED_TEXT[snapshot.providerId]
     case 'disconnected':
       return 'Not connected'
     case 'error':

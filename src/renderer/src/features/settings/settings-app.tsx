@@ -22,7 +22,10 @@ import { ipcErrorMessage, useSecret, useSettings } from './hooks'
 
 /** English only for now; these move into the locale files with i18n. */
 const PROVIDER_TEXT: Partial<
-  Record<ProviderId, { connect: string; connectHelp: string; key: string; keyHelp: string }>
+  Record<
+    ProviderId,
+    { connect: string; connectHelp: string; key: string; keyHelp: string; noun: string }
+  >
 > = {
   claude: {
     connect: 'Connect Claude Code',
@@ -31,7 +34,19 @@ const PROVIDER_TEXT: Partial<
       "session logs when the usage API can't be reached. Only the usage request itself goes to " +
       'Anthropic. Your system may ask for permission the first time.',
     key: 'Anthropic Admin API key',
-    keyHelp: 'Optional. Adds your API spend for this month. Stored encrypted on this computer.'
+    keyHelp: 'Optional. Adds your API spend for this month. Stored encrypted on this computer.',
+    noun: 'key'
+  },
+  copilot: {
+    connect: 'Connect GitHub',
+    connectHelp:
+      'Reads the sign-in of the GitHub CLI (gh), or else of the Copilot extension in your ' +
+      'editor, to show your Copilot quotas. Only the quota request itself goes to GitHub.',
+    key: 'GitHub token',
+    keyHelp:
+      "Optional. Used instead of those sign-ins, even when GitHub isn't connected. Stored " +
+      'encrypted on this computer.',
+    noun: 'token'
   }
 }
 
@@ -50,8 +65,10 @@ function connectionSummary(
   settings: ProviderSettings,
   snapshot: ProviderSnapshot | undefined
 ): string {
-  if (!settings.connected) return 'Not connected'
-  if (!snapshot || snapshot.status === 'loading') return 'Connecting…'
+  if (!snapshot || snapshot.status === 'loading') {
+    return settings.connected ? 'Connecting…' : 'Not connected'
+  }
+  // Reading without the switch is possible too, with a token typed in below.
   if (snapshot.status === 'ok') {
     return snapshot.planLabel ? `Connected · ${snapshot.planLabel}` : 'Connected'
   }
@@ -61,11 +78,14 @@ function connectionSummary(
 function SecretField({
   provider,
   label,
-  help
+  help,
+  noun
 }: {
   provider: ProviderId
   label: string
   help: string
+  /** What the secret is called in the placeholder: a key, a token. */
+  noun: string
 }): React.JSX.Element {
   const { status, info, save, clear } = useSecret(provider)
   const [draft, setDraft] = useState('')
@@ -89,9 +109,9 @@ function SecretField({
 
   const placeholder = info?.saved
     ? info.hint
-      ? `Saved key ending in ${info.hint}`
-      : 'A key is saved'
-    : 'Paste your key'
+      ? `Saved ${noun} ending in ${info.hint}`
+      : `A ${noun} is saved`
+    : `Paste your ${noun}`
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -197,7 +217,7 @@ function ProviderSection({
             />
           </div>
 
-          <SecretField provider={provider} label={text.key} help={text.keyHelp} />
+          <SecretField provider={provider} label={text.key} help={text.keyHelp} noun={text.noun} />
         </>
       )}
     </section>

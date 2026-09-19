@@ -143,6 +143,56 @@ describe('SettingsApp', () => {
   })
 })
 
+describe('Copilot', () => {
+  async function copilotSection(): Promise<HTMLElement> {
+    render(<SettingsApp />)
+    return screen.findByRole('region', { name: 'Copilot' })
+  }
+
+  it('connects GitHub only when the user turns it on', async () => {
+    const section = await copilotSection()
+
+    await userEvent.click(within(section).getByRole('switch', { name: 'Connect GitHub' }))
+
+    expect(api.settings.update).toHaveBeenCalledWith({
+      providers: { copilot: { connected: true } }
+    })
+  })
+
+  it('saves a GitHub token under Copilot', async () => {
+    const section = await copilotSection()
+    const input = within(section).getByLabelText('GitHub token')
+
+    expect(input).toHaveAttribute('placeholder', 'Paste your token')
+    await userEvent.type(input, 'github_pat_secret')
+    await userEvent.click(within(section).getByRole('button', { name: 'Save' }))
+
+    expect(api.secrets.save).toHaveBeenCalledWith('copilot', 'github_pat_secret')
+  })
+
+  it('counts as connected when a typed token works without the switch', async () => {
+    api.usage.get.mockResolvedValueOnce([
+      {
+        providerId: 'copilot',
+        status: 'ok',
+        source: 'oauth',
+        planLabel: 'Free',
+        windows: [],
+        credits: null,
+        activity: null,
+        apiSpend: null,
+        fetchedAt: new Date().toISOString(),
+        detail: null
+      }
+    ])
+
+    const section = await copilotSection()
+
+    expect(await within(section).findByText('Connected · Free')).toBeInTheDocument()
+    expect(within(section).getByRole('switch', { name: 'Connect GitHub' })).not.toBeChecked()
+  })
+})
+
 describe('appearance', () => {
   async function appearanceSection(): Promise<HTMLElement> {
     render(<SettingsApp />)
