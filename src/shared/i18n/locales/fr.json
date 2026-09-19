@@ -128,13 +128,13 @@
         "connect": "Connecter Claude Code",
         "connectHelp": "Lit la connexion que Claude Code conserve sur cet ordinateur pour afficher les limites de votre forfait, ainsi que ses journaux de session quand l'API d'utilisation est injoignable. Seule la requête d'utilisation elle-même est envoyée à Anthropic. Votre système peut demander une autorisation la première fois.",
         "key": "Clé API Admin Anthropic",
-        "keyHelp": "Facultatif. Ajoute vos dépenses API de ce mois. Stockée chiffrée sur cet ordinateur."
+        "keyHelp": "Facultatif, uniquement pour l'API facturée à l'usage : ajoute vos dépenses API de ce mois. Les limites de votre forfait Claude n'en ont pas besoin. Stockée chiffrée sur cet ordinateur."
       },
       "codex": {
         "connect": "Connecter Codex CLI",
         "connectHelp": "Lit la connexion que Codex CLI conserve sur cet ordinateur pour afficher les limites de votre forfait, ainsi que ses journaux de session quand l'API d'utilisation est injoignable. Seule la requête d'utilisation elle-même est envoyée à OpenAI.",
         "key": "Clé API Admin OpenAI",
-        "keyHelp": "Facultatif. Ajoute vos dépenses API de ce mois. Stockée chiffrée sur cet ordinateur."
+        "keyHelp": "Facultatif, uniquement pour l'API facturée à l'usage : ajoute vos dépenses API de ce mois. Les limites de votre forfait ChatGPT n'en ont pas besoin. Stockée chiffrée sur cet ordinateur."
       },
       "copilot": {
         "connect": "Connecter GitHub",

@@ -125,13 +125,13 @@
         "connect": "Connect Claude Code",
         "connectHelp": "Reads the sign-in Claude Code keeps on this computer to show your plan limits, and its session logs when the usage API can't be reached. Only the usage request itself goes to Anthropic. Your system may ask for permission the first time.",
         "key": "Anthropic Admin API key",
-        "keyHelp": "Optional. Adds your API spend for this month. Stored encrypted on this computer."
+        "keyHelp": "Optional, for pay-as-you-go API use only: adds this month's API spend. Your Claude plan's limits don't need it. Stored encrypted on this computer."
       },
       "codex": {
         "connect": "Connect Codex CLI",
         "connectHelp": "Reads the sign-in Codex CLI keeps on this computer to show your plan limits, and its session logs when the usage API can't be reached. Only the usage request itself goes to OpenAI.",
         "key": "OpenAI Admin API key",
-        "keyHelp": "Optional. Adds your API spend for this month. Stored encrypted on this computer."
+        "keyHelp": "Optional, for pay-as-you-go API use only: adds this month's API spend. Your ChatGPT plan's limits don't need it. Stored encrypted on this computer."
       },
       "copilot": {
         "connect": "Connect GitHub",

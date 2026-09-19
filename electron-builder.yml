@@ -62,6 +62,9 @@ dmg:
 
 linux:
   target: [AppImage, deb]
+  # Names the installed .desktop file after desktopName in package.json, which
+  # Electron also uses as the window's app_id, so desktops can match the two.
+  syncDesktopName: true
   category: Utility
   synopsis: Usage limits for Claude, Codex and GitHub Copilot
   maintainer: OFK0 <OFK0@users.noreply.github.com>

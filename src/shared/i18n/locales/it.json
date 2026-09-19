@@ -128,13 +128,13 @@
         "connect": "Collega Claude Code",
         "connectHelp": "Legge l'accesso che Claude Code conserva su questo computer per mostrare i limiti del tuo piano, e i suoi log di sessione quando l'API di utilizzo non è raggiungibile. Ad Anthropic viene inviata solo la richiesta di utilizzo. Il sistema potrebbe chiedere l'autorizzazione la prima volta.",
         "key": "Chiave API Admin di Anthropic",
-        "keyHelp": "Facoltativa. Aggiunge la tua spesa API di questo mese. Salvata cifrata su questo computer."
+        "keyHelp": "Facoltativa, solo per l'uso dell'API a consumo: aggiunge la tua spesa API di questo mese. Non serve per i limiti del tuo piano Claude. Salvata cifrata su questo computer."
       },
       "codex": {
         "connect": "Collega Codex CLI",
         "connectHelp": "Legge l'accesso che Codex CLI conserva su questo computer per mostrare i limiti del tuo piano, e i suoi log di sessione quando l'API di utilizzo non è raggiungibile. A OpenAI viene inviata solo la richiesta di utilizzo.",
         "key": "Chiave API Admin di OpenAI",
-        "keyHelp": "Facoltativa. Aggiunge la tua spesa API di questo mese. Salvata cifrata su questo computer."
+        "keyHelp": "Facoltativa, solo per l'uso dell'API a consumo: aggiunge la tua spesa API di questo mese. Non serve per i limiti del tuo piano ChatGPT. Salvata cifrata su questo computer."
       },
       "copilot": {
         "connect": "Collega GitHub",
