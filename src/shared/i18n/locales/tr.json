@@ -1,0 +1,155 @@
+{
+  "common": {
+    "xOfY": "{{used}} / {{limit}}"
+  },
+  "widget": {
+    "refresh": "Kullanımı yenile",
+    "openSettings": "Ayarları aç",
+    "hide": "Widget'ı gizle",
+    "loading": "Kullanım yükleniyor",
+    "noProviders": "Etkin sağlayıcı yok."
+  },
+  "card": {
+    "reset": "Sıfırlandı",
+    "notInPlan": "Planda yok",
+    "unlimited": "Sınırsız",
+    "limitReached": "Limit doldu",
+    "showDetails": "{{name}} ayrıntılarını göster",
+    "hideDetails": "{{name}} ayrıntılarını gizle",
+    "connect": "Ayarlardan bağlan",
+    "barLabel": "{{provider}} {{window}} kullanımı",
+    "fromSessionLogs": "Yerel oturum kayıtlarından",
+    "credits": "Kredi",
+    "apiSpend": "API harcaması",
+    "apiSpendSource": "Anthropic API, UTC günleri"
+  },
+  "window": {
+    "session": "Oturum",
+    "weekly": "Haftalık",
+    "weekly_opus": "Haftalık · Opus",
+    "weekly_sonnet": "Haftalık · Sonnet",
+    "chat": "Sohbet",
+    "completions": "Kod tamamlama",
+    "premium_interactions": "Premium istekler"
+  },
+  "reset": {
+    "in": "{{duration}} sonra sıfırlanır",
+    "resetting": "Sıfırlanıyor…",
+    "waiting": "Sıfırlandı · yeni veri bekleniyor"
+  },
+  "activity": {
+    "none": "Son 5 saatte {{tool}} etkinliği yok",
+    "session": "Bu oturumda {{messages}} · {{duration}} sonra biter",
+    "messages_one": "{{count}} mesaj",
+    "messages_other": "{{count}} mesaj"
+  },
+  "spend": "Bugün {{today}} · bu ay {{month}}",
+  "status": {
+    "loading": "Yükleniyor…",
+    "stale": "Yenilenemedi",
+    "staleSince": "Yenilenemedi · {{duration}} önce güncellendi",
+    "signIn": {
+      "claude": "Kullanımı güncellemek için Claude Code'u açın",
+      "codex": "Kullanımı güncellemek için Codex CLI'ı açın",
+      "copilot": "Kullanımı görmek için GitHub'da oturum açın"
+    },
+    "notInstalled": {
+      "claude": "Claude Code bulunamadı",
+      "codex": "Codex CLI bulunamadı",
+      "copilot": "GitHub oturumu bulunamadı"
+    },
+    "disconnected": "Bağlı değil",
+    "error": "Kullanım yüklenemedi"
+  },
+  "duration": {
+    "underMinute": "<1 dk",
+    "m": "{{m}} dk",
+    "h": "{{h}} sa",
+    "hm": "{{h}} sa {{m}} dk",
+    "d": "{{d}} gün",
+    "dh": "{{d}} gün {{h}} sa"
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "section": {
+      "general": "Genel",
+      "appearance": "Görünüm",
+      "widget": "Widget",
+      "providers": "Sağlayıcılar"
+    },
+    "language": {
+      "label": "Dil",
+      "system": "Sistem ({{language}})"
+    },
+    "theme": {
+      "label": "Tema",
+      "system": "Sistem",
+      "light": "Açık",
+      "dark": "Koyu"
+    },
+    "accent": "Vurgu rengi",
+    "reduceMotion": {
+      "label": "Hareketi azalt",
+      "help": "Süs amaçlı animasyonları kapatır. Sisteminiz daha az hareket isterse bu her durumda dikkate alınır."
+    },
+    "alwaysOnTop": {
+      "label": "Her zaman üstte",
+      "help": "Widget'ı diğer pencerelerin üstünde tutar. Kapalıyken tepsi simgesine tıklamak widget'ı öne getirir."
+    },
+    "opacity": {
+      "label": "Opaklık",
+      "help": "İmleç üzerindeyken widget tamamen opak olur."
+    },
+    "refresh": {
+      "label": "Yenileme",
+      "help": "Widget görünürken kullanımın ne sıklıkla kontrol edileceği. Gizliyken en fazla 5 dakikada bir kontrol eder.",
+      "everyMinute": "Her dakika",
+      "minutes_one": "{{count}} dakikada bir",
+      "minutes_other": "{{count}} dakikada bir",
+      "seconds_one": "{{count}} saniyede bir",
+      "seconds_other": "{{count}} saniyede bir"
+    },
+    "provider": {
+      "showInWidget": "Widget'ta göster",
+      "showInWidgetLabel": "{{name}} widget'ta gösterilsin",
+      "connecting": "Bağlanıyor…",
+      "connected": "Bağlı",
+      "connectedPlan": "Bağlı · {{plan}}",
+      "claude": {
+        "connect": "Claude Code'u bağla",
+        "connectHelp": "Plan limitlerinizi göstermek için Claude Code'un bu bilgisayarda tuttuğu oturumu, kullanım API'sine ulaşılamadığında da oturum kayıtlarını okur. Anthropic'e yalnızca kullanım isteğinin kendisi gider. Sisteminiz ilk seferde izin isteyebilir.",
+        "key": "Anthropic Admin API anahtarı",
+        "keyHelp": "İsteğe bağlı. Bu ayki API harcamanızı ekler. Bu bilgisayarda şifreli saklanır."
+      },
+      "copilot": {
+        "connect": "GitHub'ı bağla",
+        "connectHelp": "Copilot kotalarınızı göstermek için GitHub CLI'ın (gh) ya da o yoksa düzenleyicinizdeki Copilot eklentisinin oturumunu okur. GitHub'a yalnızca kota isteğinin kendisi gider.",
+        "key": "GitHub token'ı",
+        "keyHelp": "İsteğe bağlı. Bu oturumların yerine kullanılır, GitHub bağlı olmasa bile çalışır. Bu bilgisayarda şifreli saklanır."
+      }
+    },
+    "secret": {
+      "save": "Kaydet",
+      "remove": "Kaldır",
+      "key": {
+        "paste": "Anahtarınızı yapıştırın",
+        "saved": "Sonu {{hint}} ile biten anahtar kayıtlı",
+        "savedNoHint": "Bir anahtar kayıtlı"
+      },
+      "token": {
+        "paste": "Token'ınızı yapıştırın",
+        "saved": "Sonu {{hint}} ile biten token kayıtlı",
+        "savedNoHint": "Bir token kayıtlı"
+      },
+      "unavailable": {
+        "encryption": "Bu sistemde güvenli depolama yok, bu yüzden anahtarlar kaydedilemiyor.",
+        "keyring": "Sistem anahtarlığı bulunamadı (GNOME Keyring veya KWallet gibi), bu yüzden anahtarlar güvenli şekilde saklanamıyor."
+      },
+      "invalid": {
+        "empty": "Önce bir anahtar ya da token yapıştırın.",
+        "tooLong": "Bu, bir anahtar ya da token için fazla uzun.",
+        "whitespace": "Anahtar ve token'larda boşluk olmaz. Yapıştırılanı kontrol edin."
+      }
+    }
+  }
+}

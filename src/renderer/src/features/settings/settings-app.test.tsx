@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { SecretStorageStatus, TokenInfo } from '@shared/secrets'
 import { defaultSettings, mergeSettings, type Settings, type SettingsPatch } from '@shared/settings'
 import type { ProviderSnapshot } from '@shared/usage'
+import { i18n } from '@/i18n'
 import { ipcErrorMessage } from './hooks'
 import { SettingsApp } from './settings-app'
 
@@ -16,6 +17,7 @@ function withClaude(patch: Partial<Settings['providers']['claude']>): Settings {
 const noKey: TokenInfo = { saved: false, hint: null }
 
 const api = {
+  locale: { language: 'en', systemLanguages: ['tr-TR', 'en-US'] },
   settings: {
     get: vi.fn(() => Promise.resolve(defaultSettings())),
     update: vi.fn((patch: SettingsPatch) =>
@@ -118,19 +120,31 @@ describe('SettingsApp', () => {
     expect(api.secrets.clear).toHaveBeenCalledWith('claude')
   })
 
-  it('shows why a key was refused, without the IPC wrapper', async () => {
-    api.secrets.save.mockRejectedValueOnce(
-      new Error(
-        "Error invoking remote method 'secrets:save': Error: Token must not contain whitespace"
-      )
-    )
+  it('explains a pasted value with spaces without sending it', async () => {
     const section = await claudeSection()
 
     await userEvent.type(within(section).getByLabelText('Anthropic Admin API key'), 'abc def')
     await userEvent.click(within(section).getByRole('button', { name: 'Save' }))
 
     expect(await within(section).findByRole('alert')).toHaveTextContent(
-      'Token must not contain whitespace'
+      'Keys and tokens never contain spaces.'
+    )
+    expect(api.secrets.save).not.toHaveBeenCalled()
+  })
+
+  it('shows why the main process refused a key, without the IPC wrapper', async () => {
+    api.secrets.save.mockRejectedValueOnce(
+      new Error(
+        "Error invoking remote method 'secrets:save': Error: Secure storage is unavailable (no-keyring)"
+      )
+    )
+    const section = await claudeSection()
+
+    await userEvent.type(within(section).getByLabelText('Anthropic Admin API key'), 'sk-ant-x9Kq')
+    await userEvent.click(within(section).getByRole('button', { name: 'Save' }))
+
+    expect(await within(section).findByRole('alert')).toHaveTextContent(
+      'Secure storage is unavailable (no-keyring)'
     )
   })
 
@@ -140,6 +154,48 @@ describe('SettingsApp', () => {
 
     expect(await within(section).findByText(/No system keyring was found/)).toBeInTheDocument()
     expect(within(section).getByLabelText('Anthropic Admin API key')).toBeDisabled()
+  })
+})
+
+describe('language', () => {
+  async function generalSection(): Promise<HTMLElement> {
+    render(<SettingsApp />)
+    return screen.findByRole('region', { name: 'General' })
+  }
+
+  it('offers the system language by name, then every language in its own words', async () => {
+    const select = within(await generalSection()).getByLabelText('Language')
+
+    expect(
+      within(select)
+        .getAllByRole('option')
+        .map((option) => option.textContent)
+    ).toEqual([
+      'System (Türkçe)',
+      'English',
+      'Türkçe',
+      'Français',
+      'Deutsch',
+      'Italiano',
+      'Русский',
+      'العربية'
+    ])
+  })
+
+  it('saves the language the user picks', async () => {
+    const select = within(await generalSection()).getByLabelText('Language')
+
+    await userEvent.selectOptions(select, 'de')
+
+    expect(api.settings.update).toHaveBeenCalledWith({ language: 'de' })
+  })
+
+  it('shows the screen in the current language', async () => {
+    await i18n.changeLanguage('tr')
+    render(<SettingsApp />)
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Ayarlar' })).toBeInTheDocument()
+    expect(await screen.findByRole('switch', { name: "GitHub'ı bağla" })).toBeInTheDocument()
   })
 })
 

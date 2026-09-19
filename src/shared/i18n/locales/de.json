@@ -1,0 +1,155 @@
+{
+  "common": {
+    "xOfY": "{{used}} von {{limit}}"
+  },
+  "widget": {
+    "refresh": "Nutzung aktualisieren",
+    "openSettings": "Einstellungen öffnen",
+    "hide": "Widget ausblenden",
+    "loading": "Nutzung wird geladen",
+    "noProviders": "Keine Anbieter aktiviert."
+  },
+  "card": {
+    "reset": "Zurückgesetzt",
+    "notInPlan": "Nicht im Tarif",
+    "unlimited": "Unbegrenzt",
+    "limitReached": "Limit erreicht",
+    "showDetails": "Details zu {{name}} anzeigen",
+    "hideDetails": "Details zu {{name}} ausblenden",
+    "connect": "In den Einstellungen verbinden",
+    "barLabel": "{{provider}}-Nutzung: {{window}}",
+    "fromSessionLogs": "Aus den lokalen Sitzungsprotokollen",
+    "credits": "Guthaben",
+    "apiSpend": "API-Kosten",
+    "apiSpendSource": "Anthropic API, UTC-Tage"
+  },
+  "window": {
+    "session": "Sitzung",
+    "weekly": "Wöchentlich",
+    "weekly_opus": "Wöchentlich · Opus",
+    "weekly_sonnet": "Wöchentlich · Sonnet",
+    "chat": "Chat",
+    "completions": "Code-Vervollständigungen",
+    "premium_interactions": "Premium-Anfragen"
+  },
+  "reset": {
+    "in": "Zurückgesetzt in {{duration}}",
+    "resetting": "Wird zurückgesetzt…",
+    "waiting": "Zurückgesetzt · warte auf neue Daten"
+  },
+  "activity": {
+    "none": "Keine {{tool}}-Aktivität in den letzten 5 Stunden",
+    "session": "{{messages}} in dieser Sitzung · endet in {{duration}}",
+    "messages_one": "{{count}} Nachricht",
+    "messages_other": "{{count}} Nachrichten"
+  },
+  "spend": "{{today}} heute · {{month}} diesen Monat",
+  "status": {
+    "loading": "Wird geladen…",
+    "stale": "Aktualisierung fehlgeschlagen",
+    "staleSince": "Aktualisierung fehlgeschlagen · Stand vor {{duration}}",
+    "signIn": {
+      "claude": "Claude Code öffnen, um die Nutzung zu aktualisieren",
+      "codex": "Codex CLI öffnen, um die Nutzung zu aktualisieren",
+      "copilot": "Bei GitHub anmelden, um die Nutzung zu sehen"
+    },
+    "notInstalled": {
+      "claude": "Claude Code nicht gefunden",
+      "codex": "Codex CLI nicht gefunden",
+      "copilot": "Keine GitHub-Anmeldung gefunden"
+    },
+    "disconnected": "Nicht verbunden",
+    "error": "Nutzung konnte nicht geladen werden"
+  },
+  "duration": {
+    "underMinute": "<1 Min.",
+    "m": "{{m}} Min.",
+    "h": "{{h}} Std.",
+    "hm": "{{h}} Std. {{m}} Min.",
+    "d": "{{d}} T.",
+    "dh": "{{d}} T. {{h}} Std."
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "section": {
+      "general": "Allgemein",
+      "appearance": "Darstellung",
+      "widget": "Widget",
+      "providers": "Anbieter"
+    },
+    "language": {
+      "label": "Sprache",
+      "system": "System ({{language}})"
+    },
+    "theme": {
+      "label": "Design",
+      "system": "System",
+      "light": "Hell",
+      "dark": "Dunkel"
+    },
+    "accent": "Akzentfarbe",
+    "reduceMotion": {
+      "label": "Bewegung reduzieren",
+      "help": "Schaltet dekorative Animationen aus. Wenn Ihr System weniger Bewegung verlangt, wird das ohnehin berücksichtigt."
+    },
+    "alwaysOnTop": {
+      "label": "Immer im Vordergrund",
+      "help": "Hält das Widget über anderen Fenstern. Ist es aus, holt ein Klick auf das Symbol im Infobereich das Widget nach vorne."
+    },
+    "opacity": {
+      "label": "Deckkraft",
+      "help": "Das Widget wird vollständig deckend, solange der Mauszeiger darüber ist."
+    },
+    "refresh": {
+      "label": "Aktualisierung",
+      "help": "Wie oft die Nutzung geprüft wird, während das Widget sichtbar ist. Ausgeblendet höchstens alle 5 Minuten.",
+      "everyMinute": "Jede Minute",
+      "minutes_one": "Alle {{count}} Minute",
+      "minutes_other": "Alle {{count}} Minuten",
+      "seconds_one": "Alle {{count}} Sekunde",
+      "seconds_other": "Alle {{count}} Sekunden"
+    },
+    "provider": {
+      "showInWidget": "Im Widget anzeigen",
+      "showInWidgetLabel": "{{name}} im Widget anzeigen",
+      "connecting": "Verbinde…",
+      "connected": "Verbunden",
+      "connectedPlan": "Verbunden · {{plan}}",
+      "claude": {
+        "connect": "Claude Code verbinden",
+        "connectHelp": "Liest die Anmeldung, die Claude Code auf diesem Computer speichert, um Ihre Tariflimits anzuzeigen, und seine Sitzungsprotokolle, wenn die Nutzungs-API nicht erreichbar ist. Nur die Nutzungsanfrage selbst geht an Anthropic. Ihr System fragt beim ersten Mal eventuell nach einer Berechtigung.",
+        "key": "Anthropic Admin-API-Schlüssel",
+        "keyHelp": "Optional. Ergänzt Ihre API-Kosten für diesen Monat. Wird verschlüsselt auf diesem Computer gespeichert."
+      },
+      "copilot": {
+        "connect": "GitHub verbinden",
+        "connectHelp": "Liest die Anmeldung der GitHub CLI (gh) oder andernfalls die der Copilot-Erweiterung in Ihrem Editor, um Ihre Copilot-Kontingente anzuzeigen. Nur die Kontingentanfrage selbst geht an GitHub.",
+        "key": "GitHub-Token",
+        "keyHelp": "Optional. Wird statt dieser Anmeldungen verwendet, auch wenn GitHub nicht verbunden ist. Wird verschlüsselt auf diesem Computer gespeichert."
+      }
+    },
+    "secret": {
+      "save": "Speichern",
+      "remove": "Entfernen",
+      "key": {
+        "paste": "Schlüssel einfügen",
+        "saved": "Gespeicherter Schlüssel endet auf {{hint}}",
+        "savedNoHint": "Ein Schlüssel ist gespeichert"
+      },
+      "token": {
+        "paste": "Token einfügen",
+        "saved": "Gespeichertes Token endet auf {{hint}}",
+        "savedNoHint": "Ein Token ist gespeichert"
+      },
+      "unavailable": {
+        "encryption": "Sicherer Speicher ist auf diesem System nicht verfügbar, daher können keine Schlüssel gespeichert werden.",
+        "keyring": "Kein System-Schlüsselbund gefunden (etwa GNOME Keyring oder KWallet), daher können Schlüssel nicht sicher gespeichert werden."
+      },
+      "invalid": {
+        "empty": "Bitte zuerst einen Schlüssel oder ein Token einfügen.",
+        "tooLong": "Das ist zu lang für einen Schlüssel oder ein Token.",
+        "whitespace": "Schlüssel und Tokens enthalten nie Leerzeichen. Bitte das Eingefügte prüfen."
+      }
+    }
+  }
+}

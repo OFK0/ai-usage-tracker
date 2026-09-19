@@ -1,0 +1,158 @@
+{
+  "common": {
+    "xOfY": "{{used}} su {{limit}}"
+  },
+  "widget": {
+    "refresh": "Aggiorna utilizzo",
+    "openSettings": "Apri impostazioni",
+    "hide": "Nascondi widget",
+    "loading": "Caricamento dell'utilizzo",
+    "noProviders": "Nessun fornitore attivo."
+  },
+  "card": {
+    "reset": "Azzerato",
+    "notInPlan": "Non incluso nel piano",
+    "unlimited": "Illimitato",
+    "limitReached": "Limite raggiunto",
+    "showDetails": "Mostra dettagli di {{name}}",
+    "hideDetails": "Nascondi dettagli di {{name}}",
+    "connect": "Collega nelle impostazioni",
+    "barLabel": "Utilizzo di {{provider}}: {{window}}",
+    "fromSessionLogs": "Dai log di sessione locali",
+    "credits": "Crediti",
+    "apiSpend": "Spesa API",
+    "apiSpendSource": "API Anthropic, giorni UTC"
+  },
+  "window": {
+    "session": "Sessione",
+    "weekly": "Settimanale",
+    "weekly_opus": "Settimanale · Opus",
+    "weekly_sonnet": "Settimanale · Sonnet",
+    "chat": "Chat",
+    "completions": "Completamenti di codice",
+    "premium_interactions": "Richieste premium"
+  },
+  "reset": {
+    "in": "Si azzera tra {{duration}}",
+    "resetting": "Azzeramento…",
+    "waiting": "Azzerato · in attesa di nuovi dati"
+  },
+  "activity": {
+    "none": "Nessuna attività di {{tool}} nelle ultime 5 ore",
+    "session": "{{messages}} in questa sessione · termina tra {{duration}}",
+    "messages_one": "{{count}} messaggio",
+    "messages_many": "{{count}} di messaggi",
+    "messages_other": "{{count}} messaggi"
+  },
+  "spend": "{{today}} oggi · {{month}} questo mese",
+  "status": {
+    "loading": "Caricamento…",
+    "stale": "Aggiornamento non riuscito",
+    "staleSince": "Aggiornamento non riuscito · aggiornato {{duration}} fa",
+    "signIn": {
+      "claude": "Apri Claude Code per aggiornare l'utilizzo",
+      "codex": "Apri Codex CLI per aggiornare l'utilizzo",
+      "copilot": "Accedi a GitHub per vedere l'utilizzo"
+    },
+    "notInstalled": {
+      "claude": "Claude Code non trovato",
+      "codex": "Codex CLI non trovato",
+      "copilot": "Nessun accesso a GitHub trovato"
+    },
+    "disconnected": "Non collegato",
+    "error": "Impossibile caricare l'utilizzo"
+  },
+  "duration": {
+    "underMinute": "<1 min",
+    "m": "{{m}} min",
+    "h": "{{h}} h",
+    "hm": "{{h}} h {{m}} min",
+    "d": "{{d}} g",
+    "dh": "{{d}} g {{h}} h"
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "section": {
+      "general": "Generali",
+      "appearance": "Aspetto",
+      "widget": "Widget",
+      "providers": "Fornitori"
+    },
+    "language": {
+      "label": "Lingua",
+      "system": "Sistema ({{language}})"
+    },
+    "theme": {
+      "label": "Tema",
+      "system": "Sistema",
+      "light": "Chiaro",
+      "dark": "Scuro"
+    },
+    "accent": "Colore di accento",
+    "reduceMotion": {
+      "label": "Riduci animazioni",
+      "help": "Disattiva le animazioni decorative. Se il sistema chiede meno movimento, viene rispettato comunque."
+    },
+    "alwaysOnTop": {
+      "label": "Sempre in primo piano",
+      "help": "Tiene il widget sopra le altre finestre. Se è disattivato, un clic sull'icona nell'area di notifica porta il widget in primo piano."
+    },
+    "opacity": {
+      "label": "Opacità",
+      "help": "Il widget diventa completamente opaco quando il puntatore è sopra."
+    },
+    "refresh": {
+      "label": "Aggiornamento",
+      "help": "Ogni quanto viene controllato l'utilizzo mentre il widget è visibile. Quando è nascosto, al massimo ogni 5 minuti.",
+      "everyMinute": "Ogni minuto",
+      "minutes_one": "Ogni {{count}} minuto",
+      "minutes_many": "Ogni {{count}} minuti",
+      "minutes_other": "Ogni {{count}} minuti",
+      "seconds_one": "Ogni {{count}} secondo",
+      "seconds_many": "Ogni {{count}} secondi",
+      "seconds_other": "Ogni {{count}} secondi"
+    },
+    "provider": {
+      "showInWidget": "Mostra nel widget",
+      "showInWidgetLabel": "Mostra {{name}} nel widget",
+      "connecting": "Connessione…",
+      "connected": "Collegato",
+      "connectedPlan": "Collegato · {{plan}}",
+      "claude": {
+        "connect": "Collega Claude Code",
+        "connectHelp": "Legge l'accesso che Claude Code conserva su questo computer per mostrare i limiti del tuo piano, e i suoi log di sessione quando l'API di utilizzo non è raggiungibile. Ad Anthropic viene inviata solo la richiesta di utilizzo. Il sistema potrebbe chiedere l'autorizzazione la prima volta.",
+        "key": "Chiave API Admin di Anthropic",
+        "keyHelp": "Facoltativa. Aggiunge la tua spesa API di questo mese. Salvata cifrata su questo computer."
+      },
+      "copilot": {
+        "connect": "Collega GitHub",
+        "connectHelp": "Legge l'accesso di GitHub CLI (gh) o, in mancanza, quello dell'estensione Copilot del tuo editor, per mostrare le tue quote Copilot. A GitHub viene inviata solo la richiesta delle quote.",
+        "key": "Token GitHub",
+        "keyHelp": "Facoltativo. Usato al posto di questi accessi, anche se GitHub non è collegato. Salvato cifrato su questo computer."
+      }
+    },
+    "secret": {
+      "save": "Salva",
+      "remove": "Rimuovi",
+      "key": {
+        "paste": "Incolla la chiave",
+        "saved": "Chiave salvata che termina con {{hint}}",
+        "savedNoHint": "Una chiave è salvata"
+      },
+      "token": {
+        "paste": "Incolla il token",
+        "saved": "Token salvato che termina con {{hint}}",
+        "savedNoHint": "Un token è salvato"
+      },
+      "unavailable": {
+        "encryption": "L'archiviazione sicura non è disponibile su questo sistema, quindi non è possibile salvare le chiavi.",
+        "keyring": "Nessun portachiavi di sistema trovato (come GNOME Keyring o KWallet), quindi le chiavi non possono essere salvate in modo sicuro."
+      },
+      "invalid": {
+        "empty": "Incolla prima una chiave o un token.",
+        "tooLong": "È troppo lungo per essere una chiave o un token.",
+        "whitespace": "Chiavi e token non contengono mai spazi. Controlla cosa hai incollato."
+      }
+    }
+  }
+}

@@ -1,5 +1,10 @@
 import type { ProviderId } from '@shared/app-info'
-import type { SecretStorageStatus, TokenInfo } from '@shared/secrets'
+import {
+  tokenProblem,
+  type SecretStorageStatus,
+  type TokenInfo,
+  type TokenProblem
+} from '@shared/secrets'
 
 /** The part of Electron's safeStorage this module uses. */
 export interface SafeStorageLike {
@@ -29,20 +34,21 @@ export interface SecretVault {
   clear(provider: ProviderId): TokenInfo
 }
 
-const MAX_TOKEN_LENGTH = 4096
 const MIN_LENGTH_FOR_HINT = 12
+
+const PROBLEM_MESSAGES: Record<TokenProblem, string> = {
+  empty: 'Token is empty',
+  tooLong: 'Token is too long',
+  whitespace: 'Token must not contain whitespace'
+}
 
 export function parseToken(raw: unknown): string {
   if (typeof raw !== 'string') throw new Error('Token must be a string')
 
-  const token = raw.trim()
-  if (token.length === 0) throw new Error('Token is empty')
-  if (token.length > MAX_TOKEN_LENGTH) throw new Error('Token is too long')
-  // Tokens never contain whitespace, so one that does is almost certainly a
-  // bad paste and worth catching before it gets stored.
-  if (/\s/.test(token)) throw new Error('Token must not contain whitespace')
+  const problem = tokenProblem(raw)
+  if (problem) throw new Error(PROBLEM_MESSAGES[problem])
 
-  return token
+  return raw.trim()
 }
 
 export function tokenHint(token: string): string | null {

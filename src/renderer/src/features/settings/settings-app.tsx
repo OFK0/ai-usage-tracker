@@ -1,12 +1,16 @@
 import { useEffect, useId, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { SUPPORTED_PROVIDERS, type ProviderId } from '@shared/app-info'
-import type { SecretStorageStatus } from '@shared/secrets'
+import { LANGUAGE_NAMES, resolveLanguage } from '@shared/i18n/language'
+import { tokenProblem, type SecretStorageStatus } from '@shared/secrets'
 import {
+  LANGUAGES,
   SETTINGS_RANGES,
+  THEMES,
+  type LanguageSetting,
   type ProviderSettings,
   type Settings,
-  type SettingsPatch,
-  type Theme
+  type SettingsPatch
 } from '@shared/settings'
 import type { ProviderSnapshot } from '@shared/usage'
 import { Button } from '@/components/ui/button'
@@ -15,50 +19,34 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { useUsage } from '@/features/usage/hooks'
 import { providerName, statusText } from '@/features/usage/labels'
+import { i18n } from '@/i18n'
+import { formatPercent } from '@/lib/format'
 import { useDebouncedCallback } from '@/lib/use-debounced-callback'
 import { cn } from '@/lib/utils'
 import { applyAccentHue } from '@/theme/accent'
 import { ipcErrorMessage, useSecret, useSettings } from './hooks'
 
-/** English only for now; these move into the locale files with i18n. */
-const PROVIDER_TEXT: Partial<
-  Record<
-    ProviderId,
-    { connect: string; connectHelp: string; key: string; keyHelp: string; noun: string }
-  >
-> = {
-  claude: {
-    connect: 'Connect Claude Code',
-    connectHelp:
-      'Reads the sign-in Claude Code keeps on this computer to show your plan limits, and its ' +
-      "session logs when the usage API can't be reached. Only the usage request itself goes to " +
-      'Anthropic. Your system may ask for permission the first time.',
-    key: 'Anthropic Admin API key',
-    keyHelp: 'Optional. Adds your API spend for this month. Stored encrypted on this computer.',
-    noun: 'key'
-  },
-  copilot: {
-    connect: 'Connect GitHub',
-    connectHelp:
-      'Reads the sign-in of the GitHub CLI (gh), or else of the Copilot extension in your ' +
-      'editor, to show your Copilot quotas. Only the quota request itself goes to GitHub.',
-    key: 'GitHub token',
-    keyHelp:
-      "Optional. Used instead of those sign-ins, even when GitHub isn't connected. Stored " +
-      'encrypted on this computer.',
-    noun: 'token'
-  }
+type SecretKind = 'key' | 'token'
+
+/**
+ * Providers with a connect switch, and what the optional secret next to it is:
+ * an Anthropic Admin API key for Claude, a GitHub token for Copilot.
+ */
+const SECRET_KIND = {
+  claude: 'key',
+  copilot: 'token'
+} as const satisfies Partial<Record<ProviderId, SecretKind>>
+
+type ConnectableProvider = keyof typeof SECRET_KIND
+
+function isConnectable(provider: ProviderId): provider is ConnectableProvider {
+  return provider in SECRET_KIND
 }
 
-const STORAGE_UNAVAILABLE: Record<
-  Extract<SecretStorageStatus, { available: false }>['reason'],
-  string
-> = {
-  'encryption-unavailable':
-    "Secure storage isn't available on this system, so keys can't be saved.",
-  'no-keyring':
-    'No system keyring was found (such as GNOME Keyring or KWallet), so keys can’t be stored securely.'
-}
+const STORAGE_UNAVAILABLE = {
+  'encryption-unavailable': 'encryption',
+  'no-keyring': 'keyring'
+} as const satisfies Record<Extract<SecretStorageStatus, { available: false }>['reason'], string>
 
 function connectionSummary(
   provider: ProviderId,
@@ -66,34 +54,41 @@ function connectionSummary(
   snapshot: ProviderSnapshot | undefined
 ): string {
   if (!snapshot || snapshot.status === 'loading') {
-    return settings.connected ? 'Connecting…' : 'Not connected'
+    return settings.connected
+      ? i18n.t('settings.provider.connecting')
+      : i18n.t('status.disconnected')
   }
   // Reading without the switch is possible too, with a token typed in below.
   if (snapshot.status === 'ok') {
-    return snapshot.planLabel ? `Connected · ${snapshot.planLabel}` : 'Connected'
+    return snapshot.planLabel
+      ? i18n.t('settings.provider.connectedPlan', { plan: snapshot.planLabel })
+      : i18n.t('settings.provider.connected')
   }
   return statusText(snapshot, Date.now()) ?? providerName(provider)
 }
 
 function SecretField({
   provider,
+  kind,
   label,
-  help,
-  noun
+  help
 }: {
   provider: ProviderId
+  kind: SecretKind
   label: string
   help: string
-  /** What the secret is called in the placeholder: a key, a token. */
-  noun: string
 }): React.JSX.Element {
+  const { t } = useTranslation()
   const { status, info, save, clear } = useSecret(provider)
   const [draft, setDraft] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const inputId = useId()
 
-  const unavailable = status && !status.available ? STORAGE_UNAVAILABLE[status.reason] : null
+  const unavailable =
+    status && !status.available
+      ? t(`settings.secret.unavailable.${STORAGE_UNAVAILABLE[status.reason]}`)
+      : null
 
   async function run(action: () => Promise<void>): Promise<void> {
     setBusy(true)
@@ -109,9 +104,9 @@ function SecretField({
 
   const placeholder = info?.saved
     ? info.hint
-      ? `Saved ${noun} ending in ${info.hint}`
-      : `A ${noun} is saved`
-    : `Paste your ${noun}`
+      ? t(`settings.secret.${kind}.saved`, { hint: info.hint })
+      : t(`settings.secret.${kind}.savedNoHint`)
+    : t(`settings.secret.${kind}.paste`)
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -122,6 +117,13 @@ function SecretField({
         className="flex gap-2"
         onSubmit={(event) => {
           event.preventDefault()
+          // Checked here too so the reason reads in the user's language; main
+          // checks again before storing anything.
+          const problem = tokenProblem(draft)
+          if (problem) {
+            setError(t(`settings.secret.invalid.${problem}`))
+            return
+          }
           void run(async () => {
             await save(draft)
             setDraft('')
@@ -139,7 +141,7 @@ function SecretField({
           onChange={(event) => setDraft(event.target.value)}
         />
         <Button type="submit" size="sm" disabled={busy || draft.trim() === ''}>
-          Save
+          {t('settings.secret.save')}
         </Button>
         {info?.saved && (
           <Button
@@ -149,7 +151,7 @@ function SecretField({
             disabled={busy}
             onClick={() => void run(clear)}
           >
-            Remove
+            {t('settings.secret.remove')}
           </Button>
         )}
       </form>
@@ -175,8 +177,8 @@ function ProviderSection({
   snapshot: ProviderSnapshot | undefined
   onChange: (patch: Partial<ProviderSettings>) => void
 }): React.JSX.Element {
+  const { t } = useTranslation()
   const name = providerName(provider)
-  const text = PROVIDER_TEXT[provider]
   const connectId = useId()
 
   return (
@@ -193,22 +195,24 @@ function ProviderSection({
         </div>
         <div className="flex items-center gap-2">
           <span aria-hidden className="text-muted-foreground text-xs">
-            Show in widget
+            {t('settings.provider.showInWidget')}
           </span>
           <Switch
             checked={settings.enabled}
-            aria-label={`Show ${name} in the widget`}
+            aria-label={t('settings.provider.showInWidgetLabel', { name })}
             onCheckedChange={(enabled) => onChange({ enabled })}
           />
         </div>
       </div>
 
-      {text && (
+      {isConnectable(provider) && (
         <>
           <div className="flex items-start justify-between gap-4">
             <div className="flex flex-col gap-1">
-              <Label htmlFor={connectId}>{text.connect}</Label>
-              <p className="text-muted-foreground text-xs">{text.connectHelp}</p>
+              <Label htmlFor={connectId}>{t(`settings.provider.${provider}.connect`)}</Label>
+              <p className="text-muted-foreground text-xs">
+                {t(`settings.provider.${provider}.connectHelp`)}
+              </p>
             </div>
             <Switch
               id={connectId}
@@ -217,18 +221,56 @@ function ProviderSection({
             />
           </div>
 
-          <SecretField provider={provider} label={text.key} help={text.keyHelp} noun={text.noun} />
+          <SecretField
+            provider={provider}
+            kind={SECRET_KIND[provider]}
+            label={t(`settings.provider.${provider}.key`)}
+            help={t(`settings.provider.${provider}.keyHelp`)}
+          />
         </>
       )}
     </section>
   )
 }
 
-const THEME_OPTIONS: { value: Theme; label: string }[] = [
-  { value: 'system', label: 'System' },
-  { value: 'light', label: 'Light' },
-  { value: 'dark', label: 'Dark' }
-]
+function GeneralSection({
+  settings,
+  update
+}: {
+  settings: Settings
+  update: (patch: SettingsPatch) => Promise<void>
+}): React.JSX.Element {
+  const { t } = useTranslation()
+  const languageId = useId()
+  const systemLanguage = resolveLanguage('system', window.api.locale.systemLanguages)
+
+  return (
+    <section
+      aria-label={t('settings.section.general')}
+      className="bg-card border-border flex flex-col gap-4 rounded-lg border p-4"
+    >
+      <div className="flex items-center justify-between gap-4">
+        <Label htmlFor={languageId}>{t('settings.language.label')}</Label>
+        <select
+          id={languageId}
+          value={settings.language}
+          className="border-input bg-background rounded-md border px-2 py-1 text-xs"
+          onChange={(event) => void update({ language: event.target.value as LanguageSetting })}
+        >
+          <option value="system">
+            {t('settings.language.system', { language: LANGUAGE_NAMES[systemLanguage] })}
+          </option>
+          {/* Each language is listed in its own words, so it can be found from any other. */}
+          {LANGUAGES.map((language) => (
+            <option key={language} value={language} lang={language}>
+              {LANGUAGE_NAMES[language]}
+            </option>
+          ))}
+        </select>
+      </div>
+    </section>
+  )
+}
 
 function AppearanceSection({
   settings,
@@ -237,6 +279,7 @@ function AppearanceSection({
   settings: Settings
   update: (patch: SettingsPatch) => Promise<void>
 }): React.JSX.Element {
+  const { t } = useTranslation()
   // While the slider moves, the hue is previewed straight away but saved only
   // once it settles, instead of rewriting the settings file on every pixel.
   const [draftHue, setDraftHue] = useState<number | null>(null)
@@ -249,27 +292,31 @@ function AppearanceSection({
 
   return (
     <section
-      aria-label="Appearance"
+      aria-label={t('settings.section.appearance')}
       className="bg-card border-border flex flex-col gap-4 rounded-lg border p-4"
     >
       <div className="flex items-center justify-between gap-4">
-        <span className="text-sm font-medium">Theme</span>
-        <div role="radiogroup" aria-label="Theme" className="bg-muted flex rounded-md p-0.5">
-          {THEME_OPTIONS.map(({ value, label }) => (
+        <span className="text-sm font-medium">{t('settings.theme.label')}</span>
+        <div
+          role="radiogroup"
+          aria-label={t('settings.theme.label')}
+          className="bg-muted flex rounded-md p-0.5"
+        >
+          {THEMES.map((theme) => (
             <button
-              key={value}
+              key={theme}
               type="button"
               role="radio"
-              aria-checked={settings.theme === value}
+              aria-checked={settings.theme === theme}
               className={cn(
                 'rounded px-3 py-1 text-xs transition-colors',
-                settings.theme === value
+                settings.theme === theme
                   ? 'bg-card text-foreground font-medium shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               )}
-              onClick={() => void update({ theme: value })}
+              onClick={() => void update({ theme })}
             >
-              {label}
+              {t(`settings.theme.${theme}`)}
             </button>
           ))}
         </div>
@@ -277,7 +324,7 @@ function AppearanceSection({
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor={hueId}>Accent colour</Label>
+          <Label htmlFor={hueId}>{t('settings.accent')}</Label>
           <span aria-hidden className="accent-gradient h-4 w-10 rounded-full" />
         </div>
         <input
@@ -299,11 +346,8 @@ function AppearanceSection({
 
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <Label htmlFor={motionId}>Reduce motion</Label>
-          <p className="text-muted-foreground text-xs">
-            Turns off decorative animation. If your system asks for less motion, that is respected
-            either way.
-          </p>
+          <Label htmlFor={motionId}>{t('settings.reduceMotion.label')}</Label>
+          <p className="text-muted-foreground text-xs">{t('settings.reduceMotion.help')}</p>
         </div>
         <Switch
           id={motionId}
@@ -320,9 +364,13 @@ const REFRESH_INTERVALS = [30, 60, 120, 300, 600, 900, 1800]
 function intervalLabel(seconds: number): string {
   // Anything that isn't whole minutes stays in seconds, so no two options can
   // end up with the same label.
-  if (seconds < 60 || seconds % 60 !== 0) return `Every ${seconds} seconds`
+  if (seconds < 60 || seconds % 60 !== 0) {
+    return i18n.t('settings.refresh.seconds', { count: seconds })
+  }
   const minutes = seconds / 60
-  return minutes === 1 ? 'Every minute' : `Every ${minutes} minutes`
+  return minutes === 1
+    ? i18n.t('settings.refresh.everyMinute')
+    : i18n.t('settings.refresh.minutes', { count: minutes })
 }
 
 function WidgetSection({
@@ -332,6 +380,7 @@ function WidgetSection({
   settings: Settings
   update: (patch: SettingsPatch) => Promise<void>
 }): React.JSX.Element {
+  const { t } = useTranslation()
   // Same as the accent: follow the slider on screen, save once it settles.
   const [draftOpacity, setDraftOpacity] = useState<number | null>(null)
   const saveOpacity = useDebouncedCallback((opacity: number) => {
@@ -349,16 +398,13 @@ function WidgetSection({
 
   return (
     <section
-      aria-label="Widget"
+      aria-label={t('settings.section.widget')}
       className="bg-card border-border flex flex-col gap-4 rounded-lg border p-4"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <Label htmlFor={onTopId}>Always on top</Label>
-          <p className="text-muted-foreground text-xs">
-            Keeps the widget above other windows. When it's off, clicking the tray icon brings the
-            widget to the front.
-          </p>
+          <Label htmlFor={onTopId}>{t('settings.alwaysOnTop.label')}</Label>
+          <p className="text-muted-foreground text-xs">{t('settings.alwaysOnTop.help')}</p>
         </div>
         <Switch
           id={onTopId}
@@ -369,9 +415,9 @@ function WidgetSection({
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor={opacityId}>Opacity</Label>
+          <Label htmlFor={opacityId}>{t('settings.opacity.label')}</Label>
           <span className="text-muted-foreground text-xs tabular-nums">
-            {Math.round(opacity * 100)}%
+            {formatPercent(opacity * 100)}
           </span>
         </div>
         <input
@@ -388,18 +434,13 @@ function WidgetSection({
             saveOpacity(next)
           }}
         />
-        <p className="text-muted-foreground text-xs">
-          The widget turns fully opaque while the pointer is over it.
-        </p>
+        <p className="text-muted-foreground text-xs">{t('settings.opacity.help')}</p>
       </div>
 
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <Label htmlFor={intervalId}>Refresh</Label>
-          <p className="text-muted-foreground text-xs">
-            How often usage is checked while the widget is showing. Hidden, it checks every 5
-            minutes at most.
-          </p>
+          <Label htmlFor={intervalId}>{t('settings.refresh.label')}</Label>
+          <p className="text-muted-foreground text-xs">{t('settings.refresh.help')}</p>
         </div>
         <select
           id={intervalId}
@@ -418,41 +459,52 @@ function WidgetSection({
   )
 }
 
+function SectionHeading({ children }: { children: string }): React.JSX.Element {
+  return (
+    <h2 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+      {children}
+    </h2>
+  )
+}
+
 export function SettingsApp(): React.JSX.Element {
+  const { t } = useTranslation()
   const { settings, update } = useSettings()
   const { snapshots } = useUsage()
+  const title = t('settings.title')
 
   useEffect(() => {
-    document.title = 'Settings'
-  }, [])
+    document.title = title
+  }, [title])
 
   return (
     <div className="bg-background h-screen overflow-y-auto">
       <main className="mx-auto flex max-w-lg flex-col gap-6 p-6">
-        <h1 className="text-lg font-semibold">Settings</h1>
+        <h1 className="text-lg font-semibold">{title}</h1>
 
         {settings && (
           <div className="flex flex-col gap-3">
-            <h2 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-              Appearance
-            </h2>
+            <SectionHeading>{t('settings.section.general')}</SectionHeading>
+            <GeneralSection settings={settings} update={update} />
+          </div>
+        )}
+
+        {settings && (
+          <div className="flex flex-col gap-3">
+            <SectionHeading>{t('settings.section.appearance')}</SectionHeading>
             <AppearanceSection settings={settings} update={update} />
           </div>
         )}
 
         {settings && (
           <div className="flex flex-col gap-3">
-            <h2 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-              Widget
-            </h2>
+            <SectionHeading>{t('settings.section.widget')}</SectionHeading>
             <WidgetSection settings={settings} update={update} />
           </div>
         )}
 
         <div className="flex flex-col gap-3">
-          <h2 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-            Providers
-          </h2>
+          <SectionHeading>{t('settings.section.providers')}</SectionHeading>
 
           {settings &&
             SUPPORTED_PROVIDERS.map((provider) => (

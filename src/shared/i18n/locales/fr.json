@@ -1,0 +1,158 @@
+{
+  "common": {
+    "xOfY": "{{used}} sur {{limit}}"
+  },
+  "widget": {
+    "refresh": "Actualiser l'utilisation",
+    "openSettings": "Ouvrir les paramètres",
+    "hide": "Masquer le widget",
+    "loading": "Chargement de l'utilisation",
+    "noProviders": "Aucun fournisseur n'est activé."
+  },
+  "card": {
+    "reset": "Réinitialisé",
+    "notInPlan": "Hors forfait",
+    "unlimited": "Illimité",
+    "limitReached": "Limite atteinte",
+    "showDetails": "Afficher les détails de {{name}}",
+    "hideDetails": "Masquer les détails de {{name}}",
+    "connect": "Connecter dans les paramètres",
+    "barLabel": "Utilisation de {{provider}} : {{window}}",
+    "fromSessionLogs": "D'après les journaux de session locaux",
+    "credits": "Crédits",
+    "apiSpend": "Dépenses API",
+    "apiSpendSource": "API Anthropic, jours UTC"
+  },
+  "window": {
+    "session": "Session",
+    "weekly": "Hebdomadaire",
+    "weekly_opus": "Hebdomadaire · Opus",
+    "weekly_sonnet": "Hebdomadaire · Sonnet",
+    "chat": "Chat",
+    "completions": "Complétions de code",
+    "premium_interactions": "Requêtes premium"
+  },
+  "reset": {
+    "in": "Réinitialisation dans {{duration}}",
+    "resetting": "Réinitialisation…",
+    "waiting": "Réinitialisé · en attente de nouvelles données"
+  },
+  "activity": {
+    "none": "Aucune activité {{tool}} ces 5 dernières heures",
+    "session": "{{messages}} dans cette session · fin dans {{duration}}",
+    "messages_one": "{{count}} message",
+    "messages_many": "{{count}} de messages",
+    "messages_other": "{{count}} messages"
+  },
+  "spend": "{{today}} aujourd'hui · {{month}} ce mois-ci",
+  "status": {
+    "loading": "Chargement…",
+    "stale": "Actualisation impossible",
+    "staleSince": "Actualisation impossible · mis à jour il y a {{duration}}",
+    "signIn": {
+      "claude": "Ouvrez Claude Code pour mettre à jour l'utilisation",
+      "codex": "Ouvrez Codex CLI pour mettre à jour l'utilisation",
+      "copilot": "Connectez-vous à GitHub pour voir l'utilisation"
+    },
+    "notInstalled": {
+      "claude": "Claude Code introuvable",
+      "codex": "Codex CLI introuvable",
+      "copilot": "Aucune connexion GitHub trouvée"
+    },
+    "disconnected": "Non connecté",
+    "error": "Impossible de charger l'utilisation"
+  },
+  "duration": {
+    "underMinute": "<1 min",
+    "m": "{{m}} min",
+    "h": "{{h}} h",
+    "hm": "{{h}} h {{m}} min",
+    "d": "{{d}} j",
+    "dh": "{{d}} j {{h}} h"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "section": {
+      "general": "Général",
+      "appearance": "Apparence",
+      "widget": "Widget",
+      "providers": "Fournisseurs"
+    },
+    "language": {
+      "label": "Langue",
+      "system": "Système ({{language}})"
+    },
+    "theme": {
+      "label": "Thème",
+      "system": "Système",
+      "light": "Clair",
+      "dark": "Sombre"
+    },
+    "accent": "Couleur d'accent",
+    "reduceMotion": {
+      "label": "Réduire les animations",
+      "help": "Désactive les animations décoratives. Si votre système demande moins de mouvement, c'est respecté dans tous les cas."
+    },
+    "alwaysOnTop": {
+      "label": "Toujours au premier plan",
+      "help": "Garde le widget au-dessus des autres fenêtres. Désactivé, un clic sur l'icône de la zone de notification le ramène au premier plan."
+    },
+    "opacity": {
+      "label": "Opacité",
+      "help": "Le widget devient entièrement opaque quand le pointeur le survole."
+    },
+    "refresh": {
+      "label": "Actualisation",
+      "help": "Fréquence de vérification de l'utilisation quand le widget est affiché. Masqué, il vérifie au plus toutes les 5 minutes.",
+      "everyMinute": "Toutes les minutes",
+      "minutes_one": "Toutes les {{count}} minute",
+      "minutes_many": "Toutes les {{count}} minutes",
+      "minutes_other": "Toutes les {{count}} minutes",
+      "seconds_one": "Toutes les {{count}} seconde",
+      "seconds_many": "Toutes les {{count}} secondes",
+      "seconds_other": "Toutes les {{count}} secondes"
+    },
+    "provider": {
+      "showInWidget": "Afficher dans le widget",
+      "showInWidgetLabel": "Afficher {{name}} dans le widget",
+      "connecting": "Connexion…",
+      "connected": "Connecté",
+      "connectedPlan": "Connecté · {{plan}}",
+      "claude": {
+        "connect": "Connecter Claude Code",
+        "connectHelp": "Lit la connexion que Claude Code conserve sur cet ordinateur pour afficher les limites de votre forfait, ainsi que ses journaux de session quand l'API d'utilisation est injoignable. Seule la requête d'utilisation elle-même est envoyée à Anthropic. Votre système peut demander une autorisation la première fois.",
+        "key": "Clé API Admin Anthropic",
+        "keyHelp": "Facultatif. Ajoute vos dépenses API de ce mois. Stockée chiffrée sur cet ordinateur."
+      },
+      "copilot": {
+        "connect": "Connecter GitHub",
+        "connectHelp": "Lit la connexion de GitHub CLI (gh), ou à défaut celle de l'extension Copilot de votre éditeur, pour afficher vos quotas Copilot. Seule la requête de quotas elle-même est envoyée à GitHub.",
+        "key": "Jeton GitHub",
+        "keyHelp": "Facultatif. Utilisé à la place de ces connexions, même si GitHub n'est pas connecté. Stocké chiffré sur cet ordinateur."
+      }
+    },
+    "secret": {
+      "save": "Enregistrer",
+      "remove": "Supprimer",
+      "key": {
+        "paste": "Collez votre clé",
+        "saved": "Clé enregistrée se terminant par {{hint}}",
+        "savedNoHint": "Une clé est enregistrée"
+      },
+      "token": {
+        "paste": "Collez votre jeton",
+        "saved": "Jeton enregistré se terminant par {{hint}}",
+        "savedNoHint": "Un jeton est enregistré"
+      },
+      "unavailable": {
+        "encryption": "Le stockage sécurisé n'est pas disponible sur ce système : impossible d'enregistrer des clés.",
+        "keyring": "Aucun trousseau système trouvé (comme GNOME Keyring ou KWallet) : les clés ne peuvent pas être stockées de façon sécurisée."
+      },
+      "invalid": {
+        "empty": "Collez d'abord une clé ou un jeton.",
+        "tooLong": "C'est trop long pour une clé ou un jeton.",
+        "whitespace": "Les clés et les jetons ne contiennent jamais d'espaces. Vérifiez ce qui a été collé."
+      }
+    }
+  }
+}

@@ -1,6 +1,8 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { MotionConfig } from 'motion/react'
+import { resolveLanguage } from '@shared/i18n/language'
 import { useSettings } from '@/features/settings/hooks'
+import { applyLanguage } from '@/i18n'
 import { applyAccentHue } from './accent'
 
 function useMediaQuery(query: string): boolean {
@@ -17,7 +19,7 @@ function useMediaQuery(query: string): boolean {
 }
 
 /**
- * Keeps a window's theme and motion in line with the settings.
+ * Keeps a window's language, theme and motion in line with the settings.
  *
  * Light or dark is decided in the main process, which sets Electron's theme
  * source, so this only follows prefers-color-scheme. Motion is reduced when
@@ -30,6 +32,13 @@ export function Appearance({ children }: { children: ReactNode }): ReactNode {
   const dark = useMediaQuery('(prefers-color-scheme: dark)')
   const osReducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
   const reduceMotion = (settings?.reduceMotion ?? false) || osReducedMotion
+  const language = settings
+    ? resolveLanguage(settings.language, window.api.locale.systemLanguages)
+    : null
+
+  useEffect(() => {
+    if (language) applyLanguage(language)
+  }, [language])
 
   useEffect(() => {
     if (accentHue !== undefined) applyAccentHue(accentHue)

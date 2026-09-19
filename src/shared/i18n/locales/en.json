@@ -1,0 +1,155 @@
+{
+  "common": {
+    "xOfY": "{{used}} of {{limit}}"
+  },
+  "widget": {
+    "refresh": "Refresh usage",
+    "openSettings": "Open settings",
+    "hide": "Hide widget",
+    "loading": "Loading usage",
+    "noProviders": "No providers are enabled."
+  },
+  "card": {
+    "reset": "Reset",
+    "notInPlan": "Not in plan",
+    "unlimited": "Unlimited",
+    "limitReached": "Limit reached",
+    "showDetails": "Show {{name}} details",
+    "hideDetails": "Hide {{name}} details",
+    "connect": "Connect in settings",
+    "barLabel": "{{provider}} {{window}} usage",
+    "fromSessionLogs": "From the local session logs",
+    "credits": "Credits",
+    "apiSpend": "API spend",
+    "apiSpendSource": "Anthropic API, UTC days"
+  },
+  "window": {
+    "session": "Session",
+    "weekly": "Weekly",
+    "weekly_opus": "Weekly · Opus",
+    "weekly_sonnet": "Weekly · Sonnet",
+    "chat": "Chat",
+    "completions": "Code completions",
+    "premium_interactions": "Premium requests"
+  },
+  "reset": {
+    "in": "Resets in {{duration}}",
+    "resetting": "Resetting…",
+    "waiting": "Reset · waiting for fresh data"
+  },
+  "activity": {
+    "none": "No {{tool}} activity in the last 5 hours",
+    "session": "{{messages}} this session · ends in {{duration}}",
+    "messages_one": "{{count}} message",
+    "messages_other": "{{count}} messages"
+  },
+  "spend": "{{today}} today · {{month}} this month",
+  "status": {
+    "loading": "Loading…",
+    "stale": "Couldn't refresh",
+    "staleSince": "Couldn't refresh · updated {{duration}} ago",
+    "signIn": {
+      "claude": "Open Claude Code to update usage",
+      "codex": "Open Codex CLI to update usage",
+      "copilot": "Sign in to GitHub to see usage"
+    },
+    "notInstalled": {
+      "claude": "Claude Code not found",
+      "codex": "Codex CLI not found",
+      "copilot": "No GitHub sign-in found"
+    },
+    "disconnected": "Not connected",
+    "error": "Couldn't load usage"
+  },
+  "duration": {
+    "underMinute": "<1m",
+    "m": "{{m}}m",
+    "h": "{{h}}h",
+    "hm": "{{h}}h {{m}}m",
+    "d": "{{d}}d",
+    "dh": "{{d}}d {{h}}h"
+  },
+  "settings": {
+    "title": "Settings",
+    "section": {
+      "general": "General",
+      "appearance": "Appearance",
+      "widget": "Widget",
+      "providers": "Providers"
+    },
+    "language": {
+      "label": "Language",
+      "system": "System ({{language}})"
+    },
+    "theme": {
+      "label": "Theme",
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "accent": "Accent colour",
+    "reduceMotion": {
+      "label": "Reduce motion",
+      "help": "Turns off decorative animation. If your system asks for less motion, that is respected either way."
+    },
+    "alwaysOnTop": {
+      "label": "Always on top",
+      "help": "Keeps the widget above other windows. When it's off, clicking the tray icon brings the widget to the front."
+    },
+    "opacity": {
+      "label": "Opacity",
+      "help": "The widget turns fully opaque while the pointer is over it."
+    },
+    "refresh": {
+      "label": "Refresh",
+      "help": "How often usage is checked while the widget is showing. Hidden, it checks every 5 minutes at most.",
+      "everyMinute": "Every minute",
+      "minutes_one": "Every {{count}} minute",
+      "minutes_other": "Every {{count}} minutes",
+      "seconds_one": "Every {{count}} second",
+      "seconds_other": "Every {{count}} seconds"
+    },
+    "provider": {
+      "showInWidget": "Show in widget",
+      "showInWidgetLabel": "Show {{name}} in the widget",
+      "connecting": "Connecting…",
+      "connected": "Connected",
+      "connectedPlan": "Connected · {{plan}}",
+      "claude": {
+        "connect": "Connect Claude Code",
+        "connectHelp": "Reads the sign-in Claude Code keeps on this computer to show your plan limits, and its session logs when the usage API can't be reached. Only the usage request itself goes to Anthropic. Your system may ask for permission the first time.",
+        "key": "Anthropic Admin API key",
+        "keyHelp": "Optional. Adds your API spend for this month. Stored encrypted on this computer."
+      },
+      "copilot": {
+        "connect": "Connect GitHub",
+        "connectHelp": "Reads the sign-in of the GitHub CLI (gh), or else of the Copilot extension in your editor, to show your Copilot quotas. Only the quota request itself goes to GitHub.",
+        "key": "GitHub token",
+        "keyHelp": "Optional. Used instead of those sign-ins, even when GitHub isn't connected. Stored encrypted on this computer."
+      }
+    },
+    "secret": {
+      "save": "Save",
+      "remove": "Remove",
+      "key": {
+        "paste": "Paste your key",
+        "saved": "Saved key ending in {{hint}}",
+        "savedNoHint": "A key is saved"
+      },
+      "token": {
+        "paste": "Paste your token",
+        "saved": "Saved token ending in {{hint}}",
+        "savedNoHint": "A token is saved"
+      },
+      "unavailable": {
+        "encryption": "Secure storage isn't available on this system, so keys can't be saved.",
+        "keyring": "No system keyring was found (such as GNOME Keyring or KWallet), so keys can't be stored securely."
+      },
+      "invalid": {
+        "empty": "Paste a key or token first.",
+        "tooLong": "That's too long to be a key or token.",
+        "whitespace": "Keys and tokens never contain spaces. Check what was pasted."
+      }
+    }
+  }
+}

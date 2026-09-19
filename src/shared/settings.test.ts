@@ -41,7 +41,7 @@ describe('normalizeSettings', () => {
 
     expect(settings.theme).toBe('system')
     expect(settings.opacity).toBe(1)
-    expect(settings.language).toBe('en')
+    expect(settings.language).toBe('system')
   })
 
   it('clamps numbers that were edited out of range', () => {
