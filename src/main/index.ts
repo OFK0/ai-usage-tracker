@@ -10,6 +10,7 @@ import { migrateLegacySettings } from './store/migrate-legacy'
 import { applyTheme } from './theme'
 import { createTray, destroyTray } from './tray'
 import { usagePoller } from './usage'
+import { startFullscreenGuard } from './windows/fullscreen-guard'
 import { openSettingsWindow } from './windows/settings'
 import {
   applyWidgetSettings,
@@ -69,6 +70,7 @@ if (!app.requestSingleInstanceLock()) {
     )
 
     createWidgetWindow()
+    void startFullscreenGuard()
     createTray({
       refresh: () => void usagePoller.refresh(),
       openSettings: () => openSettingsWindow()

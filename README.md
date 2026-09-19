@@ -45,6 +45,21 @@ Settings → General → Launch at login.
 - In development it registers Electron plus the project folder, which starts
   the last build in `out/`.
 
+## Staying on top
+
+With Always on top on, the widget floats above other windows but keeps out of
+the way of fullscreen apps:
+
+- Windows: the app asks Windows once a second whether something is fullscreen
+  (`SHQueryUserNotificationState`, through [koffi](https://koffi.dev)), hides
+  the widget while it is, and brings it back afterwards without taking focus.
+  It goes by what Windows reports, so it applies whichever display the
+  fullscreen app is on, and a game Windows doesn't count as fullscreen leaves
+  the widget where it is.
+- macOS: the widget is on every desktop except fullscreen Spaces.
+- Linux: window managers differ too much to tell reliably, so the widget just
+  stays on top.
+
 ## Requirements
 
 - Node.js 20 or newer
