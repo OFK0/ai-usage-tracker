@@ -37,6 +37,41 @@ describe('parseClaudeUsage', () => {
     expect(windows[1]).toMatchObject({ key: 'session', resetsAt: '2026-09-18T12:40:00.000Z' })
   })
 
+  it('shows a weekly limit of its own for one model, as Fable has', () => {
+    const { windows } = parseClaudeUsage({
+      limits: [
+        { kind: 'session', group: 'session', percent: 12 },
+        { kind: 'weekly_all', group: 'weekly', percent: 30 },
+        { kind: 'weekly_model', group: 'weekly', percent: 64, scope: 'Fable' }
+      ]
+    })
+
+    expect(windows.map((window) => [window.key, window.scope, window.usedPercent])).toEqual([
+      ['session', null, 12],
+      ['weekly', null, 30],
+      ['weekly', 'Fable', 64]
+    ])
+  })
+
+  it.each([
+    ['a scope object', { scope: { type: 'model', display_name: 'Fable' } }],
+    ['a display name on the entry', { scope: null, display_name: 'Fable' }]
+  ])('finds the model name in %s', (_, fields) => {
+    const { windows } = parseClaudeUsage({
+      limits: [{ kind: 'weekly_scoped', group: 'weekly', percent: 5, ...fields }]
+    })
+
+    expect(windows[0]).toMatchObject({ key: 'weekly', scope: 'Fable' })
+  })
+
+  it('does not let a new kind without a model pass for the main weekly limit', () => {
+    const { windows } = parseClaudeUsage({
+      limits: [{ kind: 'weekly_oauth_apps', group: 'weekly', percent: 5, scope: null }]
+    })
+
+    expect(windows[0]).toMatchObject({ key: 'weekly_oauth_apps', scope: null })
+  })
+
   it('marks a full window as exhausted', () => {
     const { windows } = parseClaudeUsage({ limits: [{ kind: 'session', percent: 100 }] })
 

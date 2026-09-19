@@ -64,6 +64,12 @@ describe('windowLabel', () => {
     expect(windowLabel(window({ key: 'weekly' }))).toBe('Weekly')
   })
 
+  it('names a limit on one model after the window and the model', async () => {
+    expect(windowLabel(window({ key: 'weekly', scope: 'Fable' }))).toBe('Weekly · Fable')
+    await i18n.changeLanguage('tr')
+    expect(windowLabel(window({ key: 'weekly', scope: 'Fable' }))).toBe('Haftalık · Fable')
+  })
+
   it('makes a readable label out of an unknown key and adds its scope', () => {
     expect(windowLabel(window({ key: 'weekly_model', scope: 'Opus' }))).toBe('Weekly model · Opus')
   })

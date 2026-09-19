@@ -282,7 +282,14 @@ export function ProviderCard({
         {!compact && hasDetails && (
           <motion.div key="details" {...REVEAL} className="flex flex-col gap-3 ps-8.5">
             {windows.map((window) => (
-              <WindowRow key={window.key} window={window} provider={name} now={now} fresh={fresh} />
+              <WindowRow
+                // A plan can have a weekly limit and one for a single model.
+                key={`${window.key}:${window.scope ?? ''}`}
+                window={window}
+                provider={name}
+                now={now}
+                fresh={fresh}
+              />
             ))}
 
             {activity && (
