@@ -1,12 +1,12 @@
 import { join } from 'node:path'
 import { app, shell, type BrowserWindow, type WebPreferences } from 'electron'
 import { is } from '@electron-toolkit/utils'
-import { localeArguments, resolveLanguage } from '@shared/i18n/language'
+import { localeArguments } from '@shared/i18n/language'
+import { appLanguage } from '../i18n'
 import { settingsRepository } from '../store'
 
 /** The same locked-down preferences for every window the app opens. */
 export function secureWebPreferences(): WebPreferences {
-  const systemLanguages = app.getPreferredSystemLanguages()
   return {
     preload: join(__dirname, '../preload/index.js'),
     sandbox: true,
@@ -15,8 +15,8 @@ export function secureWebPreferences(): WebPreferences {
     // The window starts in the right language instead of switching after its
     // first paint; the preload reads these back.
     additionalArguments: localeArguments({
-      language: resolveLanguage(settingsRepository.get().language, systemLanguages),
-      systemLanguages
+      language: appLanguage(settingsRepository.get().language),
+      systemLanguages: app.getPreferredSystemLanguages()
     })
   }
 }

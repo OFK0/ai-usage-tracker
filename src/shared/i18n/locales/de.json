@@ -151,5 +151,12 @@
         "whitespace": "Schlüssel und Tokens enthalten nie Leerzeichen. Bitte das Eingefügte prüfen."
       }
     }
+  },
+  "tray": {
+    "showWidget": "Widget anzeigen",
+    "hideWidget": "Widget ausblenden",
+    "refresh": "Aktualisieren",
+    "settings": "Einstellungen…",
+    "quit": "Beenden"
   }
 }

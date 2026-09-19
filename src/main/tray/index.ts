@@ -1,7 +1,9 @@
 import { readFileSync } from 'node:fs'
 import { Menu, nativeImage, Tray, type NativeImage } from 'electron'
 import { APP_NAME } from '@shared/app-info'
+import { i18n } from '../i18n'
 import { isWidgetVisible, toggleWidgetWindow } from '../windows/widget'
+import { trayMenuTemplate } from './menu'
 
 import trayIcon from '../../../resources/tray/tray.png?asset'
 import trayIcon2x from '../../../resources/tray/tray@2x.png?asset'
@@ -33,19 +35,17 @@ export interface TrayActions {
   openSettings(): void
 }
 
-/** Rebuilt on every open so the show/hide label matches the current state. */
+/** Rebuilt on every open, so it has the current language and show/hide state. */
 function buildMenu(actions: TrayActions): Menu {
-  return Menu.buildFromTemplate([
-    {
-      label: isWidgetVisible() ? 'Hide widget' : 'Show widget',
-      click: () => toggleWidgetWindow()
-    },
-    { type: 'separator' },
-    { label: 'Refresh', click: () => actions.refresh() },
-    { label: 'Settings…', click: () => actions.openSettings() },
-    { type: 'separator' },
-    { label: 'Quit', role: 'quit' }
-  ])
+  return Menu.buildFromTemplate(
+    trayMenuTemplate({
+      t: i18n.t,
+      widgetVisible: isWidgetVisible(),
+      toggleWidget: () => toggleWidgetWindow(),
+      refresh: () => actions.refresh(),
+      openSettings: () => actions.openSettings()
+    })
+  )
 }
 
 export function createTray(actions: TrayActions): Tray {

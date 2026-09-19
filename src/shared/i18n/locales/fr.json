@@ -154,5 +154,12 @@
         "whitespace": "Les clés et les jetons ne contiennent jamais d'espaces. Vérifiez ce qui a été collé."
       }
     }
+  },
+  "tray": {
+    "showWidget": "Afficher le widget",
+    "hideWidget": "Masquer le widget",
+    "refresh": "Actualiser",
+    "settings": "Paramètres…",
+    "quit": "Quitter"
   }
 }
