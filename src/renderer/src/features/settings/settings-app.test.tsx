@@ -190,6 +190,14 @@ describe('language', () => {
     expect(api.settings.update).toHaveBeenCalledWith({ language: 'de' })
   })
 
+  it('turns on launch at login', async () => {
+    const section = await generalSection()
+
+    await userEvent.click(within(section).getByRole('switch', { name: 'Launch at login' }))
+
+    expect(api.settings.update).toHaveBeenCalledWith({ launchAtLogin: true })
+  })
+
   it('shows the screen in the current language', async () => {
     await i18n.changeLanguage('tr')
     render(<SettingsApp />)

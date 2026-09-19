@@ -82,6 +82,10 @@
       "label": "Lingua",
       "system": "Sistema ({{language}})"
     },
+    "launchAtLogin": {
+      "label": "Avvia all'accesso",
+      "help": "Avvia il widget quando accedi a questo computer."
+    },
     "theme": {
       "label": "Tema",
       "system": "Sistema",

@@ -2,6 +2,7 @@ import { app, BrowserWindow } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { APP_ID, PROVIDER_IDS } from '@shared/app-info'
 import { applyLanguage } from './i18n'
+import { adoptSystemLaunchAtLogin, applyLaunchAtLogin } from './launch-at-login'
 import { registerIpcHandlers } from './ipc'
 import { broadcast } from './ipc/typed'
 import { settingsRepository } from './store'
@@ -57,9 +58,15 @@ if (!app.requestSingleInstanceLock()) {
         (id) => settings.providers[id].connected !== previous.providers[id].connected
       )
       if (connectionChanged) void usagePoller.refresh()
+      if (settings.launchAtLogin !== previous.launchAtLogin) {
+        void applyLaunchAtLogin(settings.launchAtLogin)
+      }
       previous = settings
     })
     onWidgetVisibilityChange((visible) => usagePoller.setVisible(visible))
+    void adoptSystemLaunchAtLogin().catch((error: unknown) =>
+      console.error('Could not read launch at login', error)
+    )
 
     createWidgetWindow()
     createTray({

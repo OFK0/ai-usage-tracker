@@ -81,6 +81,10 @@
       "label": "Language",
       "system": "System ({{language}})"
     },
+    "launchAtLogin": {
+      "label": "Launch at login",
+      "help": "Starts the widget when you sign in to this computer."
+    },
     "theme": {
       "label": "Theme",
       "system": "System",
