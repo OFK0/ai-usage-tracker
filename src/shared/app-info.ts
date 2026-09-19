@@ -3,12 +3,17 @@ export const APP_ID = 'com.ofk0.ai-usage-tracker'
 export const APP_NAME = 'AI Usage Tracker'
 
 /** Providers the tracker knows about. Individual providers land in later milestones. */
-export const PROVIDER_IDS = ['claude', 'codex', 'copilot'] as const
+export const PROVIDER_IDS = ['claude', 'codex', 'copilot', 'antigravity'] as const
 
 export type ProviderId = (typeof PROVIDER_IDS)[number]
 
 /** Providers that have an implementation, in the order they're listed. */
-export const SUPPORTED_PROVIDERS: readonly ProviderId[] = ['claude', 'codex', 'copilot']
+export const SUPPORTED_PROVIDERS: readonly ProviderId[] = [
+  'claude',
+  'codex',
+  'copilot',
+  'antigravity'
+]
 
 export function isProviderId(value: unknown): value is ProviderId {
   return typeof value === 'string' && (PROVIDER_IDS as readonly string[]).includes(value)

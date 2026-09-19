@@ -51,12 +51,14 @@
     "signIn": {
       "claude": "Claude Code öffnen, um die Nutzung zu aktualisieren",
       "codex": "Codex CLI öffnen, um die Nutzung zu aktualisieren",
-      "copilot": "Bei GitHub anmelden, um die Nutzung zu sehen"
+      "copilot": "Bei GitHub anmelden, um die Nutzung zu sehen",
+      "antigravity": "Antigravity öffnen, um die Nutzung zu sehen"
     },
     "notInstalled": {
       "claude": "Claude Code nicht gefunden",
       "codex": "Codex CLI nicht gefunden",
-      "copilot": "Keine GitHub-Anmeldung gefunden"
+      "copilot": "Keine GitHub-Anmeldung gefunden",
+      "antigravity": "Antigravity nicht gefunden"
     },
     "disconnected": "Nicht verbunden",
     "error": "Nutzung konnte nicht geladen werden"
@@ -138,6 +140,10 @@
         "connectHelp": "Liest die Anmeldung der GitHub CLI (gh) oder andernfalls die der Copilot-Erweiterung in Ihrem Editor, um Ihre Copilot-Kontingente anzuzeigen. Nur die Kontingentanfrage selbst geht an GitHub.",
         "key": "GitHub-Token",
         "keyHelp": "Optional. Wird statt dieser Anmeldungen verwendet, auch wenn GitHub nicht verbunden ist. Wird verschlüsselt auf diesem Computer gespeichert."
+      },
+      "antigravity": {
+        "connect": "Antigravity verbinden",
+        "connectHelp": "Liest Ihre Kontingente direkt aus Antigravity, solange es läuft, über eine Verbindung, die diesen Computer nicht verlässt."
       }
     },
     "secret": {

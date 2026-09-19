@@ -1,7 +1,16 @@
+import { execFile } from 'node:child_process'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { app, net } from 'electron'
 import { secretVault, settingsRepository } from '../store'
+import { createAntigravityProvider } from './antigravity'
+import {
+  antigravityInstallPaths,
+  findLanguageServer,
+  isAntigravityInstalled,
+  type Run
+} from './antigravity/discovery'
+import { callLanguageServer, probeLanguageServer } from './antigravity/loopback'
 import { createClaudeProvider } from './claude'
 import { summarizeActivity } from './claude/activity'
 import { createAdminSpendReader } from './claude/admin-spend'
@@ -24,6 +33,20 @@ import {
   resolveCopilotToken
 } from './copilot/token'
 import type { UsageProvider } from './types'
+
+/** Runs a program directly, never through a shell, and returns what it printed. */
+const run: Run = (file, args) =>
+  new Promise((resolve, reject) => {
+    execFile(
+      file,
+      args,
+      { windowsHide: true, timeout: 10_000, maxBuffer: 4 * 1024 * 1024 },
+      (error, stdout) =>
+        error
+          ? reject(new Error(`${file} failed: ${error.message}`, { cause: error }))
+          : resolve(stdout)
+    )
+  })
 
 export function createProviders(): UsageProvider[] {
   const userAgent = `ai-usage-tracker/${app.getVersion()}`
@@ -87,6 +110,15 @@ export function createProviders(): UsageProvider[] {
         }),
       fetch,
       userAgent
+    }),
+    createAntigravityProvider({
+      isConnected: () => settingsRepository.get().providers.antigravity.connected,
+      findServer: () =>
+        findLanguageServer({ platform: process.platform, run, probe: probeLanguageServer }),
+      isInstalled: () =>
+        isAntigravityInstalled(antigravityInstallPaths(process.platform, process.env, homedir())),
+      call: (endpoint, method, payload, signal) =>
+        callLanguageServer(endpoint, method, payload, signal)
     })
   ]
 }

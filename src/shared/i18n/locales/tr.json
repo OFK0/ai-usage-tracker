@@ -51,12 +51,14 @@
     "signIn": {
       "claude": "Kullanımı güncellemek için Claude Code'u açın",
       "codex": "Kullanımı güncellemek için Codex CLI'ı açın",
-      "copilot": "Kullanımı görmek için GitHub'da oturum açın"
+      "copilot": "Kullanımı görmek için GitHub'da oturum açın",
+      "antigravity": "Kullanımı görmek için Antigravity'yi açın"
     },
     "notInstalled": {
       "claude": "Claude Code bulunamadı",
       "codex": "Codex CLI bulunamadı",
-      "copilot": "GitHub oturumu bulunamadı"
+      "copilot": "GitHub oturumu bulunamadı",
+      "antigravity": "Antigravity bulunamadı"
     },
     "disconnected": "Bağlı değil",
     "error": "Kullanım yüklenemedi"
@@ -138,6 +140,10 @@
         "connectHelp": "Copilot kotalarınızı göstermek için GitHub CLI'ın (gh) ya da o yoksa düzenleyicinizdeki Copilot eklentisinin oturumunu okur. GitHub'a yalnızca kota isteğinin kendisi gider.",
         "key": "GitHub token'ı",
         "keyHelp": "İsteğe bağlı. Bu oturumların yerine kullanılır, GitHub bağlı olmasa bile çalışır. Bu bilgisayarda şifreli saklanır."
+      },
+      "antigravity": {
+        "connect": "Antigravity'yi bağla",
+        "connectHelp": "Kotalarınızı, Antigravity açıkken doğrudan Antigravity'den okur; bağlantı bu bilgisayarın dışına çıkmaz."
       }
     },
     "secret": {

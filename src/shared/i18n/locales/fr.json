@@ -52,12 +52,14 @@
     "signIn": {
       "claude": "Ouvrez Claude Code pour mettre à jour l'utilisation",
       "codex": "Ouvrez Codex CLI pour mettre à jour l'utilisation",
-      "copilot": "Connectez-vous à GitHub pour voir l'utilisation"
+      "copilot": "Connectez-vous à GitHub pour voir l'utilisation",
+      "antigravity": "Ouvrez Antigravity pour voir l'utilisation"
     },
     "notInstalled": {
       "claude": "Claude Code introuvable",
       "codex": "Codex CLI introuvable",
-      "copilot": "Aucune connexion GitHub trouvée"
+      "copilot": "Aucune connexion GitHub trouvée",
+      "antigravity": "Antigravity introuvable"
     },
     "disconnected": "Non connecté",
     "error": "Impossible de charger l'utilisation"
@@ -141,6 +143,10 @@
         "connectHelp": "Lit la connexion de GitHub CLI (gh), ou à défaut celle de l'extension Copilot de votre éditeur, pour afficher vos quotas Copilot. Seule la requête de quotas elle-même est envoyée à GitHub.",
         "key": "Jeton GitHub",
         "keyHelp": "Facultatif. Utilisé à la place de ces connexions, même si GitHub n'est pas connecté. Stocké chiffré sur cet ordinateur."
+      },
+      "antigravity": {
+        "connect": "Connecter Antigravity",
+        "connectHelp": "Lit vos quotas directement depuis Antigravity pendant qu'il tourne, par une connexion qui ne quitte pas cet ordinateur."
       }
     },
     "secret": {

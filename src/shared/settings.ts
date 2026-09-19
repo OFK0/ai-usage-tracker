@@ -55,7 +55,8 @@ export const SETTINGS_RANGES = {
 const SHOWN_BY_DEFAULT: Record<ProviderId, boolean> = {
   claude: true,
   codex: false,
-  copilot: true
+  copilot: true,
+  antigravity: false
 }
 
 export function defaultSettings(): Settings {

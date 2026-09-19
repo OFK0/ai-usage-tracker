@@ -55,12 +55,14 @@
     "signIn": {
       "claude": "افتح Claude Code لتحديث الاستخدام",
       "codex": "افتح Codex CLI لتحديث الاستخدام",
-      "copilot": "سجّل الدخول إلى GitHub لعرض الاستخدام"
+      "copilot": "سجّل الدخول إلى GitHub لعرض الاستخدام",
+      "antigravity": "افتح Antigravity لعرض الاستخدام"
     },
     "notInstalled": {
       "claude": "لم يُعثر على Claude Code",
       "codex": "لم يُعثر على Codex CLI",
-      "copilot": "لم يُعثر على تسجيل دخول إلى GitHub"
+      "copilot": "لم يُعثر على تسجيل دخول إلى GitHub",
+      "antigravity": "لم يُعثر على Antigravity"
     },
     "disconnected": "غير مربوط",
     "error": "تعذّر تحميل الاستخدام"
@@ -150,6 +152,10 @@
         "connectHelp": "يقرأ تسجيل دخول GitHub CLI (gh)، أو تسجيل دخول إضافة Copilot في محرّرك إن لم يوجد، لعرض حصص Copilot. لا يُرسل إلى GitHub سوى طلب الحصص نفسه.",
         "key": "رمز GitHub",
         "keyHelp": "اختياري. يُستخدم بدلًا من تسجيلات الدخول هذه، حتى لو لم يكن GitHub مربوطًا. يُحفظ مشفّرًا على هذا الحاسوب."
+      },
+      "antigravity": {
+        "connect": "ربط Antigravity",
+        "connectHelp": "يقرأ حصصك من Antigravity نفسه أثناء تشغيله، عبر اتصال لا يغادر هذا الحاسوب."
       }
     },
     "secret": {
