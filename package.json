@@ -2,7 +2,7 @@
   "name": "ai-usage-tracker",
   "productName": "AI Usage Tracker",
   "desktopName": "ai-usage-tracker.desktop",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Desktop widget that tracks usage limits for Claude, Codex and GitHub Copilot",
   "main": "./out/main/index.js",
   "author": "OFK0",
