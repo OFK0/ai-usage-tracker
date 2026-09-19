@@ -1,11 +1,22 @@
-/** The provider's initial on the accent gradient, used wherever the provider is named. */
-export function ProviderMark({ name }: { name: string }): React.JSX.Element {
+import type { ProviderId } from '@shared/app-info'
+import { ClaudeLogo, CodexLogo, CopilotLogo } from './provider-logos'
+
+const LOGOS: Record<ProviderId, (props: { className?: string }) => React.JSX.Element> = {
+  claude: ClaudeLogo,
+  codex: CodexLogo,
+  copilot: CopilotLogo
+}
+
+/** The provider's logo on a small tile, wherever the provider is named. */
+export function ProviderMark({ provider }: { provider: ProviderId }): React.JSX.Element {
+  const Logo = LOGOS[provider]
   return (
     <span
       aria-hidden
-      className="accent-gradient text-primary-foreground grid size-6 shrink-0 place-items-center rounded-md text-xs font-bold shadow-sm"
+      data-provider={provider}
+      className="bg-muted ring-border text-foreground grid size-6 shrink-0 place-items-center rounded-md ring-1"
     >
-      {name.charAt(0)}
+      <Logo className="size-4" />
     </span>
   )
 }
