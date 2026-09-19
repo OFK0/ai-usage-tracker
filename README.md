@@ -1,4 +1,4 @@
-# LLM Usage Tracker
+# AI Usage Tracker
 
 A small desktop widget that shows how much of your LLM coding allowance is left, for
 Claude Code, Codex and GitHub Copilot, without opening a CLI or an IDE panel.

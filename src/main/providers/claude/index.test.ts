@@ -49,7 +49,7 @@ function provider(
     fetch,
     readLocalActivity,
     readApiSpend: options.spend ?? (() => Promise.resolve(null)),
-    userAgent: 'llm-usage-tracker/0.1.0',
+    userAgent: 'ai-usage-tracker/0.1.0',
     now: () => NOW
   })
   return {
@@ -88,7 +88,7 @@ describe('createClaudeProvider', () => {
     expect(init?.headers).toMatchObject({
       Authorization: 'Bearer sk-ant-oat01-test',
       'anthropic-beta': 'oauth-2025-04-20',
-      'User-Agent': 'llm-usage-tracker/0.1.0'
+      'User-Agent': 'ai-usage-tracker/0.1.0'
     })
   })
 
