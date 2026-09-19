@@ -210,7 +210,7 @@ export function ProviderCard({
       className="flex flex-col gap-2.5 py-3 first:pt-0 last:pb-0"
     >
       <div className="flex items-center gap-2.5">
-        <ProviderMark name={name} />
+        <ProviderMark provider={providerId} />
 
         <div className="flex min-w-0 flex-1 flex-col">
           <div className="flex items-center gap-1.5">

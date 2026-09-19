@@ -187,3 +187,7 @@ i18next, koffi, Vitest, Playwright, electron-builder.
 ## License
 
 MIT
+
+The provider logos come from [Lobe Icons](https://github.com/lobehub/lobe-icons)
+(MIT). Claude, Codex and GitHub Copilot are trademarks of Anthropic, OpenAI and
+GitHub; their logos are only used to show whose limits a card is about.

@@ -196,7 +196,7 @@ function ProviderSection({
     >
       <div className="flex items-center justify-between gap-4">
         <div className="flex min-w-0 items-center gap-2.5">
-          <ProviderMark name={name} />
+          <ProviderMark provider={provider} />
           <div className="min-w-0">
             <p className="text-sm font-medium">{name}</p>
             {/* The technical reason, for when the summary isn't enough. */}
